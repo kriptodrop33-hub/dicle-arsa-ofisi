@@ -2229,15 +2229,6 @@
     }, { threshold: 0.1 });
     document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
 
-    const pContainer = document.getElementById('particles');
-    for (let i = 0; i < 10; i++) {
-      const p = document.createElement('div');
-      p.className = 'hero-particle';
-      const size = Math.random() * 120 + 40;
-      p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${6+Math.random()*4}s;`;
-      pContainer.appendChild(p);
-    }
-
     function submitForm(e) {
       e.preventDefault();
       const btn = e.target.querySelector('.form-submit');

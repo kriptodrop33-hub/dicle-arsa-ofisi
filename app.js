@@ -380,15 +380,6 @@ const scrollObserver = new IntersectionObserver(entries => {
 }, { threshold: 0.1 });
 document.querySelectorAll('.animate-on-scroll').forEach(el => scrollObserver.observe(el));
 
-const pContainer = document.getElementById('particles');
-for (let i = 0; i < 10; i++) {
-  const p = document.createElement('div');
-  p.className = 'hero-particle';
-  const sz = Math.random() * 120 + 40;
-  p.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${6+Math.random()*4}s;`;
-  pContainer.appendChild(p);
-}
-
 /* ── İletişim formu → Firestore + EmailJS ── */
 async function submitForm(e) {
   e.preventDefault();
