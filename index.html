@@ -3,53 +3,109 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Dicle Arsa Ofisi — Tekirdağ Marmaraereğlisi Çeşmeli Arsa Satışı</title>
   <meta name="description" content="Tekirdağ Marmaraereğlisi Çeşmeli'de tapulu, denize komşu, E-5 yoluna yakın yatırımlık ve villa imarlı arsalar. 0533 251 60 36" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <!-- Klasik: Montserrat (başlıklar) + Inter (gövde) -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
+  <!-- 3D & Animation Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/TextPlugin.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
   <style>
-    /* ── Variables ── */
+    /* ── Editorial Premium — 3 RENK PALETİ ── */
     :root {
-      --green-dark:  #1e4d20;
-      --green-mid:   #2C5F2E;
-      --green-light: #4a8f3f;
-      --green-accent:#7ab648;
-      --gold:        #c9a961;
-      --cream:       #f5f0e8;
-      --cream-dark:  #ede5d4;
+      /* YEŞİL — koyu için tek baskın ton */
+      --green-dark:  #1f4a2a;     /* deep forest — sadece koyu yüzey/metin */
+      --green-mid:   #2f6b3d;     /* mid green — buton/ikon */
+      --green-light: #4a8f3f;     /* hover/accent için */
+      --green-accent:#7ab648;     /* küçük aksent */
+      /* ALTIN — premium hissi için tek ton */
+      --gold:        #b8954a;     /* primary gold — Christie's tarzı */
+      --gold-soft:   #d4b876;     /* açık gold — büyük yüzeyler için */
+      /* KREM — tüm açık zeminler */
+      --cream:       #f4ede0;     /* warm cream */
+      --cream-deep:  #e8ddc5;     /* bir ton daha derin */
+      --cream-pale:  #faf5eb;     /* en açık (hafif bg) */
+      /* Nötr */
       --text-dark:   #1a1a1a;
-      --text-mid:    #444;
-      --text-light:  #777;
+      --text-mid:    #555;
+      --text-light:  #888;
       --white:       #ffffff;
-      --shadow:      0 8px 32px rgba(0,0,0,.12);
-      --shadow-lg:   0 16px 48px rgba(0,0,0,.18);
-      --radius:      14px;
-      --transition:  .35s cubic-bezier(.4,0,.2,1);
+      --ink:         #2a2622;     /* metin için yumuşak siyah */
+      /* Shadows — minimal */
+      --shadow:      0 6px 28px rgba(31,74,42,.08);
+      --shadow-lg:   0 18px 60px rgba(31,74,42,.14);
+      /* Layout */
+      --radius:      6px;         /* editorial sertlik */
+      --radius-lg:   12px;
+      --transition:  .5s cubic-bezier(.2, 0.8, 0.2, 1);
+      --ease-expo:   cubic-bezier(0.16, 1, 0.3, 1);
+      /* Glass — sadece hero için, minimal */
+      --glass-bg:    rgba(255,255,255,0.08);
+      --glass-border:rgba(255,255,255,0.18);
+      --glass-blur:  blur(12px);
+      --grad-border: linear-gradient(135deg, var(--gold), var(--green-mid));
+      /* Tipografi sistem — klasik sans-serif */
+      --font-serif:  'Montserrat', system-ui, sans-serif;   /* başlıklar (eski isim korundu) */
+      --font-sans:   'Inter', 'Open Sans', system-ui, sans-serif;
     }
 
     /* ── Reset ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; font-size: 16px; }
-    body { font-family: 'Open Sans', sans-serif; color: var(--text-dark); background: var(--white); overflow-x: hidden; }
-    h1,h2,h3,h4 { font-family: 'Montserrat', sans-serif; }
+    html { font-size: 17px; }                               /* 16 → 17 base — tüm rem'ler biraz büyür */
+    @media (max-width: 1024px) { html { font-size: 16px; } }
+    @media (max-width: 480px)  { html { font-size: 15px; } }
+    body { font-family: var(--font-sans); color: var(--ink); background: var(--cream-pale); overflow-x: hidden; font-weight: 400; line-height: 1.65; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 700; letter-spacing: -0.01em; }
+    h1 em, h2 em, h3 em, h4 em { font-style: normal; font-weight: 700; color: var(--gold); }
     a { text-decoration: none; color: inherit; }
     img { display: block; width: 100%; object-fit: cover; }
     ul { list-style: none; }
+    ::selection { background: var(--gold); color: var(--white); }
 
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-    .section-title { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; color: var(--green-dark); margin-bottom: 12px; }
-    .section-sub { font-size: 1rem; color: var(--text-light); max-width: 580px; line-height: 1.65; }
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 30px; border-radius: 50px; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: .9rem; cursor: pointer; border: none; transition: var(--transition); letter-spacing: .4px; }
-    .btn-primary { background: var(--green-mid); color: var(--white); }
-    .btn-primary:hover { background: var(--green-dark); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(44,95,46,.4); }
-    .btn-outline { background: transparent; color: var(--white); border: 2px solid var(--white); }
-    .btn-outline:hover { background: var(--white); color: var(--green-dark); }
-    .tag { display: inline-block; padding: 4px 12px; border-radius: 50px; font-size: .72rem; font-weight: 700; font-family: 'Montserrat', sans-serif; letter-spacing: .4px; }
-    .tag-new    { background: #e8f5e9; color: #2e7d32; }
-    .tag-hot    { background: #fff3e0; color: #e65100; }
-    .tag-deal   { background: #fce4ec; color: #c62828; }
-    .tag-villa  { background: #e3f2fd; color: #1565c0; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+    @media (max-width: 768px) { .container { padding: 0 20px; } }
+    .section-header { text-align: center; margin: 0 auto 72px; max-width: 760px; }
+    .section-header .section-sub { margin: 22px auto 0; }
+    .section-eyebrow {
+      display: inline-block; font-family: var(--font-sans);
+      font-size: clamp(0.78rem, 1.2vw, 0.85rem);
+      font-weight: 500; letter-spacing: 0.32em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 22px;
+    }
+    .section-eyebrow::before { content:'— '; opacity: 0.6; margin-right: 4px; }
+    .section-eyebrow::after  { content:' —'; opacity: 0.6; margin-left: 4px; }
+    .section-title { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; color: var(--green-dark); line-height: 1.15; letter-spacing: -0.015em; }
+    .section-title em { font-style: normal; font-weight: 700; color: var(--gold); }
+    .section-sub { font-family: var(--font-sans); font-size: clamp(1.05rem, 1.6vw, 1.2rem); color: var(--text-mid); max-width: 620px; line-height: 1.75; font-weight: 400; }
+    @media (max-width: 768px) {
+      .section-header { margin-bottom: 48px; }
+    }
+    /* Editorial butonlar — düz, ince border, hover'da yumuşak dolgu */
+    .btn { display: inline-flex; align-items: center; gap: 10px; padding: 18px 38px; font-family: var(--font-sans); font-weight: 500; font-size: 0.88rem; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; transition: var(--transition); position: relative; border-radius: 2px; border: 1px solid transparent; min-height: 48px; }
+    .btn-primary { background: var(--green-dark); color: var(--cream); border-color: var(--green-dark); }
+    .btn-primary:hover { background: var(--green-mid); border-color: var(--green-mid); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(31,74,42,.2); }
+    .btn-outline { background: transparent; color: var(--white); border: 1px solid rgba(255,255,255,0.5); }
+    .btn-outline:hover { background: var(--white); color: var(--green-dark); border-color: var(--white); transform: translateY(-2px); }
+    .btn-gold { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
+    .btn-gold:hover { background: var(--gold); color: var(--white); transform: translateY(-2px); }
+    /* Tag'ler — sade, sadece yeşil/altın varyasyonları */
+    .tag { display: inline-block; padding: 5px 14px; font-size: 0.65rem; font-weight: 600; font-family: var(--font-sans); letter-spacing: 0.16em; text-transform: uppercase; background: transparent; border: 1px solid currentColor; }
+    .tag-new   { color: var(--green-mid); border-color: var(--green-mid); }
+    .tag-hot   { color: var(--gold); border-color: var(--gold); }
+    .tag-deal  { color: var(--green-dark); background: var(--cream-deep); border-color: var(--cream-deep); }
+    .tag-villa { color: var(--gold); background: rgba(184,149,74,0.08); border-color: var(--gold); }
 
     @keyframes fadeUp   { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
     @keyframes pulse    { 0%,100% { transform:scale(1); } 50% { transform:scale(1.06); } }
@@ -58,184 +114,553 @@
     .animate-on-scroll { opacity:0; transform:translateY(30px); transition: opacity .7s ease, transform .7s ease; }
     .animate-on-scroll.visible { opacity:1; transform:translateY(0); }
 
-    /* ── NAVBAR ── */
-    #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 18px 0; transition: var(--transition); }
-    #navbar.scrolled { background: rgba(255,255,255,.97); backdrop-filter: blur(12px); padding: 10px 0; box-shadow: 0 2px 20px rgba(0,0,0,.1); }
+    /* ── NAVBAR (editorial — şeffaf üzerinde başlar) ── */
+    #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 24px 0; transition: var(--transition); background: transparent; }
+    #navbar.scrolled { background: rgba(244,237,224,0.96); backdrop-filter: blur(14px); padding: 14px 0; box-shadow: 0 1px 0 rgba(31,74,42,0.06); }
     .nav-inner { display: flex; align-items: center; justify-content: space-between; }
-    .nav-logo { display: flex; align-items: center; gap: 12px; }
-    .nav-logo-mark { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+    .nav-logo { display: flex; align-items: center; gap: 14px; }
+    .nav-logo-mark { width: 44px; height: 44px; border-radius: 0; background: transparent; border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
     #navbar.scrolled .nav-logo-mark { background: var(--green-dark); border-color: var(--green-dark); }
     .nav-logo-mark svg { width: 26px; height: 26px; }
-    .nav-logo-text { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--white); transition: var(--transition); line-height: 1.15; letter-spacing: .5px; }
-    .nav-logo-text span { font-size: .65rem; font-weight: 500; display: block; letter-spacing: 1.8px; opacity: .75; margin-top: 2px; }
+    .nav-logo-text { font-family: var(--font-serif); font-weight: 700; font-size: 1rem; color: var(--white); transition: var(--transition); line-height: 1.15; letter-spacing: 0.02em; }
+    .nav-logo-text span { font-family: var(--font-sans); font-size: 0.55rem; font-weight: 500; display: block; letter-spacing: 0.32em; opacity: 0.7; margin-top: 4px; color: var(--gold-soft); }
     #navbar.scrolled .nav-logo-text { color: var(--green-dark); }
-    .nav-links { display: flex; align-items: center; gap: 28px; }
-    .nav-links a { font-family: 'Montserrat', sans-serif; font-size: .85rem; font-weight: 600; color: rgba(255,255,255,.9); letter-spacing: .4px; transition: var(--transition); position: relative; }
-    .nav-links a::after { content:''; position:absolute; bottom:-4px; left:0; right:0; height:2px; background:var(--green-accent); transform:scaleX(0); transition:var(--transition); }
-    .nav-links a:hover::after { transform:scaleX(1); }
+    .nav-links { display: flex; align-items: center; gap: 36px; }
+    .nav-links a { font-family: var(--font-sans); font-size: 0.72rem; font-weight: 500; color: rgba(255,255,255,0.9); letter-spacing: 0.22em; text-transform: uppercase; transition: var(--transition); position: relative; }
+    .nav-links a::after { content:''; position: absolute; bottom: -6px; left: 0; right: 0; height: 1px; background: var(--gold); transform: scaleX(0); transition: var(--transition); transform-origin: left; }
+    .nav-links a:hover::after { transform: scaleX(1); }
     .nav-links a:hover { color: var(--white); }
-    #navbar.scrolled .nav-links a { color: var(--text-mid); }
-    #navbar.scrolled .nav-links a:hover { color: var(--green-mid); }
-    .nav-phone { background: var(--white); color: var(--green-dark) !important; padding: 10px 20px; border-radius: 50px; font-weight: 700 !important; display: inline-flex; align-items: center; gap: 8px; }
-    .nav-phone svg { width: 14px; height: 14px; }
-    .nav-phone:hover { background: var(--green-accent) !important; color: var(--white) !important; }
-    #navbar.scrolled .nav-phone { background: var(--green-mid); color: var(--white) !important; }
-    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
-    .hamburger span { display: block; width: 24px; height: 2px; background: var(--white); transition: var(--transition); border-radius: 2px; }
+    #navbar.scrolled .nav-links a { color: var(--ink); }
+    #navbar.scrolled .nav-links a:hover { color: var(--green-dark); }
+    .nav-phone { background: transparent !important; color: var(--white) !important; padding: 11px 22px !important; border-radius: 2px !important; font-family: var(--font-sans) !important; font-weight: 500 !important; font-size: 0.72rem !important; letter-spacing: 0.22em !important; text-transform: uppercase !important; display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.5); transition: var(--transition); }
+    .nav-phone svg { width: 12px; height: 12px; }
+    .nav-phone:hover { background: var(--white) !important; color: var(--green-dark) !important; }
+    #navbar.scrolled .nav-phone { background: var(--green-dark) !important; color: var(--cream) !important; border-color: var(--green-dark); }
+    #navbar.scrolled .nav-phone:hover { background: var(--green-mid) !important; border-color: var(--green-mid); }
+    .hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; padding: 8px; width: 40px; height: 40px; align-items: center; justify-content: center; }
+    .hamburger span { display: block; width: 26px; height: 1px; background: var(--white); transition: var(--transition); }
     #navbar.scrolled .hamburger span { background: var(--green-dark); }
-    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
     .hamburger.open span:nth-child(2) { opacity: 0; }
-    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
-    .mobile-menu { display: none; position: fixed; inset: 0; background: var(--green-dark); z-index: 999; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+    /* Mobil menü — editorial koyu yeşil + altın aksent */
+    .mobile-menu { display: none; position: fixed; inset: 0; background: var(--green-dark); z-index: 999; flex-direction: column; align-items: center; justify-content: center; gap: 36px; padding: 40px; }
     .mobile-menu.open { display: flex; }
-    .mobile-menu a { font-family: 'Montserrat', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--white); }
+    .mobile-menu::before { content:''; position: absolute; top: 60px; left: 50%; transform: translateX(-50%); width: 40px; height: 1px; background: var(--gold); opacity: 0.6; }
+    .mobile-menu a { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 700; color: var(--white); letter-spacing: -0.01em; transition: var(--transition); }
+    .mobile-menu a:hover { color: var(--gold); }
+    .mobile-menu a:last-child {
+      margin-top: 24px; font-family: var(--font-sans); font-size: 0.88rem;
+      font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;
+      background: transparent !important; border: 1px solid var(--gold);
+      color: var(--gold) !important; padding: 16px 32px !important;
+      border-radius: 2px !important;
+    }
+    .mobile-menu a:last-child:hover { background: var(--gold) !important; color: var(--green-dark) !important; }
 
-    /* ── HERO ── */
+    /* ── HERO (Editorial Premium — büyük foto + zarif tipografi) ── */
     #hero {
       min-height: 100vh; position: relative; display: flex; align-items: center;
-      background:
-        linear-gradient(160deg, rgba(30,77,32,.85) 0%, rgba(44,95,46,.7) 50%, rgba(20,20,20,.6) 100%),
-        url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1600&q=80') center/cover no-repeat;
+      background: var(--green-dark);
       overflow: hidden;
     }
-    .hero-particles { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
-    .hero-particle { position:absolute; border-radius:50%; background:rgba(255,255,255,.06); animation:float 6s ease-in-out infinite; }
-    .hero-content { position: relative; z-index: 2; max-width: 760px; animation: fadeUp .9s ease both; }
-    .hero-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.15); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,.25); color:var(--white); padding:8px 18px; border-radius:50px; font-size:.8rem; font-family:'Montserrat',sans-serif; font-weight:600; letter-spacing:.6px; margin-bottom:24px; }
-    .hero-badge-dot { width:8px; height:8px; border-radius:50%; background:var(--green-accent); animation:pulse 2s infinite; }
-    .hero-title { font-size: clamp(2.2rem, 5vw, 4rem); font-weight: 900; color: var(--white); line-height: 1.12; margin-bottom: 22px; }
-    .hero-title em { font-style:normal; color: var(--green-accent); }
-    .hero-desc { font-size: 1.1rem; color: rgba(255,255,255,.85); line-height: 1.75; margin-bottom: 36px; max-width: 580px; }
-    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
-    .hero-features { display: flex; gap: 28px; margin-top: 40px; flex-wrap: wrap; }
-    .hero-feature { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,.9); font-size: .88rem; font-weight: 500; }
-    .hero-feature svg { width: 20px; height: 20px; color: var(--green-accent); flex-shrink: 0; }
-    .scroll-down { position:absolute; bottom:32px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:6px; color:rgba(255,255,255,.55); font-size:.7rem; font-family:'Montserrat',sans-serif; letter-spacing:1.5px; }
-    .scroll-down svg { animation: scrollArrow 2s ease-in-out infinite; }
+    /* Tam ekran arka plan foto — yavaş Ken Burns zoom */
+    .hero-bg-img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=2400&q=85');
+      background-size: cover; background-position: center;
+      animation: kenBurns 28s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+    @keyframes kenBurns {
+      0%   { transform: scale(1.0) translate(0, 0); }
+      100% { transform: scale(1.12) translate(-2%, -1%); }
+    }
+    /* Sade dikey gradient overlay — soldan yumuşak vinyet */
+    .hero-gradient-overlay {
+      position: absolute; inset: 0; z-index: 1;
+      background:
+        linear-gradient(90deg, rgba(20,40,25,0.78) 0%, rgba(20,40,25,0.4) 55%, rgba(20,40,25,0.15) 100%),
+        linear-gradient(180deg, rgba(20,40,25,0.05) 0%, rgba(20,40,25,0.55) 100%);
+    }
+    .hero-particles { display: none; }
+    .hero-content { position: relative; z-index: 5; max-width: 880px; padding: 80px 0; }
+    /* Eyebrow — Christie's tarzı küçük büyük harfli üst etiket */
+    .hero-badge {
+      display: inline-block;
+      background: transparent; border: none; padding: 0;
+      color: var(--gold-soft); font-family: var(--font-sans);
+      font-size: clamp(0.78rem, 1.1vw, 0.88rem); font-weight: 500;
+      letter-spacing: 0.4em; text-transform: uppercase;
+      margin-bottom: 32px;
+      backdrop-filter: none; -webkit-backdrop-filter: none;
+      border-radius: 0;
+    }
+    .hero-badge::before { content:'— '; opacity: 0.7; margin-right: 6px; }
+    .hero-badge-dot { display: none; }
+    /* Klasik sans-serif başlık */
+    .hero-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2.8rem, 6.5vw, 5.5rem);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 40px;
+    }
+    .hero-title em {
+      font-style: normal;
+      font-weight: 800;
+      color: var(--gold-soft);
+      text-shadow: none;
+      -webkit-text-fill-color: var(--gold-soft);
+    }
+    .hero-title em .char {
+      color: var(--gold-soft);
+      -webkit-text-fill-color: var(--gold-soft);
+    }
+    .hero-title .char { will-change: transform, opacity; }
+    .hero-desc {
+      font-family: var(--font-sans);
+      font-size: clamp(1.1rem, 1.6vw, 1.32rem);
+      font-weight: 300;
+      color: rgba(255,255,255,0.88);
+      line-height: 1.7; margin-bottom: 52px; max-width: 620px;
+      letter-spacing: 0.005em;
+    }
+    .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+    /* Hero altı featureları — sadece minimum gerekli, görsel olarak ince */
+    .hero-features {
+      display: flex; gap: 36px; margin-top: 64px; flex-wrap: wrap;
+      padding-top: 36px; border-top: 1px solid rgba(255,255,255,0.15);
+    }
+    .hero-feature {
+      display: flex; align-items: center; gap: 12px;
+      color: rgba(255,255,255,0.88);
+      font-family: var(--font-sans);
+      font-size: clamp(0.78rem, 1vw, 0.86rem);
+      font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+    }
+    .hero-feature svg { width: 18px; height: 18px; color: var(--gold-soft); flex-shrink: 0; }
+    /* Scroll cue — minimal */
+    .scroll-down {
+      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      color: rgba(255,255,255,0.55); font-family: var(--font-sans);
+      font-size: 0.72rem; letter-spacing: 0.28em; text-transform: uppercase;
+      z-index: 5;
+    }
+    .scroll-down svg { animation: scrollArrow 2.4s ease-in-out infinite; }
 
-    /* ── LOCATION STRIP ── */
-    #location { background: var(--green-dark); padding: 40px 0; }
-    .location-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-    .location-item { display: flex; align-items: center; gap: 14px; color: var(--white); }
-    .location-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .location-icon svg { width: 22px; height: 22px; color: var(--green-accent); }
-    .location-label { font-size: .75rem; color: rgba(255,255,255,.6); font-family:'Montserrat',sans-serif; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 2px; }
-    .location-value { font-family:'Montserrat',sans-serif; font-weight: 700; font-size: .95rem; color: var(--white); }
+    /* Hero — Mobil optimizasyon */
+    @media (max-width: 768px) {
+      .hero-content { padding: 100px 0 60px; }
+      .hero-title { font-size: clamp(2.2rem, 9vw, 3.2rem); line-height: 1.1; margin-bottom: 26px; }
+      .hero-desc { font-size: 1.02rem; margin-bottom: 34px; line-height: 1.65; }
+      .hero-badge { font-size: 0.7rem; letter-spacing: 0.28em; margin-bottom: 20px; }
+      .hero-actions { flex-direction: column; gap: 12px; align-items: stretch; }
+      .hero-actions .btn { width: 100%; justify-content: center; padding: 18px 24px; }
+      .hero-features { gap: 16px 22px; margin-top: 40px; padding-top: 28px; }
+      .hero-feature { font-size: 0.7rem; letter-spacing: 0.14em; }
+      .scroll-down { bottom: 20px; font-size: 0.6rem; }
+    }
+
+    /* ── LOCATION STRIP — koyu yeşil sakin bant ── */
+    #location {
+      background: var(--green-dark);
+      padding: 56px 0;
+      border-top: 1px solid rgba(184,149,74,0.25);
+      border-bottom: 1px solid rgba(184,149,74,0.25);
+    }
+    .location-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
+    .location-item { display: flex; align-items: center; gap: 16px; color: var(--white); }
+    .location-icon {
+      width: 44px; height: 44px;
+      background: transparent;
+      border: 1px solid var(--gold);
+      border-radius: 0;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .location-icon svg { width: 20px; height: 20px; color: var(--gold); }
+    .location-label {
+      font-family: var(--font-sans);
+      font-size: 0.65rem; color: var(--gold-soft);
+      letter-spacing: 0.24em; text-transform: uppercase;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .location-value {
+      font-family: var(--font-serif);
+      font-weight: 700; font-size: 1rem;
+      color: var(--white); letter-spacing: 0;
+    }
+    @media (max-width: 768px) {
+      .location-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+    }
 
     /* ── LISTINGS ── */
-    #listings { padding: 100px 0 90px; background: var(--cream); }
-    .section-header { margin-bottom: 56px; text-align: center; }
-    .section-header .section-sub { margin: 0 auto; }
+    #listings { padding: 140px 0 130px; background: var(--cream-pale); }
     .listings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
-    .listing-card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: var(--transition); }
-    .listing-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); }
-    .listing-img { position: relative; height: 220px; overflow: hidden; background: #d4cfc0; }
-    .listing-img img { height: 100%; transition: transform .5s ease; }
+    /* ── LISTING KARTLARI — editorial card ── */
+    .listing-card { background: var(--white); border-radius: 0; overflow: hidden; box-shadow: var(--shadow); transition: var(--transition); border: 1px solid transparent; }
+    .listing-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--gold); }
+    .listing-img { position: relative; height: 300px; overflow: hidden; background: var(--cream-deep); }
+    .listing-img img { height: 100%; transition: transform 1.2s var(--ease-expo); }
     .listing-card:hover .listing-img img { transform: scale(1.06); }
-    .listing-tags { position:absolute; top:14px; left:14px; display:flex; gap:6px; flex-wrap: wrap; }
-    .listing-parcel { position:absolute; top:14px; right:14px; background: rgba(0,0,0,.7); color: var(--white); padding: 5px 12px; border-radius: 50px; font-family: 'Montserrat',sans-serif; font-size: .7rem; font-weight: 700; letter-spacing: .4px; }
-    .listing-body { padding: 22px; }
-    .listing-location { display:flex; align-items:center; gap:6px; color:var(--text-light); font-size:.82rem; margin-bottom:10px; }
-    .listing-location svg { width:14px; height:14px; color:var(--green-mid); }
-    .listing-title { font-family:'Montserrat',sans-serif; font-size:1.05rem; font-weight:700; color:var(--text-dark); margin-bottom:14px; line-height:1.35; }
-    .listing-specs { display:flex; gap:14px; margin-bottom:16px; padding-bottom: 16px; border-bottom: 1px solid #f0ebe0; flex-wrap: wrap; }
-    .listing-spec { display:flex; align-items:center; gap:5px; font-size:.8rem; color:var(--text-mid); font-weight: 500; }
-    .listing-spec svg { width:14px; height:14px; color:var(--green-mid); }
-    .listing-footer { display:flex; align-items:center; justify-content:space-between; }
-    .listing-price { font-family:'Montserrat',sans-serif; }
-    .listing-price-label { font-size:.7rem; color:var(--text-light); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 2px; }
-    .listing-price-total { font-size:1.35rem; font-weight:900; color:var(--green-dark); line-height: 1; }
-    .listing-price-total small { font-size: .7rem; font-weight: 700; color: var(--green-mid); }
-    .btn-card { padding: 10px 18px; font-size: .78rem; background:var(--green-mid); color:var(--white); border-radius: 50px; font-family:'Montserrat',sans-serif; font-weight:700; transition:var(--transition); cursor:pointer; border:none; display: inline-flex; align-items: center; gap: 6px; }
-    .btn-card:hover { background: var(--green-dark); transform: translateY(-1px); }
-    .btn-card svg { width: 12px; height: 12px; }
-    .listings-cta { text-align:center; margin-top:48px; padding: 32px; background: var(--white); border-radius: 18px; border: 2px dashed var(--cream-dark); }
-    .listings-cta-title { font-family:'Montserrat',sans-serif; font-weight:700; font-size: 1.15rem; color: var(--green-dark); margin-bottom: 8px; }
-    .listings-cta-text { color: var(--text-mid); font-size: .92rem; margin-bottom: 20px; }
+    .listing-tags { position:absolute; top:18px; left:18px; display:flex; gap:6px; flex-wrap: wrap; }
+    .listing-parcel { position:absolute; top:18px; right:18px; background: var(--green-dark); color: var(--gold-soft); padding: 7px 16px; font-family: var(--font-sans); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; }
+    .listing-body { padding: 32px 28px 28px; }
+    .listing-location { display:flex; align-items:center; gap:8px; color:var(--text-light); font-family: var(--font-sans); font-size: 0.78rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 16px; }
+    .listing-location svg { width:14px; height:14px; color:var(--gold); }
+    .listing-title { font-family: var(--font-serif); font-size: 1.35rem; font-weight: 700; color: var(--green-dark); margin-bottom: 20px; line-height: 1.3; letter-spacing: -0.01em; }
+    .listing-specs { display:flex; gap: 20px; margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--cream-deep); flex-wrap: wrap; }
+    .listing-spec { display:flex; align-items:center; gap: 7px; font-family: var(--font-sans); font-size: 0.88rem; color: var(--text-mid); font-weight: 400; }
+    .listing-spec svg { width:15px; height:15px; color:var(--gold); }
+    .listing-footer { display:flex; align-items:center; justify-content:space-between; gap: 14px; }
+    .listing-price { font-family: var(--font-sans); }
+    .listing-price-label { font-family: var(--font-sans); font-size: 0.68rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.24em; margin-bottom: 5px; }
+    .listing-price-total { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 800; color: var(--green-dark); line-height: 1; letter-spacing: -0.015em; }
+    .listing-price-total small { font-family: var(--font-sans); font-size: 0.78rem; font-weight: 500; color: var(--text-light); letter-spacing: 0.1em; }
+    .btn-card { padding: 14px 24px; font-size: 0.78rem; background: transparent; color: var(--green-dark); border-radius: 0; font-family: var(--font-sans); font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; transition: var(--transition); cursor: pointer; border: 1px solid var(--green-dark); display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
+    .btn-card:hover { background: var(--green-dark); color: var(--cream); }
+    .btn-card svg { width: 13px; height: 13px; }
+    .listings-cta { text-align:center; margin-top: 72px; padding: 64px 36px; background: var(--white); border: 1px solid var(--cream-deep); }
+    .listings-cta-title { font-family: var(--font-serif); font-weight: 700; font-size: 1.5rem; color: var(--green-dark); margin-bottom: 14px; }
+    .listings-cta-text { font-family: var(--font-sans); color: var(--text-mid); font-size: 1.05rem; margin-bottom: 30px; max-width: 580px; margin-left: auto; margin-right: auto; line-height: 1.7; }
 
-    /* ── FEATURES ── */
-    #features { padding: 100px 0; background: var(--white); }
-    .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; margin-top: 56px; }
-    .feature-card { padding: 34px 22px; border-radius: var(--radius); background: var(--cream); border: 1px solid var(--cream-dark); text-align: center; transition: var(--transition); }
-    .feature-card:hover { background: var(--green-dark); transform: translateY(-6px); box-shadow: var(--shadow-lg); }
-    .feature-icon { width: 60px; height: 60px; border-radius: 16px; background: var(--green-mid); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; transition: var(--transition); }
-    .feature-card:hover .feature-icon { background: rgba(255,255,255,.2); }
-    .feature-icon svg { width: 26px; height: 26px; color: var(--white); }
-    .feature-title { font-family:'Montserrat',sans-serif; font-size:1rem; font-weight:700; color:var(--text-dark); margin-bottom:8px; transition:var(--transition); }
-    .feature-card:hover .feature-title { color:var(--white); }
-    .feature-desc { font-size:.85rem; color:var(--text-light); line-height:1.65; transition:var(--transition); }
-    .feature-card:hover .feature-desc { color:rgba(255,255,255,.75); }
+    /* Listings — Mobil */
+    @media (max-width: 768px) {
+      #listings { padding: 80px 0 70px; }
+      .listing-img { height: 240px; }
+      .listing-title { font-size: 1.32rem; }
+      .listing-body { padding: 26px 22px 22px; }
+      .listing-footer { flex-direction: column; align-items: flex-start; gap: 18px; }
+      .listing-footer .btn-card { width: 100%; justify-content: center; }
+      .listings-cta { padding: 44px 24px; margin-top: 48px; }
+      .listings-cta-title { font-size: 1.4rem; }
+    }
 
-    /* ── ABOUT ── */
-    #about { padding: 100px 0; background: var(--cream); }
-    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
-    .about-text .section-title { margin-bottom: 18px; }
-    .about-text p { color: var(--text-mid); line-height: 1.85; margin-bottom: 16px; font-size:.95rem; }
-    .about-checks { margin: 24px 0 32px; display: flex; flex-direction: column; gap: 12px; }
-    .about-check { display: flex; align-items: center; gap: 12px; font-size: .9rem; font-weight: 500; color: var(--text-dark); }
-    .about-check-icon { width: 22px; height: 22px; border-radius: 50%; background: var(--green-mid); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .about-check-icon svg { width: 12px; height: 12px; color: var(--white); }
+    /* ── FEATURES (editorial — 4 sade kart, sınırla işaretlenmiş) ── */
+    #features { padding: 140px 0; background: var(--cream); position: relative; }
+    .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 56px; border-top: 1px solid var(--cream-deep); border-left: 1px solid var(--cream-deep); }
+    .feature-card { padding: 60px 38px; background: var(--cream); border-right: 1px solid var(--cream-deep); border-bottom: 1px solid var(--cream-deep); text-align: left; transition: var(--transition); position: relative; overflow: hidden; }
+    .feature-card:hover { background: var(--white); }
+    .feature-icon { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; margin: 0 0 30px; transition: var(--transition); background: transparent; border: none; border-radius: 0; }
+    .feature-icon svg { width: 34px; height: 34px; color: var(--gold); stroke-width: 1.5; }
+    .feature-title { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 700; color: var(--green-dark); margin-bottom: 14px; line-height: 1.3; }
+    .feature-desc { font-family: var(--font-sans); font-size: 1rem; color: var(--text-mid); line-height: 1.7; }
+
+    /* Features — Mobil */
+    @media (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      #features { padding: 80px 0; }
+      .features-grid { grid-template-columns: 1fr; }
+      .feature-card { padding: 40px 26px; }
+      .feature-title { font-size: 1.25rem; }
+    }
+
+    /* ── ABOUT (editorial: foto + zarif metin yan yana) ── */
+    #about { padding: 140px 0; background: var(--white); }
+    .about-grid { display: grid; grid-template-columns: 5fr 7fr; gap: 100px; align-items: center; }
+    .about-text .section-title { margin-bottom: 28px; }
+    .about-text p { font-family: var(--font-sans); color: var(--text-mid); line-height: 1.85; margin-bottom: 20px; font-size: 1.1rem; font-weight: 300; }
+    .about-checks { margin: 36px 0 44px; display: flex; flex-direction: column; gap: 18px; padding-left: 0; border-left: 2px solid var(--gold); padding-left: 28px; }
+    .about-check { display: flex; align-items: center; gap: 14px; font-family: var(--font-sans); font-size: 1.02rem; font-weight: 400; color: var(--ink); }
+    .about-check-icon {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1px solid var(--gold);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: none;
+    }
+    .about-check-icon svg { width: 12px; height: 12px; color: var(--gold); }
+
+    /* About — Mobil */
+    @media (max-width: 900px) {
+      #about { padding: 80px 0; }
+      .about-grid { grid-template-columns: 1fr; gap: 56px; }
+      .about-img-main { height: 380px; }
+      .about-img-badge { right: 0; bottom: -24px; padding: 22px 24px; }
+      .about-img-badge svg { width: 24px; height: 24px; }
+      .about-img-badge-text .b-num { font-size: 1.05rem; }
+      .about-img-badge-text .b-lbl { font-size: 0.58rem; }
+    }
+    @media (max-width: 480px) {
+      .about-img-main { height: 280px; }
+      .about-text p { font-size: 1rem; }
+      .about-check { font-size: 0.95rem; }
+    }
     .about-visual { position: relative; }
-    .about-img-main { border-radius: 20px; height: 420px; overflow: hidden; box-shadow: var(--shadow-lg); }
-    .about-img-badge { position: absolute; bottom: -22px; right: -22px; background: var(--green-dark); color: var(--white); padding: 22px 26px; border-radius: 16px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 14px; }
-    .about-img-badge svg { width: 32px; height: 32px; color: var(--green-accent); }
-    .about-img-badge-text .b-num { font-family:'Montserrat',sans-serif; font-weight: 900; font-size: 1.05rem; line-height: 1.1; }
-    .about-img-badge-text .b-lbl { font-size: .72rem; opacity: .7; letter-spacing: .4px; }
+    .about-img-main { border-radius: 0; height: 540px; overflow: hidden; box-shadow: var(--shadow-lg); }
+    /* Foto altında ince altın çerçeve detayı */
+    .about-visual::before {
+      content:''; position: absolute; inset: 18px; border: 1px solid var(--gold);
+      pointer-events: none; z-index: 1; opacity: 0.4;
+    }
+    .about-img-badge {
+      position: absolute; bottom: 32px; right: -32px;
+      background: var(--green-dark); color: var(--cream);
+      padding: 28px 32px; border-radius: 0;
+      box-shadow: 0 20px 50px rgba(31,74,42,0.35);
+      display: flex; align-items: center; gap: 18px;
+      border: none;
+      z-index: 2;
+    }
+    .about-img-badge svg { width: 28px; height: 28px; color: var(--gold); stroke-width: 1.5; }
+    .about-img-badge-text .b-num { font-family: var(--font-serif); font-weight: 700; font-size: 1.1rem; line-height: 1.1; }
+    .about-img-badge-text .b-lbl { font-family: var(--font-sans); font-size: 0.65rem; opacity: 0.7; letter-spacing: 0.22em; text-transform: uppercase; margin-top: 4px; }
 
-    /* ── CONTACT ── */
-    #contact { padding: 100px 0; background: var(--white); }
-    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
-    .contact-info .section-title { margin-bottom: 14px; }
-    .contact-info > p { color: var(--text-mid); line-height: 1.75; margin-bottom: 32px; }
-    .contact-items { display: flex; flex-direction: column; gap: 18px; margin-bottom: 28px; }
-    .contact-item { display: flex; gap: 16px; align-items: flex-start; }
-    .contact-item-icon { width: 46px; height: 46px; border-radius: 12px; background: var(--cream); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .contact-item-icon svg { width: 20px; height: 20px; color: var(--green-mid); }
-    .contact-item-label { font-family:'Montserrat',sans-serif; font-size:.75rem; font-weight:600; color:var(--text-light); letter-spacing:.4px; text-transform:uppercase; margin-bottom:3px; }
-    .contact-item-value { font-size:.92rem; color:var(--text-dark); font-weight:600; }
-    .contact-item-sub { font-size: .82rem; color: var(--text-light); margin-top: 2px; }
-    .contact-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-    .whatsapp-btn { display: inline-flex; align-items: center; gap: 10px; background: #25d366; color: var(--white); padding: 13px 24px; border-radius: 50px; font-family:'Montserrat',sans-serif; font-weight:700; font-size:.88rem; transition:var(--transition); }
-    .whatsapp-btn:hover { background: #128c7e; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,211,102,.4); }
-    .call-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--green-mid); color: var(--white); padding: 13px 24px; border-radius: 50px; font-family:'Montserrat',sans-serif; font-weight:700; font-size:.88rem; transition:var(--transition); }
-    .call-btn:hover { background: var(--green-dark); transform: translateY(-2px); }
-    .contact-form { background: var(--cream); padding: 36px; border-radius: 20px; }
-    .form-title { font-family:'Montserrat',sans-serif; font-size:1.2rem; font-weight:700; color:var(--green-dark); margin-bottom:6px; }
-    .form-sub { color: var(--text-light); font-size: .85rem; margin-bottom: 22px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-    .form-group label { font-size:.78rem; font-weight:600; color:var(--text-mid); font-family:'Montserrat',sans-serif; letter-spacing:.3px; }
+    /* ── CONTACT (editorial: sade form + listeleme) ── */
+    #contact { padding: 140px 0; background: var(--cream-pale); }
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+    .contact-info .section-title { margin-bottom: 24px; }
+    .contact-info > p { font-family: var(--font-sans); color: var(--text-mid); line-height: 1.85; margin-bottom: 44px; font-size: 1.1rem; font-weight: 300; }
+    .contact-items { display: flex; flex-direction: column; gap: 30px; margin-bottom: 44px; padding-top: 32px; border-top: 1px solid var(--cream-deep); }
+    .contact-item { display: flex; gap: 20px; align-items: flex-start; transition: var(--transition); }
+    .contact-item:hover { transform: none; }
+    .contact-item-icon {
+      width: 40px; height: 40px;
+      background: transparent;
+      border: 1px solid var(--gold);
+      border-radius: 0;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; box-shadow: none;
+    }
+    .contact-item-icon svg { width: 18px; height: 18px; color: var(--gold); }
+    .contact-item:hover .contact-item-icon { transform: none; }
+    .contact-item-label { font-family: var(--font-sans); font-size: 0.72rem; font-weight: 500; color: var(--text-light); letter-spacing: 0.24em; text-transform: uppercase; margin-bottom: 7px; }
+    .contact-item-value { font-family: var(--font-serif); font-size: 1.1rem; color: var(--green-dark); font-weight: 700; line-height: 1.3; }
+
+    /* Contact — Mobil */
+    @media (max-width: 900px) {
+      #contact { padding: 80px 0; }
+      .contact-grid { grid-template-columns: 1fr; gap: 56px; }
+      .contact-form { padding: 36px 26px; }
+    }
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+      .contact-info > p { font-size: 1rem; }
+    }
+    .contact-item-sub { font-family: var(--font-sans); font-size: 0.78rem; color: var(--text-light); margin-top: 4px; font-weight: 300; }
+    .contact-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+    .whatsapp-btn { display: inline-flex; align-items: center; gap: 10px; background: transparent; color: var(--green-dark); border: 1px solid var(--green-dark); padding: 14px 26px; border-radius: 2px; font-family: var(--font-sans); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; transition: var(--transition); }
+    .whatsapp-btn:hover { background: var(--green-dark); color: var(--cream); }
+    .call-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--green-dark); color: var(--cream); padding: 14px 26px; border-radius: 2px; font-family: var(--font-sans); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; transition: var(--transition); border: 1px solid var(--green-dark); }
+    .call-btn:hover { background: var(--green-mid); border-color: var(--green-mid); }
+    /* Form — editorial sade */
+    .contact-form { background: var(--white); padding: 56px 48px; border-radius: 0; border: 1px solid var(--cream-deep); }
+    .form-title { font-family: var(--font-serif); font-size: 1.4rem; font-weight: 700; color: var(--green-dark); margin-bottom: 10px; line-height: 1.2; }
+    .form-sub { font-family: var(--font-sans); color: var(--text-mid); font-size: 0.92rem; margin-bottom: 36px; font-weight: 300; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+    .form-group label { font-family: var(--font-sans); font-size: 0.68rem; font-weight: 500; color: var(--text-light); letter-spacing: 0.22em; text-transform: uppercase; }
     .form-group input, .form-group select, .form-group textarea {
-      padding: 12px 16px; border: 1.5px solid var(--cream-dark); border-radius: 10px;
-      font-family: 'Open Sans', sans-serif; font-size: .9rem; color: var(--text-dark);
-      background: var(--white); transition: var(--transition); outline: none;
+      padding: 14px 0; border: none; border-bottom: 1px solid var(--cream-deep); border-radius: 0;
+      font-family: var(--font-sans); font-size: 0.95rem; color: var(--ink);
+      background: transparent; transition: var(--transition); outline: none;
     }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(44,95,46,.12);
+      border-bottom-color: var(--gold); box-shadow: none;
     }
-    .form-group textarea { resize: vertical; min-height: 90px; }
-    .form-submit { width: 100%; padding: 14px; background: var(--green-mid); color: var(--white); border: none; border-radius: 50px; font-family:'Montserrat',sans-serif; font-weight:700; font-size:.92rem; cursor:pointer; transition:var(--transition); }
-    .form-submit:hover { background: var(--green-dark); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(44,95,46,.4); }
-    .form-success { display:none; text-align:center; padding:18px; color:var(--green-dark); font-family:'Montserrat',sans-serif; font-weight:600; }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-submit { width: 100%; padding: 18px; background: var(--green-dark); color: var(--cream); border: none; border-radius: 2px; font-family: var(--font-sans); font-weight: 500; font-size: 0.82rem; letter-spacing: 0.22em; text-transform: uppercase; cursor: pointer; transition: var(--transition); margin-top: 14px; }
+    .form-submit:hover { background: var(--green-mid); transform: translateY(-2px); box-shadow: 0 12px 28px rgba(31,74,42,0.22); }
+    .form-success { display: none; text-align: center; padding: 18px; color: var(--green-dark); font-family: var(--font-serif); font-weight: 700; font-size: 1rem; }
 
-    /* ── FOOTER ── */
-    #footer { background: #111; padding: 60px 0 28px; }
-    .footer-top { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 48px; padding-bottom: 44px; border-bottom: 1px solid rgba(255,255,255,.08); }
-    .footer-brand .nav-logo-text { color: var(--white); margin-bottom: 14px; font-size:1.05rem; }
-    .footer-brand p { color: rgba(255,255,255,.45); font-size:.85rem; line-height:1.75; max-width:340px; margin-bottom:22px; }
-    .social-links { display: flex; gap: 10px; }
-    .social-link { width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
-    .social-link:hover { background: var(--green-mid); transform: translateY(-2px); }
-    .social-link svg { width: 16px; height: 16px; color: rgba(255,255,255,.7); }
-    .social-link:hover svg { color: var(--white); }
-    .footer-col h4 { font-family:'Montserrat',sans-serif; font-size:.82rem; font-weight:700; color:var(--white); letter-spacing:.8px; text-transform:uppercase; margin-bottom:18px; }
-    .footer-col ul { display:flex; flex-direction:column; gap:9px; }
-    .footer-col ul li a, .footer-col ul li { color:rgba(255,255,255,.5); font-size:.85rem; transition:var(--transition); }
-    .footer-col ul li a:hover { color:var(--green-accent); padding-left:4px; }
-    .footer-bottom { display:flex; justify-content:space-between; align-items:center; padding-top:26px; gap: 16px; flex-wrap: wrap; }
-    .footer-copy { color:rgba(255,255,255,.3); font-size:.78rem; }
-    .footer-badge { display:flex; align-items:center; gap:6px; color:rgba(255,255,255,.4); font-size:.78rem; font-family:'Montserrat',sans-serif; font-weight:600; }
-    .footer-badge svg { width:14px; height:14px; color:var(--green-accent); }
+    /* ── PRE-FOOTER CTA BANDI — büyük, dikkat çekici ── */
+    #prefooter {
+      position: relative;
+      padding: 110px 0;
+      background: var(--cream);
+      overflow: hidden;
+      border-top: 1px solid var(--cream-deep);
+    }
+    .prefooter-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse at 80% 50%, rgba(184,149,74,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 100%, rgba(31,74,42,0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .prefooter-bg::before {
+      content:''; position: absolute; inset: 0;
+      background-image:
+        linear-gradient(90deg, transparent 49%, rgba(184,149,74,0.08) 49%, rgba(184,149,74,0.08) 51%, transparent 51%);
+      background-size: 80px 80px;
+      opacity: 0.4;
+    }
+    .prefooter-grid {
+      position: relative; z-index: 1;
+      display: grid; grid-template-columns: 1.2fr 1fr;
+      gap: 80px; align-items: center;
+    }
+    .prefooter-eyebrow {
+      display: inline-block; font-family: var(--font-sans);
+      font-size: 0.78rem; font-weight: 500;
+      letter-spacing: 0.34em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 20px;
+    }
+    .prefooter-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+      font-weight: 700; line-height: 1.15;
+      color: var(--green-dark); letter-spacing: -0.02em;
+      margin-bottom: 22px;
+    }
+    .prefooter-title em { font-style: normal; color: var(--gold); }
+    .prefooter-desc {
+      font-family: var(--font-sans); font-size: 1.1rem;
+      color: var(--text-mid); line-height: 1.75; font-weight: 300;
+      max-width: 520px;
+    }
+    .prefooter-actions {
+      display: flex; flex-direction: column; gap: 18px;
+    }
+    .prefooter-cta-card {
+      position: relative; display: block;
+      padding: 32px 36px; background: var(--white);
+      border: 1px solid var(--cream-deep);
+      transition: var(--transition);
+      overflow: hidden;
+    }
+    .prefooter-cta-card::before {
+      content:''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: var(--gold); transform: scaleY(0); transform-origin: top;
+      transition: transform 0.5s var(--ease-expo);
+    }
+    .prefooter-cta-card:hover {
+      transform: translateX(8px);
+      border-color: var(--gold);
+      box-shadow: 0 14px 40px rgba(31,74,42,0.10);
+    }
+    .prefooter-cta-card:hover::before { transform: scaleY(1); }
+    .prefooter-cta-card--alt { background: var(--green-dark); border-color: var(--green-dark); }
+    .prefooter-cta-card--alt:hover { background: var(--green-mid); border-color: var(--gold); }
+    .prefooter-cta-eyebrow {
+      font-family: var(--font-sans); font-size: 0.7rem;
+      font-weight: 500; letter-spacing: 0.28em;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: 10px;
+    }
+    .prefooter-cta-card--alt .prefooter-cta-eyebrow { color: var(--gold-soft); }
+    .prefooter-cta-value {
+      font-family: var(--font-serif); font-size: 1.65rem;
+      font-weight: 700; color: var(--green-dark);
+      letter-spacing: -0.01em; line-height: 1.1;
+    }
+    .prefooter-cta-card--alt .prefooter-cta-value { color: var(--cream); }
+    .prefooter-cta-sub {
+      font-family: var(--font-sans); font-size: 0.88rem;
+      color: var(--text-light); margin-top: 8px; font-weight: 400;
+    }
+    .prefooter-cta-card--alt .prefooter-cta-sub { color: rgba(255,255,255,0.65); }
+    .prefooter-arrow {
+      position: absolute; right: 30px; top: 50%; transform: translateY(-50%);
+      width: 22px; height: 22px; color: var(--gold);
+      transition: transform 0.4s var(--ease-expo);
+    }
+    .prefooter-cta-card:hover .prefooter-arrow { transform: translateY(-50%) translateX(6px); }
+    .prefooter-cta-card--alt .prefooter-arrow { color: var(--gold-soft); }
+
+    /* Mobil pre-footer */
+    @media (max-width: 900px) {
+      #prefooter { padding: 70px 0; }
+      .prefooter-grid { grid-template-columns: 1fr; gap: 48px; }
+      .prefooter-cta-card { padding: 26px 28px; }
+      .prefooter-cta-value { font-size: 1.4rem; }
+      .prefooter-arrow { right: 22px; }
+    }
+
+    /* ── FOOTER — koyu yeşil, daha zengin & katmanlı ── */
+    #footer {
+      position: relative;
+      background: linear-gradient(180deg, #1a3d23 0%, var(--green-dark) 100%);
+      padding: 100px 0 36px;
+      color: var(--cream);
+      overflow: hidden;
+    }
+    /* Üst altın çizgi + nokta deseni */
+    .footer-accent-top {
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, transparent 0%, var(--gold) 20%, var(--gold) 80%, transparent 100%);
+    }
+    #footer::before {
+      content:''; position: absolute; inset: 0;
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(184,149,74,0.06) 1px, transparent 0);
+      background-size: 28px 28px;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    #footer .container { position: relative; z-index: 1; }
+    .footer-top { display: grid; grid-template-columns: 1.8fr 1fr 1.1fr 1.1fr; gap: 56px; padding-bottom: 60px; border-bottom: 1px solid rgba(184,149,74,0.15); }
+    .footer-brand .nav-logo-text { color: var(--cream); margin-bottom: 22px; font-family: var(--font-serif); font-size: 1.2rem; font-weight: 700; }
+    .footer-brand p { color: rgba(255,255,255,0.6); font-family: var(--font-sans); font-size: 1rem; line-height: 1.85; max-width: 400px; margin-bottom: 36px; font-weight: 300; }
+    .social-links { display: flex; gap: 12px; }
+    .social-link { width: 44px; height: 44px; border-radius: 0; background: transparent; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+    .social-link:hover { background: var(--gold); border-color: var(--gold); transform: translateY(-2px); }
+    .social-link svg { width: 18px; height: 18px; color: var(--cream); }
+    .social-link:hover svg { color: var(--green-dark); }
+    .footer-col h4 { font-family: var(--font-sans); font-size: 0.78rem; font-weight: 500; color: var(--gold-soft); letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 26px; }
+    .footer-col ul { display: flex; flex-direction: column; gap: 14px; }
+    .footer-col ul li a, .footer-col ul li { color: rgba(255,255,255,0.7); font-family: var(--font-sans); font-size: 0.98rem; transition: var(--transition); font-weight: 400; }
+    .footer-col ul li a:hover { color: var(--gold); padding-left: 4px; }
+
+    /* İletişim listesi — ikonlu */
+    .footer-contact-list li {
+      display: flex; align-items: center; gap: 12px;
+      color: rgba(255,255,255,0.75) !important;
+    }
+    .footer-contact-list li svg {
+      width: 16px; height: 16px;
+      color: var(--gold); flex-shrink: 0;
+    }
+    .footer-contact-list li a { color: rgba(255,255,255,0.75); }
+    .footer-contact-list li a:hover { color: var(--gold); padding-left: 0; }
+
+    /* Çalışma saatleri tablosu */
+    .footer-hours { display: flex; flex-direction: column; gap: 12px; }
+    .footer-hours li {
+      display: flex !important; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px dashed rgba(184,149,74,0.18);
+      color: rgba(255,255,255,0.7) !important; font-size: 0.92rem !important;
+    }
+    .footer-hours li:last-child { border-bottom: none; }
+    .footer-hours li span:first-child {
+      font-family: var(--font-sans); font-weight: 500; color: var(--cream);
+    }
+    .footer-hours li span:last-child {
+      font-family: var(--font-sans); font-weight: 600; color: var(--gold-soft);
+      letter-spacing: 0.02em;
+    }
+    .footer-hours-special { color: var(--gold) !important; font-weight: 700 !important; }
+    .footer-hours-note {
+      margin-top: 18px; padding: 14px 16px;
+      background: rgba(184,149,74,0.08);
+      border-left: 2px solid var(--gold);
+      display: flex; align-items: center; gap: 12px;
+      font-family: var(--font-sans); font-size: 0.85rem;
+      color: rgba(255,255,255,0.85); line-height: 1.5;
+    }
+    .footer-hours-note svg { width: 22px; height: 22px; color: var(--gold); flex-shrink: 0; }
+    .footer-hours-note strong { color: var(--gold-soft); font-weight: 600; }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 36px; gap: 16px; flex-wrap: wrap; }
+    .footer-copy { color: rgba(255,255,255,0.55); font-family: var(--font-sans); font-size: 0.88rem; font-weight: 400; }
+    .footer-copy strong { color: var(--gold-soft); font-weight: 600; }
+    .footer-badge {
+      display: flex; align-items: center; gap: 10px;
+      color: var(--gold-soft); font-family: var(--font-sans);
+      font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      padding: 8px 16px; border: 1px solid rgba(184,149,74,0.3);
+    }
+    .footer-badge svg { width: 14px; height: 14px; color: var(--gold); }
 
     /* ── FLOATING WHATSAPP ── */
     .float-whatsapp {
@@ -249,28 +674,37 @@
     .float-whatsapp:hover { transform: scale(1.1); }
     .float-whatsapp svg { width: 28px; height: 28px; color: var(--white); }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width:1024px) {
+    /* ── RESPONSIVE — Editorial Mobile ── */
+    @media (max-width: 1024px) {
       .listings-grid { grid-template-columns: repeat(2, 1fr); }
-      .features-grid { grid-template-columns: repeat(2, 1fr); }
-      .location-grid { grid-template-columns: repeat(2, 1fr); }
-      .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+      /* features-grid + location-grid + about/contact için kendi rule'larında handle ettim */
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 48px 56px; }
+      .footer-brand { grid-column: 1 / -1; }
     }
-    @media (max-width:768px) {
+    @media (max-width: 768px) {
       .nav-links { display: none; }
       .hamburger { display: flex; }
-      .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 40px; }
-      .about-img-badge { right:0; bottom:-16px; }
-      .form-row { grid-template-columns: 1fr; }
-      .listings-grid { grid-template-columns: 1fr; }
-      .features-grid { grid-template-columns: 1fr; }
+      /* about-grid + contact-grid kendi rule'larında handle */
+      .listings-grid { grid-template-columns: 1fr; gap: 32px; }
+      #navbar { padding: 16px 0; }
+      #navbar.scrolled { padding: 12px 0; }
+      .nav-logo-mark { width: 38px; height: 38px; }
+      .nav-logo-text { font-size: 0.92rem; }
+      .nav-logo-text span { font-size: 0.5rem; letter-spacing: 0.28em; }
     }
-    @media (max-width:480px) {
-      .location-grid { grid-template-columns: 1fr; }
-      .footer-top { grid-template-columns: 1fr; }
-      .footer-bottom { flex-direction:column; gap:12px; text-align:center; }
-      .hero-actions { flex-direction:column; align-items: stretch; }
-      .hero-actions .btn { justify-content:center; }
+    @media (max-width: 480px) {
+      .footer-top { grid-template-columns: 1fr; gap: 36px; padding-bottom: 36px; }
+      .footer-bottom { flex-direction: column; gap: 14px; text-align: center; }
+      #footer { padding: 60px 0 24px; }
+      .footer-brand p { font-size: 0.95rem; }
+      .footer-col h4 { font-size: 0.72rem; }
+      .about-img-badge { right: 0; bottom: -16px; padding: 18px 20px; }
+    }
+
+    /* Floating WhatsApp — mobil küçült */
+    @media (max-width: 480px) {
+      .float-whatsapp { width: 52px; height: 52px; right: 16px; bottom: 16px; }
+      .float-whatsapp svg { width: 24px; height: 24px; }
     }
 
     /* ════════════════════════════════════════
@@ -404,9 +838,548 @@
       body.admin-mode #navbar { top: 90px; }
       body.admin-mode { padding-top: 90px; }
     }
+
+    /* ════════════════════════════════════════
+       SAYFA YÜKLEME EKRANI
+    ════════════════════════════════════════ */
+    #page-loader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--green-dark);
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.7s ease, visibility 0.7s ease;
+    }
+    #page-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader-inner { text-align: center; }
+    .loader-logo-box {
+      width: 88px; height: 88px; margin: 0 auto;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+      display: flex; align-items: center; justify-content: center;
+      animation: loaderPulse 1.6s ease-in-out infinite;
+      box-shadow: 0 12px 40px rgba(122,182,72,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .loader-svg {
+      width: 56px; height: 56px;
+      filter: drop-shadow(0 0 14px rgba(201,169,97,0.4));
+    }
+    @keyframes loaderPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 12px 40px rgba(122,182,72,0.25), inset 0 1px 0 rgba(255,255,255,0.1); }
+      50%      { transform: scale(1.08); box-shadow: 0 16px 56px rgba(201,169,97,0.4), inset 0 1px 0 rgba(255,255,255,0.18); }
+    }
+    .loader-text {
+      font-family: 'Montserrat', sans-serif; font-weight: 900;
+      font-size: 1.05rem; color: var(--white); letter-spacing: 4px;
+      margin: 22px 0 4px; opacity: 0.95;
+    }
+    .loader-subtext {
+      font-family: 'Montserrat', sans-serif; font-weight: 600;
+      font-size: 0.65rem; color: var(--green-accent);
+      letter-spacing: 3px; margin-bottom: 22px; opacity: 0.8;
+    }
+    .loader-bar {
+      width: 220px; height: 2px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 2px; margin: 0 auto; overflow: hidden;
+    }
+    .loader-bar-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--green-accent), var(--gold));
+      border-radius: 2px;
+    }
+
+    /* Özel imleç — Editorial tasarımda gereksiz, tamamen gizle */
+    #cursor-dot, #cursor-follower { display: none !important; }
+
+    /* ════════════════════════════════════════
+       SCROLL İLERLEME ÇUBUĞU
+    ════════════════════════════════════════ */
+    #scroll-progress {
+      position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+      background: linear-gradient(90deg, var(--green-accent), var(--gold), var(--green-accent));
+      background-size: 200% 100%;
+      z-index: 1001; pointer-events: none;
+      animation: progressShimmer 2s linear infinite;
+    }
+    @keyframes progressShimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+
+    /* ════════════════════════════════════════
+       HERO — 3D & CANVAS KATMANLARI
+    ════════════════════════════════════════ */
+    .hero-gradient-overlay {
+      position: absolute; inset: 0; z-index: 1;
+      background: linear-gradient(160deg, rgba(20,55,22,.92) 0%, rgba(30,65,32,.80) 45%, rgba(10,20,10,.70) 100%);
+    }
+    .hero-content { z-index: 5; position: relative; }
+    .scroll-down { z-index: 5; position: absolute; }
+    .hero-stats { z-index: 5; }
+    .hero-particles { display: none; } /* Three.js ile değiştirildi */
+
+    /* Hero title — karakter animasyonu */
+    .hero-title .char {
+      display: inline-block;
+      will-change: transform, opacity;
+    }
+    /* İlk durum GSAP ile ayarlanacak */
+
+    /* Hero 3D stat badge'leri — içerik akışında, asla başlığa binmez */
+    .hero-stats {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 32px;
+      max-width: 560px;
+      z-index: 3;
+    }
+    .hero-stat-badge {
+      background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px; padding: 14px 16px;
+      text-align: center; color: var(--white);
+      transform-style: preserve-3d;
+      will-change: transform;
+      opacity: 0;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.12);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-stat-badge::before {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(135deg, transparent 0%, rgba(122,182,72,0.06) 50%, transparent 100%);
+      pointer-events:none;
+    }
+    .stat-num {
+      font-family: 'Montserrat', sans-serif; font-weight: 900;
+      font-size: 1.35rem; color: var(--green-accent); line-height: 1;
+      text-shadow: 0 0 20px rgba(122,182,72,0.4);
+    }
+    .stat-lbl {
+      font-size: 0.6rem; color: rgba(255,255,255,0.78);
+      margin-top: 5px; letter-spacing: 0.7px;
+      font-family: 'Montserrat', sans-serif; font-weight: 600;
+      text-transform: uppercase;
+    }
+    @media (max-width: 640px) {
+      .hero-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .hero-stat-badge { padding: 10px 8px; }
+      .stat-num { font-size: 1rem; }
+      .stat-lbl { font-size: 0.5rem; }
+    }
+
+    /* ════════════════════════════════════════
+       NAVBAR — GLASS MORPHISM & 3D LOGO
+    ════════════════════════════════════════ */
+    #navbar.scrolled {
+      background: rgba(255,255,255,0.88) !important;
+      backdrop-filter: blur(24px) saturate(1.8) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
+      padding: 10px 0 !important;
+      box-shadow: 0 2px 32px rgba(0,0,0,0.1), inset 0 -1px 0 rgba(0,0,0,0.06) !important;
+    }
+    .nav-logo-mark {
+      transform-style: preserve-3d;
+      transition: transform 0.45s var(--ease-expo) !important;
+    }
+    .nav-logo:hover .nav-logo-mark {
+      transform: rotateY(20deg) rotateX(12deg) scale(1.08);
+    }
+
+    /* ════════════════════════════════════════
+       İLAN KARTLARI — 3D TILT & GLOW
+    ════════════════════════════════════════ */
+    .listings-grid { perspective: var(--perspective); }
+    .listing-card {
+      transform-style: preserve-3d;
+      will-change: transform;
+      overflow: visible;
+      position: relative;
+    }
+    /* Üst köşe yuvarlama — overflow:visible olunca img doğrudan kliplenmez */
+    .listing-img {
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .listing-card::before {
+      content: ''; position: absolute; inset: -2px;
+      border-radius: calc(var(--radius) + 3px);
+      background: var(--grad-border);
+      opacity: 0; z-index: -1; filter: blur(6px);
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+    .listing-card:hover::before { opacity: 0.65; }
+    /* hover box-shadow — transform Vanilla Tilt tarafından yönetilir */
+    .listing-card:hover { box-shadow: var(--shadow-lg) !important; }
+
+    /* ════════════════════════════════════════
+       LOCATION STRIP — DÖNEN IŞIL & 3D İKON
+    ════════════════════════════════════════ */
+    #location { position: relative; overflow: hidden; }
+    #location::after {
+      content: ''; position: absolute; top: -100%; left: -50%;
+      width: 200%; height: 300%; pointer-events: none;
+      background: conic-gradient(from 0deg at 50% 50%, transparent 75%, rgba(122,182,72,0.08) 85%, transparent 100%);
+      animation: rotateGlow 18s linear infinite;
+    }
+    @keyframes rotateGlow { to { transform: rotate(360deg); } }
+    .location-icon {
+      transition: transform 0.4s var(--ease-expo);
+      transform-style: preserve-3d;
+    }
+    .location-item:hover .location-icon {
+      transform: rotateY(20deg) rotateX(12deg) scale(1.12);
+    }
+
+    /* ════════════════════════════════════════
+       FEATURES — 3D YÜZEN İKON & SAYAÇLAR
+    ════════════════════════════════════════ */
+    .features-grid { /* perspective Vanilla Tilt tarafından kart bazında uygulanır */ }
+    .feature-icon {
+      animation: floatIcon 4s ease-in-out infinite;
+      /* 3D rotateY kaldırıldı — SVG yamuk görünmesin */
+    }
+    @keyframes floatIcon {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+    /* SVG ikon her zaman ortalanmış ve tam görünür */
+    .feature-icon svg {
+      display: block;
+      width: 28px; height: 28px;
+      stroke: #ffffff;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+    .feature-card { transform-style: preserve-3d; }
+    /* hover transform — Vanilla Tilt yönetir; sadece shadow güncellenir */
+    .feature-card:hover { box-shadow: var(--shadow-lg) !important; }
+
+    /* İstatistik sayaçları */
+    .features-stats-row {
+      display: flex; justify-content: center;
+      gap: 56px; margin-bottom: 60px; flex-wrap: wrap;
+    }
+    .feature-counter {
+      text-align: center; display: flex;
+      flex-direction: column; align-items: center;
+    }
+    .counter-row { display: flex; align-items: baseline; gap: 3px; }
+    .counter-num {
+      font-family: 'Montserrat', sans-serif; font-weight: 900;
+      font-size: 3.2rem; line-height: 1;
+      background: linear-gradient(135deg, var(--green-dark), var(--green-accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .feature-counter:nth-child(1) .counter-num { background: linear-gradient(135deg, var(--green-dark), var(--green-accent)); -webkit-background-clip: text; background-clip: text; }
+    .feature-counter:nth-child(2) .counter-num { background: linear-gradient(135deg, var(--gold-deep), var(--gold)); -webkit-background-clip: text; background-clip: text; }
+    .feature-counter:nth-child(3) .counter-num { background: linear-gradient(135deg, var(--sky-deep), var(--sky)); -webkit-background-clip: text; background-clip: text; }
+    .feature-counter:nth-child(4) .counter-num { background: linear-gradient(135deg, var(--copper), var(--terracotta)); -webkit-background-clip: text; background-clip: text; }
+    .counter-plus {
+      font-family: 'Montserrat', sans-serif; font-weight: 900;
+      font-size: 1.8rem; color: var(--green-accent);
+      -webkit-text-fill-color: var(--green-accent);
+    }
+    .feature-counter:nth-child(2) .counter-plus { color: var(--gold); -webkit-text-fill-color: var(--gold); }
+    .feature-counter:nth-child(3) .counter-plus { color: var(--sky); -webkit-text-fill-color: var(--sky); }
+    .feature-counter:nth-child(4) .counter-plus { color: var(--copper); -webkit-text-fill-color: var(--copper); }
+    .counter-label {
+      font-size: 0.8rem; color: var(--text-light);
+      letter-spacing: 0.8px; margin-top: 6px;
+      font-family: 'Montserrat', sans-serif; font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* ════════════════════════════════════════
+       ABOUT — PARALLAX & REVEAL MASKE
+    ════════════════════════════════════════ */
+    #about {
+      clip-path: polygon(0 50px, 100% 0, 100% calc(100% - 50px), 0 100%);
+      padding: 150px 0 !important;
+      position: relative;
+    }
+    .about-img-main { position: relative; overflow: hidden; }
+    .about-img-reveal-mask {
+      position: absolute; inset: 0; background: var(--green-dark);
+      transform-origin: right center; z-index: 2;
+    }
+
+    /* ════════════════════════════════════════
+       CONTACT — ANİMASYONLU ARKA PLAN
+    ════════════════════════════════════════ */
+    #contact { position: relative; overflow: hidden; }
+    #contact::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 85%, rgba(122,182,72,0.07) 0%, transparent 55%),
+        radial-gradient(circle at 85% 15%, rgba(201,169,97,0.07) 0%, transparent 55%);
+      animation: patternMove 14s ease-in-out infinite alternate;
+    }
+    @keyframes patternMove {
+      0%   { transform: translate(0,0) scale(1); }
+      100% { transform: translate(-15px, 10px) scale(1.04); }
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      transform: translateY(-1px) !important;
+      border-color: var(--green-mid) !important;
+      box-shadow: 0 4px 20px rgba(44,95,46,0.18), 0 0 0 3px rgba(44,95,46,0.1) !important;
+    }
+    .form-submit { position: relative; overflow: hidden; }
+    .form-submit::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+      transform: translateX(-100%); transition: transform 0.65s ease;
+    }
+    .form-submit:hover::after { transform: translateX(100%); }
+
+    /* ════════════════════════════════════════
+       BLOB ARKA PLANLAR
+    ════════════════════════════════════════ */
+    .blob-bg {
+      position: absolute; pointer-events: none;
+      opacity: 0.055; z-index: 0;
+      animation: blobMorph 16s ease-in-out infinite alternate;
+    }
+    @keyframes blobMorph {
+      0%   { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: rotate(0deg) scale(1); }
+      33%  { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; transform: rotate(120deg) scale(1.08); }
+      66%  { border-radius: 50% 50% 30% 70% / 40% 70% 60% 50%; transform: rotate(240deg) scale(0.95); }
+      100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: rotate(360deg) scale(1); }
+    }
+
+    /* ════════════════════════════════════════
+       FOOTER — GELİŞMİŞ
+    ════════════════════════════════════════ */
+    .social-link {
+      transform-style: preserve-3d;
+      transition: transform 0.3s var(--ease-expo), background 0.3s ease !important;
+    }
+    .social-link:hover {
+      transform: translateY(-4px) rotateX(12deg) !important;
+    }
+
+    /* ════════════════════════════════════════
+       FLOAT WHATSAPP — GELIŞMIŞ PULSE
+    ════════════════════════════════════════ */
+    .float-whatsapp {
+      box-shadow: 0 8px 24px rgba(37,211,102,.45), 0 0 0 0 rgba(37,211,102,0.4);
+      animation: waPulse 2.5s ease-out infinite;
+    }
+    @keyframes waPulse {
+      0%   { box-shadow: 0 8px 24px rgba(37,211,102,.45), 0 0 0 0 rgba(37,211,102,0.4); }
+      70%  { box-shadow: 0 8px 24px rgba(37,211,102,.45), 0 0 0 18px rgba(37,211,102,0); }
+      100% { box-shadow: 0 8px 24px rgba(37,211,102,.45), 0 0 0 0 rgba(37,211,102,0); }
+    }
   </style>
 </head>
 <body>
+
+  <!-- SAYFA YÜKLEME EKRANI -->
+  <div id="page-loader">
+    <div class="loader-inner">
+      <div class="loader-logo-box" id="loaderLogoBox">
+        <svg class="loader-svg" viewBox="0 0 32 32" fill="none">
+          <path d="M16 4 L4 26 L28 26 Z" fill="#c9a961" opacity=".95"/>
+          <path d="M16 12 L10 24 L22 24 Z" fill="#7ab648"/>
+          <text x="16" y="22" text-anchor="middle" font-family="Montserrat" font-weight="900" font-size="6" fill="#1e4d20">D</text>
+        </svg>
+      </div>
+      <div class="loader-text" id="loaderText">DİCLE ARSA OFİSİ</div>
+      <div class="loader-subtext" id="loaderSubtext">NESİPOĞULLARI</div>
+      <div class="loader-bar"><div class="loader-bar-fill" id="loaderBarFill"></div></div>
+    </div>
+  </div>
+
+  <!-- BRANDING SENKRONİZASYONU: 1) localStorage cache ile anında göster, 2) Firestore'dan global güncel veriyi çek -->
+  <script>
+    (function() {
+      /* ── Güvenli DOM yardımcıları ──────────────────────────────────
+         settings/site dokümanı Firestore'dan geliyor. Bu veri DOM'a
+         innerHTML ile basılırsa, dokümana yazabilen herkes her
+         ziyaretçinin tarayıcısında kod çalıştırabilir. Bu yüzden
+         aşağıdaki yollarda innerHTML KULLANILMAZ. Yeni bir marka alanı
+         eklerken bu kuralı koru. */
+
+      // Yalnızca https ve base64 görsel şemalarına izin ver.
+      // javascript:, data:text/html gibi şemalar ve tırnak kaçışı ile
+      // öznitelik kırma denemeleri burada elenir.
+      function safeLogoSrc(src) {
+        if (typeof src !== 'string') return null;
+        return /^(https:\/\/|data:image\/(png|jpe?g|webp|gif);base64,)/i.test(src) ? src : null;
+      }
+
+      function setLogoImg(el, src, size, radius) {
+        if (!el) return false;
+        var safe = safeLogoSrc(src);
+        if (!safe) return false;
+        el.textContent = '';                    // mevcut içeriği temizle
+        var img = document.createElement('img');
+        img.src = safe;                         // öznitelik olarak set edilir, ayrıştırılmaz
+        img.alt = 'Logo';
+        img.style.cssText = 'width:' + size + 'px;height:' + size + 'px;object-fit:contain;border-radius:' + radius + 'px;display:block;';
+        el.appendChild(img);
+        return true;
+      }
+
+      // Hero başlığında <br> ve <em> biçimlendirmesine izin veriliyor.
+      // Beyaz liste yaklaşımı: önce her şeyi kaçır, sonra yalnızca bu
+      // iki etiketi geri aç. Öznitelik yazmak mümkün değil, çünkü
+      // etiket adından sonra yalnızca boşluk ve / kabul ediliyor.
+      function sanitizeRichText(str) {
+        if (typeof str !== 'string') return '';
+        var esc = str
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        return esc.replace(/&lt;(\/?)(br|em)\s*\/?&gt;/gi, function(_, slash, tag) {
+          return '<' + slash + tag.toLowerCase() + '>';
+        });
+      }
+
+      // Navbar VE footer'daki tüm marka yazılarını günceller.
+      // Eskiden tekil querySelector kullanılıyordu; footer eski adda kalıyordu.
+      function setBrandText(name, subtitle) {
+        document.querySelectorAll('.nav-logo-text').forEach(function(el) {
+          el.textContent = name;
+          if (subtitle) {
+            var sp = document.createElement('span');
+            sp.textContent = subtitle;
+            el.appendChild(sp);
+          }
+        });
+      }
+
+      // Telefon ayarını sitedeki tüm tel: ve wa.me linklerine uygula.
+      // Bu olmadan panelden numara değiştirmek hiçbir şeyi değiştirmiyordu.
+      var sonTelefon = null;
+      function applyPhone(phone) {
+        if (typeof phone === 'string' && phone.trim()) sonTelefon = phone;
+        else phone = sonTelefon;                        // argümansız çağrı: sonuncuyu tekrar uygula
+        if (typeof phone !== 'string' || !phone.trim()) return;
+        var digits = phone.replace(/\D/g, '');
+        if (digits.length < 10) return;                     // anlamsız girdi
+        var intl = digits.length === 10 ? '90' + digits
+                 : digits.charAt(0) === '0' ? '9' + digits
+                 : digits;
+        document.querySelectorAll('a[href^="tel:"]').forEach(function(a) {
+          a.href = 'tel:+' + intl;
+          // Yalnızca düz metin bağlantılarda görünen numarayı da değiştir;
+          // ikon/svg içerenlerin yapısını bozma.
+          if (a.children.length === 0) a.textContent = phone;
+        });
+        document.querySelectorAll('a[href*="wa.me/"]').forEach(function(a) {
+          a.href = a.href.replace(/wa\.me\/\d+/, 'wa.me/' + intl);
+        });
+      }
+
+      /* ── Tek giriş noktası ──────────────────────────────────────────
+         Marka/ayar verisini DOM'a uygulayan TEK fonksiyon burasıdır.
+         Başka yerden .nav-logo-text / .hero-title / #navLogoMark'a
+         yazma; yarış durumu ve titreme oluşuyor. */
+      function applyBranding(s) {
+        if (!s) return;
+
+        if (s.siteName) {
+          var lt = document.getElementById('loaderText');
+          if (lt) lt.textContent = s.siteName;
+        }
+        if (s.siteSubtitle) {
+          var ls = document.getElementById('loaderSubtext');
+          if (ls) ls.textContent = s.siteSubtitle;
+        }
+
+        if (s.logo) {
+          setLogoImg(document.getElementById('loaderLogoBox'), s.logo, 64, 14);
+          var setNav = function() {
+            return setLogoImg(document.getElementById('navLogoMark'), s.logo, 44, 8);
+          };
+          // Navbar bu script çalışırken henüz ayrıştırılmamış olabilir.
+          if (!document.getElementById('navLogoMark')) {
+            var obs = new MutationObserver(function() {
+              if (document.getElementById('navLogoMark')) { setNav(); obs.disconnect(); }
+            });
+            obs.observe(document.documentElement, { childList: true, subtree: true });
+            setTimeout(function() { obs.disconnect(); }, 5000);
+          } else {
+            setNav();
+          }
+        }
+
+        if (s.siteName) setBrandText(s.siteName, s.siteSubtitle || '');
+
+        if (s.heroTitle) {
+          var ht = document.querySelector('.hero-title');
+          if (ht) ht.innerHTML = sanitizeRichText(s.heroTitle);
+        }
+        if (s.heroDesc) {
+          var hd = document.querySelector('.hero-desc');
+          if (hd) hd.textContent = s.heroDesc;
+        }
+
+        applyPhone(s.phone);
+
+        // Tema da ayarın parçası — böylece cihazlar arası senkron olur.
+        // ThemeSystem sayfa sonunda tanımlanıyor; localStorage yolunda
+        // henüz yok, Firestore yolunda (async) hazır oluyor.
+        if (s.theme && window.ThemeSystem && window.ThemeSystem.THEMES[s.theme]) {
+          window.ThemeSystem.applyTheme(s.theme);
+        }
+      }
+      window.__applyBranding = applyBranding;
+      /* İlan kartları sayfa açılışından SONRA basılıyor ve içlerinde
+         wa.me linkleri var. renderListings bunu çağırıp yeni kartlara
+         da güncel numarayı uyguluyor. */
+      window.__applyPhone = function() { applyPhone(); };
+
+      // 1) localStorage önbelleğinden anında uygula — ilk boyamada gecikme olmasın
+      try {
+        var raw = localStorage.getItem('siteSettings');
+        if (raw) applyBranding(JSON.parse(raw));
+      } catch (e) { /* yok say */ }
+
+      // 2) Firestore'dan güncel veriyi çek — tüm cihazlar aynı veriyi görür.
+      //    Bu her zaman localStorage'dan SONRA çalışır, dolayısıyla son söz onundur.
+      var fsAttempts = 0;
+      function fetchFromFirestore() {
+        fsAttempts++;
+        // firebase SDK yüklü VE app initialize edilmiş mi? (app.js sayfa sonunda yükleniyor)
+        var ready = typeof firebase !== 'undefined' && firebase.firestore && firebase.apps && firebase.apps.length > 0;
+        if (!ready) {
+          if (fsAttempts > 100) { // 10 saniye sonra vazgeç
+            console.warn('Firebase initialize edilmedi, branding Firestore\'dan çekilemedi');
+            return;
+          }
+          setTimeout(fetchFromFirestore, 100);
+          return;
+        }
+        try {
+          firebase.firestore().collection('settings').doc('site').get()
+            .then(function(doc) {
+              if (!doc.exists) return;
+              var fresh = doc.data();
+              if (!fresh) return;
+              applyBranding(fresh);
+              try {
+                localStorage.setItem('siteSettings', JSON.stringify(fresh));
+              } catch (e) { /* kota dolu — yok say, Firestore zaten kalıcı */ }
+            })
+            .catch(function(err) { console.warn('Firestore branding okuma:', err); });
+        } catch (e) { console.warn('Firestore branding hata:', e); }
+      }
+      fetchFromFirestore();
+    })();
+  </script>
+
+  <!-- ÖZEL İMLEÇ -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-follower"></div>
+
+  <!-- SCROLL İLERLEME ÇUBUĞU -->
+  <div id="scroll-progress"></div>
 
   <!-- MOBILE MENU -->
   <div class="mobile-menu" id="mobileMenu">
@@ -453,52 +1426,53 @@
     </div>
   </nav>
 
-  <!-- HERO -->
+  <!-- HERO — Editorial Premium -->
   <section id="hero">
-    <div class="hero-particles" id="particles"></div>
+    <!-- Tam ekran arsa fotoğrafı + yavaş Ken Burns zoom -->
+    <div class="hero-bg-img"></div>
+    <!-- Yumuşak gradient overlay -->
+    <div class="hero-gradient-overlay"></div>
     <div class="container">
       <div class="hero-content">
-        <div class="hero-badge">
-          <span class="hero-badge-dot"></span>
-          Tekirdağ Marmaraereğlisi · Çeşmeli — 170/10 Parsel
+        <div class="hero-badge" id="heroBadge">
+          Tekirdağ Marmaraereğlisi · Çeşmeli
         </div>
         <h1 class="hero-title">
           Hayalinizdeki<br>
           <em>Yere</em> Sahip Olun
         </h1>
         <p class="hero-desc">
-          Trakya'nın incisi Marmaraereğlisi'nde, denize komşu, E-5 yoluna yakın, tapulu yatırımlık ve villa imarlı arsalar.
-          Uygun fiyat garantisi, taksit imkanı ve Pazar günü servis hizmetiyle hizmetinizdeyiz.
+          Trakya'nın incisi Marmaraereğlisi'nde denize komşu, E-5 yoluna yakın,
+          tapulu yatırımlık ve villa imarlı arsalar. 300 m²'den başlayan parsel
+          seçenekleri, taksit imkanı ve Pazar günü ücretsiz arazi turu.
         </p>
         <div class="hero-actions">
-          <a href="#listings" class="btn btn-primary">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            Arsaları İncele
-          </a>
-          <a href="tel:+905332516036" class="btn btn-outline">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 01.04 2.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.18 6.18l1.28-1.28a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-            0533 251 60 36
-          </a>
+          <a href="#listings" class="btn btn-primary">Arsaları İncele</a>
+          <a href="tel:+905332516036" class="btn btn-outline">0533 251 60 36</a>
         </div>
         <div class="hero-features">
           <div class="hero-feature">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            Tapulu Güvenli Yatırım
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Tapulu Güvenli
           </div>
           <div class="hero-feature">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            Uygun Fiyat Garantisi
-          </div>
-          <div class="hero-feature">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
             Taksit Seçenekleri
+          </div>
+          <div class="hero-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Altyapı Hazır
+          </div>
+          <div class="hero-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Pazar Günü Servis
           </div>
         </div>
       </div>
     </div>
     <div class="scroll-down">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-      AŞAĞI KAYDIRIN
+      <span>Aşağı Kaydır</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
     </div>
   </section>
 
@@ -549,15 +1523,16 @@
   <!-- LISTINGS -->
   <section id="listings">
     <div class="container">
-      <div class="section-header animate-on-scroll">
-        <h2 class="section-title">Marmaraereğlisi Arsa Portföyü</h2>
-        <p class="section-sub">Tekirdağ Marmaraereğlisi Çeşmeli bölgesinde 170/10 parselinde yer alan, denize ve E-5'e komşu, elektrik-su altyapısı hazır tapulu arsa fırsatlarımız.</p>
+      <div class="section-header">
+        <span class="section-eyebrow">Portföy</span>
+        <h2 class="section-title">Marmaraereğlisi <em>Arsa Portföyü</em></h2>
+        <p class="section-sub">Çeşmeli 170/10 parselinde, denize ve E-5'e komşu, elektrik–su altyapısı hazır tapulu arsa fırsatları.</p>
       </div>
       <div class="listings-grid" id="listingsGrid"></div>
 
-      <div class="listings-cta animate-on-scroll">
-        <div class="listings-cta-title">📋 Daha Fazla Arsa Seçeneği</div>
-        <div class="listings-cta-text">Bütçenize ve metrekare ihtiyacınıza uygun (250 m²'den 1000 m²'ye) imarlı/imarsız arsa portföyümüz mevcuttur. Detaylı bilgi için bizi arayın.</div>
+      <div class="listings-cta">
+        <div class="listings-cta-title">Daha Fazla Seçenek</div>
+        <div class="listings-cta-text">Bütçeniz ve metrekare ihtiyacınıza göre 250 m²'den 1000 m²'ye kadar imarlı / imarsız portföyümüz mevcuttur.</div>
         <a href="tel:+905332516036" class="btn btn-primary">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 01.04 2.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.18 6.18l1.28-1.28a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
           0533 251 60 36 — Hemen Arayın
@@ -569,33 +1544,35 @@
   <!-- FEATURES -->
   <section id="features">
     <div class="container">
-      <div class="section-header animate-on-scroll">
-        <h2 class="section-title">Neden Dicle Arsa Ofisi?</h2>
-        <p class="section-sub">Marmaraereğlisi'nde size en uygun arsa fırsatlarını sunuyor, satış öncesi ve sonrası tüm desteği veriyoruz.</p>
+      <div class="section-header">
+        <span class="section-eyebrow">Hizmetlerimiz</span>
+        <h2 class="section-title">Neden <em>Dicle Arsa Ofisi</em></h2>
+        <p class="section-sub">Marmaraereğlisi'nde tapulu, altyapı hazır arsalarda; satış öncesi rehberlik ve sonrası destekle yanınızdayız.</p>
       </div>
+
       <div class="features-grid">
-        <div class="feature-card animate-on-scroll">
+        <div class="feature-card">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
           </div>
           <h3 class="feature-title">Tapulu Yatırım</h3>
           <p class="feature-desc">Tüm arsalarımız tapulu — hisseli veya müstakil seçeneklerle güvenli yatırım.</p>
         </div>
-        <div class="feature-card animate-on-scroll">
+        <div class="feature-card">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><circle cx="12" cy="16" r="1"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
           </div>
           <h3 class="feature-title">Taksit İmkanı</h3>
           <p class="feature-desc">Bütçenize uygun taksit seçenekleri — peşin alımlarda özel indirim fırsatları.</p>
         </div>
-        <div class="feature-card animate-on-scroll">
+        <div class="feature-card">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7"/></svg>
           </div>
           <h3 class="feature-title">Altyapısı Hazır</h3>
           <p class="feature-desc">Elektrik ve su başında, kadastro yolu mevcut — anahtar teslim yatırım.</p>
         </div>
-        <div class="feature-card animate-on-scroll">
+        <div class="feature-card">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           </div>
@@ -610,47 +1587,47 @@
   <section id="about">
     <div class="container">
       <div class="about-grid">
-        <div class="about-text animate-on-scroll">
-          <h2 class="section-title">Hakkımızda</h2>
-          <p>Dicle Arsa Ofisi (Nesipoğulları İnşaat & Arsa Alım Satım), İstanbul Avcılar merkezli, Tekirdağ Marmaraereğlisi Çeşmeli bölgesinde tapulu arsa satışı yapan güvenilir bir gayrimenkul ofisidir.</p>
-          <p>Trakya'nın incisi Marmaraereğlisi'nde — denize komşu, E-5 yoluna yakın, altyapısı hazır arsalarla yatırımcılara ve villa hayali kuran ailelere uygun fiyat garantili çözümler sunuyoruz.</p>
+        <div class="about-visual">
+          <div style="position:relative;">
+            <div class="about-img-main">
+              <div class="about-img-reveal-mask" id="aboutRevealMask"></div>
+              <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=900&q=85" alt="Marmaraereğlisi arsa görünümü" loading="lazy" />
+            </div>
+            <div class="about-img-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <div class="about-img-badge-text">
+                <div class="b-num">Tekirdağ</div>
+                <div class="b-lbl">Marmaraereğlisi · Çeşmeli</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="about-text">
+          <span class="section-eyebrow">Hakkımızda</span>
+          <h2 class="section-title">Marmaraereğlisi'nde <em>Güvenilir Arsa Ofisi</em></h2>
+          <p>Dicle Arsa Ofisi (Nesipoğulları İnşaat & Arsa Alım Satım), İstanbul Avcılar merkezli, Tekirdağ Marmaraereğlisi Çeşmeli bölgesinde tapulu arsa satışı yapan bir gayrimenkul ofisidir.</p>
+          <p>Trakya'nın incisi Marmaraereğlisi'nde denize komşu, E-5 yoluna yakın, altyapısı hazır arsalarla yatırımcılara ve villa hayali kuran ailelere çözümler sunuyoruz.</p>
           <div class="about-checks">
             <div class="about-check">
-              <div class="about-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="about-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
               Tapuda refakat — ücretsiz işlem desteği
             </div>
             <div class="about-check">
-              <div class="about-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-              İmarlı / İmarsız her bütçeye uygun seçenekler
+              <div class="about-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+              İmarlı / imarsız her bütçeye uygun seçenekler
             </div>
             <div class="about-check">
-              <div class="about-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="about-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
               250 m²'den 1 dönüme kadar parsel çeşitliliği
             </div>
             <div class="about-check">
-              <div class="about-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="about-check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
               Pazar günü ücretsiz arazi gezi servisi
             </div>
           </div>
-          <div style="display:flex;gap:12px;flex-wrap:wrap;">
-            <a href="https://wa.me/905332516036" target="_blank" class="whatsapp-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              WhatsApp'tan Yazın
-            </a>
-          </div>
-        </div>
-        <div class="about-visual animate-on-scroll">
-          <div style="position:relative;">
-            <div class="about-img-main">
-              <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=700&q=80" alt="Marmaraereğlisi arsa görünümü" loading="lazy" style="height:420px;" />
-            </div>
-            <div class="about-img-badge">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <div class="about-img-badge-text">
-                <div class="b-num">Tekirdağ</div>
-                <div class="b-lbl">MARMARAEREĞLİSİ · ÇEŞMELİ</div>
-              </div>
-            </div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;">
+            <a href="https://wa.me/905332516036" target="_blank" class="whatsapp-btn">WhatsApp'tan Yazın</a>
+            <a href="tel:+905332516036" class="call-btn">0533 251 60 36</a>
           </div>
         </div>
       </div>
@@ -661,9 +1638,10 @@
   <section id="contact">
     <div class="container">
       <div class="contact-grid">
-        <div class="contact-info animate-on-scroll">
-          <h2 class="section-title">İletişim</h2>
-          <p>Marmaraereğlisi Çeşmeli arsa portföyümüz hakkında bilgi almak veya arazi gezisi planlamak için bize ulaşın. Nurhayat Hanım size en uygun seçenekleri sunsun.</p>
+        <div class="contact-info">
+          <span class="section-eyebrow">İletişim</span>
+          <h2 class="section-title">Bizimle <em>İletişime Geçin</em></h2>
+          <p>Marmaraereğlisi Çeşmeli arsa portföyümüz hakkında bilgi almak veya arazi gezisi planlamak için bize ulaşın.</p>
           <div class="contact-items">
             <div class="contact-item">
               <div class="contact-item-icon">
@@ -772,7 +1750,37 @@
   </section>
 
   <!-- FOOTER -->
+  <!-- PRE-FOOTER CTA BANDI -->
+  <section id="prefooter">
+    <div class="prefooter-bg" aria-hidden="true"></div>
+    <div class="container">
+      <div class="prefooter-grid">
+        <div class="prefooter-text">
+          <span class="prefooter-eyebrow">— Hazır mısınız? —</span>
+          <h2 class="prefooter-title">Hayalinizdeki Arsayı<br><em>Birlikte Bulalım</em></h2>
+          <p class="prefooter-desc">Marmaraereğlisi Çeşmeli'de size en uygun arsayı seçmek için Pazar günleri ücretsiz arazi gezisi düzenliyoruz.</p>
+        </div>
+        <div class="prefooter-actions">
+          <a href="tel:+905332516036" class="prefooter-cta-card">
+            <div class="prefooter-cta-eyebrow">Hemen Arayın</div>
+            <div class="prefooter-cta-value">0533 251 60 36</div>
+            <div class="prefooter-cta-sub">Pzt–Cmt · 09:00 – 19:00</div>
+            <svg class="prefooter-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+          <a href="https://wa.me/905332516036" target="_blank" class="prefooter-cta-card prefooter-cta-card--alt">
+            <div class="prefooter-cta-eyebrow">WhatsApp</div>
+            <div class="prefooter-cta-value">Mesaj Gönderin</div>
+            <div class="prefooter-cta-sub">7/24 yanıtlıyoruz</div>
+            <svg class="prefooter-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <footer id="footer">
+    <!-- Üst altın çizgi -->
+    <div class="footer-accent-top" aria-hidden="true"></div>
     <div class="container">
       <div class="footer-top">
         <div class="footer-brand">
@@ -780,9 +1788,9 @@
             DİCLE ARSA OFİSİ
             <span>NESİPOĞULLARI</span>
           </div>
-          <p>Tekirdağ Marmaraereğlisi Çeşmeli bölgesinde tapulu, denize komşu, altyapısı hazır yatırım ve villa imarlı arsa satışı.</p>
+          <p>Tekirdağ Marmaraereğlisi Çeşmeli bölgesinde tapulu, denize komşu, altyapısı hazır yatırım ve villa imarlı arsa satışı yapan güvenilir gayrimenkul ofisi.</p>
           <div class="social-links">
-            <a href="https://www.instagram.com/diclearsaofisi6" target="_blank" class="social-link" aria-label="Instagram">
+            <a href="https://www.instagram.com/dicle_arsaofisi" target="_blank" class="social-link" aria-label="Instagram">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
             </a>
             <a href="https://wa.me/905332516036" target="_blank" class="social-link" aria-label="WhatsApp">
@@ -805,19 +1813,42 @@
         </div>
         <div class="footer-col">
           <h4>İletişim</h4>
-          <ul>
-            <li>📞 <a href="tel:+905332516036">0533 251 60 36</a></li>
-            <li>👤 Nurhayat Hanım</li>
-            <li>📍 Avcılar / İstanbul</li>
-            <li>🏞️ Marmaraereğlisi / Çeşmeli</li>
-            <li>🔖 170/10 Parsel</li>
+          <ul class="footer-contact-list">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 01.04 2.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.18 6.18l1.28-1.28a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+              <a href="tel:+905332516036">0533 251 60 36</a>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Nurhayat Hanım
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Marmaraereğlisi / Çeşmeli
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+              170/10 Parsel · Tekirdağ
+            </li>
           </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Çalışma Saatleri</h4>
+          <ul class="footer-hours">
+            <li><span>Pazartesi – Cuma</span><span>09:00 – 19:00</span></li>
+            <li><span>Cumartesi</span><span>09:00 – 18:00</span></li>
+            <li><span>Pazar</span><span class="footer-hours-special">Arazi Gezisi</span></li>
+          </ul>
+          <div class="footer-hours-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <span>Pazar günü İstanbul–Marmaraereğlisi <strong>ücretsiz servis</strong></span>
+          </div>
         </div>
       </div>
       <div class="footer-bottom">
-        <div class="footer-copy">© 2024 Dicle Arsa Ofisi · Nesipoğulları İnşaat & Arsa Alım Satım Ltd. Şti. — Tüm hakları saklıdır.</div>
+        <div class="footer-copy">© 2026 <strong>Dicle Arsa Ofisi</strong> · Nesipoğulları İnşaat & Arsa Alım Satım Ltd. Şti.</div>
         <div class="footer-badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           Tapulu · Güvenilir · Hızlı
         </div>
       </div>
@@ -960,7 +1991,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="modal-btn modal-btn-danger" id="listingDeleteBtn" onclick="deleteListing()" style="margin-right:auto;display:none;">Sil</button>
+        <button class="modal-btn modal-btn-danger" id="listingDeleteBtn" onclick="modalDeleteListing()" style="margin-right:auto;display:none;">Sil</button>
         <button class="modal-btn modal-btn-cancel" onclick="closeModal('listingModal')">İptal</button>
         <button class="modal-btn modal-btn-save" onclick="saveListing()">Kaydet</button>
       </div>
@@ -975,340 +2006,131 @@
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
   </a>
 
-  <script>
-    /* ════════ LISTINGS DATA + RENDER ════════ */
-    const DEFAULT_LISTINGS = [
-      { id: 1, title: '1 Dönüm (1000 m²) Yatırımlık Arsa', size: '1000 m²', price: '700.000', priceLabel: 'Toplam Fiyat', location: 'Marmaraereğlisi / Çeşmeli — Çarlı Manzaralı', parcel: '170/10', tag: 'hot|🔥 ÖNE ÇIKAN', features: 'Elektrik / Su, Tapulu, Yatırımlık', image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=80', description: '' },
-      { id: 2, title: '300 m² Konumu Mükemmel Arsa', size: '300 m²', price: '349.000', priceLabel: 'Toplam Fiyat', location: 'Marmaraereğlisi / Çeşmeli', parcel: '170/10', tag: 'deal|💎 ŞOK FİYAT', features: 'Kadastro Yolu, Taksit ✓, Tapulu', image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=700&q=80', description: '' },
-      { id: 3, title: 'Deniz Manzaralı 300 m² Arsa', size: '300 m²', price: '450.000', priceLabel: 'Toplam Fiyat', location: 'Marmaraereğlisi / Çeşmeli — 266/31', parcel: '266/31', tag: 'new|🌊 DENİZ MANZARALI', features: 'Denize Komşu, Tapulu, Manzaralı', image: 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=700&q=80', description: '' },
-      { id: 4, title: 'Villa İmarlı 300 m² Arsa', size: '300 m²', price: '499.000', priceLabel: 'Toplam Fiyat', location: 'Marmaraereğlisi / Çeşmeli', parcel: '170/10', tag: 'villa|🏡 VİLLA İMARLI', features: 'Villa İmarlı, Altyapı Var, E-5 Yakını', image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=700&q=80', description: '' },
-      { id: 5, title: 'Konteyner Bungalov Koyabilir 300 m²', size: '300 m²', price: '399.000', priceLabel: 'Toplam Fiyat', location: 'Marmaraereğlisi / Çeşmeli', parcel: '170/10', tag: 'new|🏕️ BUNGALOV UYGUN', features: 'Prefabrik OK, E-5\'e Yakın, Tapulu', image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=700&q=80', description: '' },
-      { id: 6, title: 'Özel Kampanya — 1 Dönüm Fırsat', size: '1000 m²', price: '619.000', priceLabel: 'Kampanya Fiyatı', location: 'Marmaraereğlisi / Çeşmeli', parcel: '170/10', tag: 'hot|🔥 KAMPANYA', features: 'Hemen Tapu, Yatırımlık, Müstakil', image: 'https://images.unsplash.com/photo-1464093515883-ec948246accb?w=700&q=80', description: '' }
-    ];
 
-    const STORAGE_KEY = 'dicle_listings_v1';
-    const PW_KEY = 'dicle_admin_pw_v1';
-    const SESSION_KEY = 'dicle_admin_session_v1';
-
-    function loadListings() {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) return JSON.parse(stored);
-      } catch (e) {}
-      return [...DEFAULT_LISTINGS];
-    }
-    function saveListings(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
-
-    let listings = loadListings();
-    let editingId = null;
-    let currentImage = '';
-
-    function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-    function renderListings() {
-      const grid = document.getElementById('listingsGrid');
-      if (!grid) return;
-      if (listings.length === 0) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-light);">Henüz ilan eklenmemiş. Yönetim panelinden ekleyebilirsiniz.</div>';
-        return;
-      }
-      grid.innerHTML = listings.map(l => {
-        const [tagClass, tagText] = (l.tag || '|').split('|');
-        const tagHtml = tagText ? `<span class="tag tag-${tagClass}">${escapeHtml(tagText)}</span>` : '';
-        const features = (l.features||'').split(',').map(f => f.trim()).filter(Boolean).slice(0,3);
-        const featuresHtml = features.map(f => `<span class="listing-spec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> ${escapeHtml(f)}</span>`).join('');
-        const waMsg = encodeURIComponent(`Merhaba, "${l.title}" (${l.size} - ${l.price} ₺) ilanı hakkında bilgi almak istiyorum.`);
-        const imgSrc = l.image || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=80';
-        return `
-          <div class="listing-card animate-on-scroll visible" data-id="${l.id}">
-            <div class="card-admin-controls">
-              <button class="card-admin-btn edit" onclick="editListing(${l.id})" title="Düzenle">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </button>
-              <button class="card-admin-btn delete" onclick="confirmDelete(${l.id})" title="Sil">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-              </button>
-            </div>
-            <div class="listing-img">
-              <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(l.title)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=80'" />
-              <div class="listing-tags">${tagHtml}</div>
-              ${l.parcel ? `<div class="listing-parcel">${escapeHtml(l.parcel)}</div>` : ''}
-            </div>
-            <div class="listing-body">
-              <div class="listing-location">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                ${escapeHtml(l.location || '')}
-              </div>
-              <div class="listing-title">${escapeHtml(l.title)}</div>
-              <div class="listing-specs">
-                <span class="listing-spec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg> ${escapeHtml(l.size)}</span>
-                ${featuresHtml}
-              </div>
-              <div class="listing-footer">
-                <div class="listing-price">
-                  <div class="listing-price-label">${escapeHtml(l.priceLabel || 'Toplam Fiyat')}</div>
-                  <div class="listing-price-total">${escapeHtml(l.price)} <small>₺</small></div>
-                </div>
-                <a href="https://wa.me/905332516036?text=${waMsg}" target="_blank" class="btn-card">
-                  Bilgi Al
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                </a>
-              </div>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    /* ════════ MODAL HELPERS ════════ */
-    function openModal(id) { document.getElementById(id).classList.add('open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-    document.addEventListener('click', e => {
-      if (e.target.classList && e.target.classList.contains('modal-backdrop')) e.target.classList.remove('open');
-    });
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open'));
-      if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); openLoginModal(); }
-    });
-
-    function showToast(msg, isError) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.toggle('error', !!isError);
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2400);
-    }
-
-    /* ════════ AUTH ════════ */
-    function hashStr(s) {
-      let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
-      return (h >>> 0).toString(16);
-    }
-    function getStoredPwHash() {
-      return localStorage.getItem(PW_KEY) || hashStr('admin123');
-    }
-    function isLoggedIn() { return sessionStorage.getItem(SESSION_KEY) === '1'; }
-    function applyAdminMode() { document.body.classList.toggle('admin-mode', isLoggedIn()); }
-
-    function openLoginModal() {
-      if (isLoggedIn()) { showToast('Zaten giriş yaptınız'); return; }
-      document.getElementById('loginPassword').value = '';
-      openModal('loginModal');
-      setTimeout(() => document.getElementById('loginPassword').focus(), 100);
-    }
-    function doLogin() {
-      const pw = document.getElementById('loginPassword').value;
-      if (!pw) return;
-      if (hashStr(pw) === getStoredPwHash()) {
-        sessionStorage.setItem(SESSION_KEY, '1');
-        applyAdminMode();
-        closeModal('loginModal');
-        showToast('✓ Yönetim moduna girildi');
-      } else {
-        showToast('Şifre hatalı', true);
-      }
-    }
-    function adminLogout() {
-      sessionStorage.removeItem(SESSION_KEY);
-      applyAdminMode();
-      showToast('Çıkış yapıldı');
-    }
-    function openChangePwModal() {
-      document.getElementById('newPassword1').value = '';
-      document.getElementById('newPassword2').value = '';
-      openModal('changePwModal');
-    }
-    function doChangePassword() {
-      const p1 = document.getElementById('newPassword1').value;
-      const p2 = document.getElementById('newPassword2').value;
-      if (!p1 || p1.length < 4) { showToast('Şifre en az 4 karakter olmalı', true); return; }
-      if (p1 !== p2) { showToast('Şifreler eşleşmiyor', true); return; }
-      localStorage.setItem(PW_KEY, hashStr(p1));
-      closeModal('changePwModal');
-      showToast('✓ Şifre değiştirildi');
-    }
-
-    /* ════════ LISTING CRUD ════════ */
-    function openListingModal() {
-      if (!isLoggedIn()) { openLoginModal(); return; }
-      editingId = null;
-      currentImage = '';
-      document.getElementById('listingModalTitle').textContent = 'Yeni İlan Ekle';
-      document.getElementById('listingDeleteBtn').style.display = 'none';
-      ['lTitle','lSize','lPrice','lFeatures','lDescription','lImageUrl'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('lPriceLabel').value = 'Toplam Fiyat';
-      document.getElementById('lLocation').value = 'Marmaraereğlisi / Çeşmeli';
-      document.getElementById('lParcel').value = '170/10';
-      document.getElementById('lTag').value = '';
-      resetImageUploader();
-      openModal('listingModal');
-    }
-    function editListing(id) {
-      const l = listings.find(x => x.id === id);
-      if (!l) return;
-      editingId = id;
-      currentImage = l.image || '';
-      document.getElementById('listingModalTitle').textContent = 'İlanı Düzenle';
-      document.getElementById('listingDeleteBtn').style.display = '';
-      document.getElementById('lTitle').value = l.title || '';
-      document.getElementById('lSize').value = l.size || '';
-      document.getElementById('lPrice').value = l.price || '';
-      document.getElementById('lPriceLabel').value = l.priceLabel || 'Toplam Fiyat';
-      document.getElementById('lLocation').value = l.location || '';
-      document.getElementById('lParcel').value = l.parcel || '';
-      document.getElementById('lTag').value = l.tag || '';
-      document.getElementById('lFeatures').value = l.features || '';
-      document.getElementById('lDescription').value = l.description || '';
-      document.getElementById('lImageUrl').value = (l.image && l.image.startsWith('data:')) ? '' : (l.image || '');
-      showImagePreview(l.image);
-      openModal('listingModal');
-    }
-    function saveListing() {
-      const title = document.getElementById('lTitle').value.trim();
-      const size = document.getElementById('lSize').value.trim();
-      const price = document.getElementById('lPrice').value.trim();
-      if (!title || !size || !price) { showToast('Başlık, m² ve fiyat zorunlu', true); return; }
-      const urlInput = document.getElementById('lImageUrl').value.trim();
-      const image = currentImage || urlInput || '';
-      const data = {
-        title, size, price,
-        priceLabel: document.getElementById('lPriceLabel').value.trim() || 'Toplam Fiyat',
-        location: document.getElementById('lLocation').value.trim(),
-        parcel: document.getElementById('lParcel').value.trim(),
-        tag: document.getElementById('lTag').value,
-        features: document.getElementById('lFeatures').value.trim(),
-        description: document.getElementById('lDescription').value.trim(),
-        image
-      };
-      if (editingId) {
-        const idx = listings.findIndex(x => x.id === editingId);
-        listings[idx] = { ...listings[idx], ...data };
-        showToast('✓ İlan güncellendi');
-      } else {
-        data.id = Date.now();
-        listings.unshift(data);
-        showToast('✓ İlan eklendi');
-      }
-      saveListings(listings);
-      renderListings();
-      closeModal('listingModal');
-    }
-    function confirmDelete(id) {
-      const l = listings.find(x => x.id === id);
-      if (!l) return;
-      if (confirm(`"${l.title}" ilanını silmek istediğinize emin misiniz?`)) {
-        listings = listings.filter(x => x.id !== id);
-        saveListings(listings);
-        renderListings();
-        showToast('İlan silindi');
-      }
-    }
-    function deleteListing() {
-      if (!editingId) return;
-      const l = listings.find(x => x.id === editingId);
-      if (confirm(`"${l.title}" ilanını silmek istediğinize emin misiniz?`)) {
-        listings = listings.filter(x => x.id !== editingId);
-        saveListings(listings);
-        renderListings();
-        closeModal('listingModal');
-        showToast('İlan silindi');
-      }
-    }
-
-    /* ════════ IMAGE UPLOAD ════════ */
-    function resetImageUploader() {
-      const u = document.getElementById('imageUploader');
-      u.classList.remove('has-image');
-      u.innerHTML = `<div class="image-uploader-prompt" id="imagePrompt">📷 <strong>Tıklayın</strong> ve bilgisayardan fotoğraf seçin<br><small style="opacity:.7;">veya aşağıya görsel URL'si yapıştırın</small></div><input type="file" id="imageFile" accept="image/*" onchange="handleImageUpload(event)" />`;
-    }
-    function showImagePreview(src) {
-      if (!src) { resetImageUploader(); return; }
-      const u = document.getElementById('imageUploader');
-      u.classList.add('has-image');
-      u.innerHTML = `<img src="${escapeHtml(src)}" alt="önizleme" /><input type="file" id="imageFile" accept="image/*" onchange="handleImageUpload(event)" />`;
-    }
-    function handleImageUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 4 * 1024 * 1024) { showToast('Dosya 4MB\'dan büyük olamaz', true); return; }
-      const reader = new FileReader();
-      reader.onload = ev => {
-        // Resize to max 1200px width and re-encode as JPEG for smaller storage
-        const img = new Image();
-        img.onload = () => {
-          const maxW = 1200;
-          const scale = Math.min(1, maxW / img.width);
-          const w = Math.round(img.width * scale);
-          const h = Math.round(img.height * scale);
-          const canvas = document.createElement('canvas');
-          canvas.width = w; canvas.height = h;
-          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          currentImage = canvas.toDataURL('image/jpeg', 0.82);
-          showImagePreview(currentImage);
-          document.getElementById('lImageUrl').value = '';
-        };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-    function previewUrlImage() {
-      const url = document.getElementById('lImageUrl').value.trim();
-      if (url && /^https?:\/\//.test(url)) { currentImage = url; showImagePreview(url); }
-    }
-
-    /* ════════ INIT ════════ */
-    renderListings();
-    applyAdminMode();
-
-    /* ════════ ORIGINAL SCRIPTS ════════ */
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-      navbar.classList.toggle('scrolled', window.scrollY > 60);
-    });
-
-    const hamburger = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobileMenu');
-    function toggleMobile() { hamburger.classList.toggle('open'); mobileMenu.classList.toggle('open'); }
-    function closeMobile() { hamburger.classList.remove('open'); mobileMenu.classList.remove('open'); }
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
-      });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
-
-    const pContainer = document.getElementById('particles');
-    for (let i = 0; i < 10; i++) {
-      const p = document.createElement('div');
-      p.className = 'hero-particle';
-      const size = Math.random() * 120 + 40;
-      p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${6+Math.random()*4}s;`;
-      pContainer.appendChild(p);
-    }
-
-    function submitForm(e) {
-      e.preventDefault();
-      const btn = e.target.querySelector('.form-submit');
-      btn.textContent = 'Gönderiliyor...';
-      btn.disabled = true;
-      setTimeout(() => {
-        e.target.style.display = 'none';
-        document.getElementById('formSuccess').style.display = 'block';
-      }, 1200);
-    }
-
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', e => {
-        const target = document.querySelector(a.getAttribute('href'));
-        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-      });
-    });
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>emailjs.init("SCzc_UmeUAmiu-1_k");</script>
+  <script src="app.js"></script>
 
   <!-- Tema Sistemi -->
   <script>
-const THEMES = {green: {name:'🌿 Yeşil (Varsayılan)',colors:{'--green-dark':'#1e4d20','--green-mid':'#2C5F2E','--green-light':'#4a8f3f','--green-accent':'#7ab648','--gold':'#c9a961','--cream':'#f5f0e8','--cream-dark':'#ede5d4','--text-dark':'#1a1a1a','--text-mid':'#444','--text-light':'#777','--white':'#ffffff'}},blue:{name:'🔵 Mavi',colors:{'--green-dark':'#0d47a1','--green-mid':'#1565c0','--green-light':'#1976d2','--green-accent':'#42a5f5','--gold':'#64b5f6','--cream':'#e3f2fd','--cream-dark':'#bbdefb','--text-dark':'#0d47a1','--text-mid':'#1565c0','--text-light':'#64b5f6','--white':'#ffffff'}},gold:{name:'✨ Altın',colors:{'--green-dark':'#b8860b','--green-mid':'#daa520','--green-light':'#ffd700','--green-accent':'#ffa500','--gold':'#f0e68c','--cream':'#fffacd','--cream-dark':'#eee8aa','--text-dark':'#8b6914','--text-mid':'#b8860b','--text-light':'#daa520','--white':'#ffffff'}},dark:{name:'🌙 Koyu',colors:{'--green-dark':'#1a1a1a','--green-mid':'#2d2d2d','--green-light':'#404040','--green-accent':'#4a9eff','--gold':'#ffa500','--cream':'#1e1e1e','--cream-dark':'#2a2a2a','--text-dark':'#e0e0e0','--text-mid':'#b0b0b0','--text-light':'#808080','--white':'#1a1a1a'}},purple:{name:'💜 Mor',colors:{'--green-dark':'#4a148c','--green-mid':'#6a1b9a','--green-light':'#7b1fa2','--green-accent':'#ab47bc','--gold':'#ce93d8','--cream':'#f3e5f5','--cream-dark':'#e1bee7','--text-dark':'#4a148c','--text-mid':'#6a1b9a','--text-light':'#ab47bc','--white':'#ffffff'}},red:{name:'❤️ Kırmızı',colors:{'--green-dark':'#b71c1c','--green-mid':'#c62828','--green-light':'#d32f2f','--green-accent':'#f44336','--gold':'#ef9a9a','--cream':'#ffebee','--cream-dark':'#ffcdd2','--text-dark':'#b71c1c','--text-mid':'#c62828','--text-light':'#f44336','--white':'#ffffff'}}};
-function applyTheme(t){const e=THEMES[t]||THEMES.green;Object.entries(e.colors).forEach((([e,a])=>{document.documentElement.style.setProperty(e,a)})),localStorage.setItem('selectedTheme',t),localStorage.setItem('siteSettings',JSON.stringify({...getSiteSettings(),theme:t}))}function getSiteSettings(){return JSON.parse(localStorage.getItem('siteSettings'))||{siteName:'DİCLE ARSA OFİSİ',siteSubtitle:'NESİPOĞULLARI',heroTitle:'Hayalinizdeki<br><em>Yere</em> Sahip Olun',heroDesc:'Trakya\'nın incisi Marmaraereğlisi\'nde, denize komşu, E-5 yoluna yakın, tapulu yatırımlık ve villa imarlı arsalar.',phone:'0533 251 60 36',logo:null,theme:'green'}}function saveSiteSettings(t){localStorage.setItem('siteSettings',JSON.stringify(t))}function uploadImageAsBase64(t,e){if(!t)return;const a=new FileReader;a.onload=t=>{e(t.target.result)},a.readAsDataURL(t)}function getListings(){return JSON.parse(localStorage.getItem('listings'))||[]}function saveListings(t){localStorage.setItem('listings',JSON.stringify(t))}function addListing(t){const e=getListings();return e.id=Date.now(),e.push(t),saveListings(e),t}function updateListing(t,e){let a=getListings();a=a.map((a=>a.id===t?{...a,...e}:a)),saveListings(a)}function deleteListing(t){let e=getListings();e=e.filter((e=>e.id!==t)),saveListings(e)}function updateSiteUI(){const t=getSiteSettings(),e=document.querySelector('.nav-logo-text');e&&(e.innerHTML=`${t.siteName}<span>${t.siteSubtitle}</span>`);const a=document.querySelector('.hero-title');a&&(a.innerHTML=t.heroTitle);const n=document.querySelector('.hero-desc');n&&(n.textContent=t.heroDesc)}document.addEventListener('DOMContentLoaded',(()=>{const t=localStorage.getItem('selectedTheme')||'green';applyTheme(t),updateSiteUI()})),window.ThemeSystem={applyTheme,getSiteSettings,saveSiteSettings,uploadImageAsBase64,getListings,saveListings,addListing,updateListing,deleteListing,THEMES};
+/* ════════ TEMA SİSTEMİ ════════
+   Not: Her tema :root'ta tanımlı DEĞİŞKENLERİN TAMAMINI set etmelidir.
+   Eksik bırakılan değişken Editorial Premium değerinde kalır ve palet
+   yarım uygulanır (koyu temada metin okunamaz hale gelirdi). */
+const THEMES = {
+  green: {
+    name: '🌿 Yeşil (Varsayılan)',
+    colors: {
+      '--green-dark': '#1f4a2a', '--green-mid': '#2f6b3d', '--green-light': '#4a8f3f', '--green-accent': '#7ab648',
+      '--gold': '#b8954a', '--gold-soft': '#d4b876',
+      '--cream': '#f4ede0', '--cream-deep': '#e8ddc5', '--cream-pale': '#faf5eb',
+      '--text-dark': '#1a1a1a', '--text-mid': '#555555', '--text-light': '#888888',
+      '--white': '#ffffff', '--ink': '#2a2622'
+    }
+  },
+  blue: {
+    name: '🔵 Mavi',
+    colors: {
+      '--green-dark': '#123a63', '--green-mid': '#1b5a94', '--green-light': '#2f7fc4', '--green-accent': '#5aa9e6',
+      '--gold': '#4a7fa8', '--gold-soft': '#8fbcd9',
+      '--cream': '#eef4f9', '--cream-deep': '#d8e6f1', '--cream-pale': '#f7fafd',
+      '--text-dark': '#0f2b47', '--text-mid': '#3d5a75', '--text-light': '#7089a1',
+      '--white': '#ffffff', '--ink': '#16263a'
+    }
+  },
+  gold: {
+    name: '✨ Altın',
+    colors: {
+      '--green-dark': '#6b5218', '--green-mid': '#8f6f22', '--green-light': '#b8913a', '--green-accent': '#d9b45c',
+      '--gold': '#b8954a', '--gold-soft': '#e0c98c',
+      '--cream': '#faf3e0', '--cream-deep': '#efe2c2', '--cream-pale': '#fdf9ee',
+      '--text-dark': '#2b2110', '--text-mid': '#5c4a24', '--text-light': '#8a7746',
+      '--white': '#ffffff', '--ink': '#332811'
+    }
+  },
+  dark: {
+    name: '🌙 Koyu',
+    /* Koyu temada açık/koyu anlamları ters çevrilir: yüzey değişkenleri
+       (--cream*, --white) koyulaşır, metin değişkenleri (--text-*, --ink) açılır. */
+    colors: {
+      '--green-dark': '#0e0e0f', '--green-mid': '#1c1d20', '--green-light': '#2a2c31', '--green-accent': '#7ab648',
+      '--gold': '#c9a961', '--gold-soft': '#8a7440',
+      '--cream': '#17181b', '--cream-deep': '#101113', '--cream-pale': '#1c1d20',
+      '--text-dark': '#f0ece4', '--text-mid': '#b8b2a6', '--text-light': '#8a857b',
+      '--white': '#17181b', '--ink': '#f0ece4'
+    }
+  },
+  purple: {
+    name: '💜 Mor',
+    colors: {
+      '--green-dark': '#3b1259', '--green-mid': '#5a1f82', '--green-light': '#7b35a8', '--green-accent': '#a86ecb',
+      '--gold': '#9c6bbf', '--gold-soft': '#c9a3de',
+      '--cream': '#f5eefa', '--cream-deep': '#e6d5f0', '--cream-pale': '#faf6fd',
+      '--text-dark': '#2a0e40', '--text-mid': '#523268', '--text-light': '#7d5f91',
+      '--white': '#ffffff', '--ink': '#33124d'
+    }
+  },
+  red: {
+    name: '❤️ Kırmızı',
+    colors: {
+      '--green-dark': '#6e1616', '--green-mid': '#93221f', '--green-light': '#c0392b', '--green-accent': '#e06055',
+      '--gold': '#b8954a', '--gold-soft': '#d9a89f',
+      '--cream': '#faeeec', '--cream-deep': '#f0d8d4', '--cream-pale': '#fdf7f6',
+      '--text-dark': '#2b0f0d', '--text-mid': '#5c2f2b', '--text-light': '#8a5a55',
+      '--white': '#ffffff', '--ink': '#331311'
+    }
+  }
+};
+
+const DEFAULT_SITE_SETTINGS = {
+  siteName:     'DİCLE ARSA OFİSİ',
+  siteSubtitle: 'NESİPOĞULLARI',
+  heroTitle:    'Hayalinizdeki<br><em>Yere</em> Sahip Olun',
+  heroDesc:     'Trakya\'nın incisi Marmaraereğlisi\'nde, denize komşu, E-5 yoluna yakın, tapulu yatırımlık ve villa imarlı arsalar.',
+  phone:        '0533 251 60 36',
+  logo:         null,
+  theme:        'green'
+};
+
+function applyTheme(name) {
+  const theme = THEMES[name] || THEMES.green;
+  Object.entries(theme.colors).forEach(([prop, val]) => {
+    document.documentElement.style.setProperty(prop, val);
+  });
+  /* Kota dolarsa veya depolama engelliyse tema yine uygulanmış olmalı;
+     hata çağrı zincirini kırmamalı. Yalnızca tema anahtarı yazılır —
+     siteSettings'in tamamını (base64 logo dahil) her seferinde yeniden
+     serileştirmek gereksiz ve kotayı tüketir. */
+  try { localStorage.setItem('selectedTheme', name); } catch (e) { /* yoksay */ }
+}
+
+function getSiteSettings() {
+  try {
+    return JSON.parse(localStorage.getItem('siteSettings')) || { ...DEFAULT_SITE_SETTINGS };
+  } catch (e) {
+    return { ...DEFAULT_SITE_SETTINGS };
+  }
+}
+
+function saveSiteSettings(settings) {
+  try { localStorage.setItem('siteSettings', JSON.stringify(settings)); } catch (e) { /* yoksay */ }
+}
+
+/* Yalnızca kullanıcı açıkça bir tema SEÇTİYSE uygula. Aksi halde
+   index.html :root'taki "Editorial Premium" paleti geçerli kalır —
+   eskiden burada koşulsuz applyTheme('green') çağrılıyor ve tasarım
+   paleti her açılışta inline style ile eziliyordu.
+   Marka (logo/başlık/telefon) uygulaması applyBranding'in işi; buradan
+   updateSiteUI çağrılmaz — o, HTML'deki gerçek metni kısa varsayılanla
+   eziyordu. */
+document.addEventListener('DOMContentLoaded', () => {
+  const stored = (function () {
+    try { return localStorage.getItem('selectedTheme'); } catch (e) { return null; }
+  }());
+  if (stored && THEMES[stored]) applyTheme(stored);
+});
+
+window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
   </script>
 
   <!-- Tema Seçim Modal -->
@@ -1364,10 +2186,22 @@ function applyTheme(t){const e=THEMES[t]||THEMES.green;Object.entries(e.colors).
   </div>
 
   <script>
-    function applyThemeAndClose(themeName) {
-      ThemeSystem.applyTheme(themeName);
+    async function applyThemeAndClose(themeName) {
+      ThemeSystem.applyTheme(themeName);   // anında uygula, kullanıcı beklemesin
       closeModal('themeModal');
-      location.reload(); // Tema değiştiğinde sayfayı yenile
+
+      /* Temayı Firestore'a da yaz. Eskiden yalnızca localStorage'a
+         yazılıyordu: A cihazında Mavi seçilince B cihazı Yeşil kalıyordu
+         ve bu kalıcıydı. applyBranding okuma tarafında s.theme'i uyguluyor. */
+      try {
+        await firebase.firestore().collection('settings').doc('site')
+          .set({ theme: themeName }, { merge: true });
+      } catch (e) {
+        console.warn('Tema buluta kaydedilemedi (yalnızca bu cihazda geçerli):', e);
+        if (typeof showToast === 'function') {
+          showToast('⚠️ Tema yalnızca bu cihaza kaydedildi.', true);
+        }
+      }
     }
 
     function openSettingsModal() {
@@ -1392,71 +2226,146 @@ function applyTheme(t){const e=THEMES[t]||THEMES.green;Object.entries(e.colors).
       const file = event.target.files[0];
       if (!file) return;
 
+      // Dosya tipi kontrolü
+      if (!file.type.startsWith('image/')) {
+        showToast('⚠️ Lütfen bir görsel dosyası seçin', true);
+        return;
+      }
+      // Max 5MB dosya
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('⚠️ Dosya 5MB\'tan büyük olamaz', true);
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (e) => {
-        const base64 = e.target.result;
-        document.getElementById('logoImg').src = base64;
-        document.getElementById('logoPreview').style.display = 'block';
-        window.uploadedLogo = base64; // Global değişkende sakla
+        const img = new Image();
+        img.onload = () => {
+          // Logoyu 256x256 max boyuta sıkıştır — localStorage kotasını aşmasın
+          const MAX = 256;
+          let { width, height } = img;
+          if (width > MAX || height > MAX) {
+            const ratio = Math.min(MAX / width, MAX / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, width, height);
+          // PNG ile şeffaflık koru (logolar genelde şeffaf arka planlı)
+          const compressed = canvas.toDataURL('image/png');
+          // Localstorage limit: yaklaşık 5MB. Sıkıştırma sonrası ~30-100KB beklenir.
+          if (compressed.length > 500 * 1024) {
+            showToast('⚠️ Logo çok büyük, daha küçük boyutlu bir görsel deneyin', true);
+            return;
+          }
+          document.getElementById('logoImg').src = compressed;
+          document.getElementById('logoPreview').style.display = 'block';
+          window.uploadedLogo = compressed;
+          showToast('✅ Logo hazır — Kaydet\'e basın');
+        };
+        img.onerror = () => showToast('⚠️ Görsel okunamadı', true);
+        img.src = e.target.result;
       };
+      reader.onerror = () => showToast('⚠️ Dosya okunamadı', true);
       reader.readAsDataURL(file);
     }
 
-    function saveSettings() {
+    async function saveSettings() {
       try {
+        const dbRef = firebase.firestore().collection('settings').doc('site');
+
+        /* Taban veri Firestore'dan okunur, localStorage'dan DEĞİL.
+           Eskiden taban ThemeSystem.getSiteSettings() idi; gizli sekmede
+           veya önbelleği temizlenmiş cihazda bu sabit varsayılanları
+           döndürüyor, ardından gelen merge yazımı Firestore'daki gerçek
+           logoyu/başlığı null'a çeviriyordu. Sessiz ve geri alınamaz
+           veri kaybıydı. */
+        let base = {};
+        try {
+          const snap = await dbRef.get();
+          if (snap.exists) base = snap.data() || {};
+        } catch (readErr) {
+          console.error('Firestore ayar okuma hatası:', readErr);
+          showToast('⚠️ Mevcut ayarlar okunamadı, kayıt iptal edildi.', true);
+          return;
+        }
+
         const settings = {
-          ...ThemeSystem.getSiteSettings(),
-          siteName: document.getElementById('siteName').value || 'DİCLE ARSA OFİSİ',
+          ...base,
+          siteName:     document.getElementById('siteName').value || 'DİCLE ARSA OFİSİ',
           siteSubtitle: document.getElementById('siteSubtitle').value || 'NESİPOĞULLARI',
-          heroTitle: document.getElementById('heroTitle').value.replace(/\n/g, '<br>') || 'Hayalinizdeki<br><em>Yere</em> Sahip Olun',
-          heroDesc: document.getElementById('heroDesc').value || '',
-          phone: document.getElementById('phone').value || '0533 251 60 36',
-          logo: window.uploadedLogo || ThemeSystem.getSiteSettings().logo,
+          heroTitle:    document.getElementById('heroTitle').value.replace(/\n/g, '<br>') || 'Hayalinizdeki<br><em>Yere</em> Sahip Olun',
+          heroDesc:     document.getElementById('heroDesc').value || '',
+          phone:        document.getElementById('phone').value || '0533 251 60 36',
+          logo:         window.uploadedLogo || base.logo || null,
+          theme:        base.theme || 'green',
         };
-        ThemeSystem.saveSiteSettings(settings);
 
-        // Update navbar logo immediately
-        updateNavbarLogo(settings.logo);
+        // ANA KAYIT: Firestore — tüm tarayıcılar/cihazlar buradan okur
+        try {
+          await dbRef.set({
+            siteName:     settings.siteName,
+            siteSubtitle: settings.siteSubtitle,
+            heroTitle:    settings.heroTitle,
+            heroDesc:     settings.heroDesc,
+            phone:        settings.phone,
+            logo:         settings.logo,
+            theme:        settings.theme,
+            updatedAt:    firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
+        } catch (fsErr) {
+          console.error('Firestore kayıt hatası:', fsErr);
+          showToast('⚠️ Bulut kaydı başarısız: ' + (fsErr.message || fsErr), true);
+          return;
+        }
 
-        // Update hero content
-        const logoText = document.querySelector('.nav-logo-text');
-        if (logoText) {
-          logoText.innerHTML = `${settings.siteName}<span>${settings.siteSubtitle}</span>`;
+        // Yalnızca Firestore kaydı başarılıysa yerel önbelleği tazele
+        try {
+          ThemeSystem.saveSiteSettings(settings);
+        } catch (quotaErr) {
+          console.warn('localStorage kotası dolu, yalnızca Firestore\'a kaydedildi');
         }
-        const heroTitle = document.querySelector('.hero-title');
-        if (heroTitle) {
-          heroTitle.innerHTML = settings.heroTitle;
-        }
-        const heroDesc = document.querySelector('.hero-desc');
-        if (heroDesc) {
-          heroDesc.textContent = settings.heroDesc;
-        }
+
+        /* DOM güncellemesi tek yerden: applyBranding. Eskiden burada
+           .nav-logo-text ve .hero-title'a ayrıca innerHTML ile yazılıyordu;
+           hem kod iki kopyaydı hem de XSS yüzeyi ikinci kez açılıyordu. */
+        if (window.__applyBranding) window.__applyBranding(settings);
 
         showToast('✅ Ayarlar kaydedildi!');
         window.uploadedLogo = null;
 
-        // Close modal with slight delay to ensure all updates are done
         setTimeout(() => {
           const modal = document.getElementById('settingsModal');
-          if (modal) {
-            modal.classList.remove('open');
-          }
+          if (modal) modal.classList.remove('open');
         }, 150);
       } catch (e) {
         console.error('Ayarlar kaydedilirken hata:', e);
-        showToast('⚠️ Hata oluştu', true);
+        showToast('⚠️ Hata oluştu: ' + (e.message || e), true);
       }
     }
 
-    function updateNavbarLogo(logoBase64) {
+    function updateNavbarLogo(logoSrc) {
       const navLogoMark = document.getElementById('navLogoMark');
       if (!navLogoMark) return;
+      navLogoMark.textContent = '';
 
-      if (logoBase64) {
-        // Yüklü logo varsa IMG göster
-        navLogoMark.innerHTML = `<img src="${logoBase64}" style="width: 44px; height: 44px; object-fit: contain; border-radius: 8px;">`;
+      // Şema doğrulaması: yalnızca https ve base64 görsel kabul edilir
+      const safe = typeof logoSrc === 'string' &&
+        /^(https:\/\/|data:image\/(png|jpe?g|webp|gif);base64,)/i.test(logoSrc) ? logoSrc : null;
+
+      if (safe) {
+        const img = document.createElement('img');
+        img.src = safe;
+        img.alt = 'Logo';
+        img.style.cssText = 'width:44px;height:44px;object-fit:contain;border-radius:8px;';
+        navLogoMark.appendChild(img);
       } else {
-        // Yoksa orijinal SVG'yi geri koy
+        // Sabit yedek işaret — kullanıcı verisi içermez, statik biçimlendirme
         navLogoMark.innerHTML = `<svg viewBox="0 0 32 32" fill="none">
           <path d="M16 4 L4 26 L28 26 Z" fill="#c9a961" opacity=".95"/>
           <path d="M16 12 L10 24 L22 24 Z" fill="#7ab648"/>
@@ -1465,13 +2374,11 @@ function applyTheme(t){const e=THEMES[t]||THEMES.green;Object.entries(e.colors).
       }
     }
 
-    // Sayfa yüklendiğinde navbar logosunu güncelle
-    document.addEventListener('DOMContentLoaded', () => {
-      const settings = ThemeSystem.getSiteSettings();
-      if (settings.logo) {
-        updateNavbarLogo(settings.logo);
-      }
-    }, { once: true });
+    /* Not: Sayfa açılışında logoyu uygulayan ayrı bir DOMContentLoaded
+       dinleyicisi VARDI ve kaldırıldı. Aynı düğüme üçüncü bir yoldan
+       yazıyordu; Firestore yanıtı hızlı geldiğinde eski logoyu yeni
+       logonun üzerine bindiriyor ve yenilemeden düzelmiyordu.
+       Açılış uygulaması artık yalnızca applyBranding'in işi. */
 
     // Admin bar'a tema ve ayarlar butonları ekle
     document.addEventListener('DOMContentLoaded', () => {
@@ -1494,6 +2401,331 @@ function applyTheme(t){const e=THEMES[t]||THEMES.green;Object.entries(e.colors).
         }
       }
     });
+  </script>
+
+  <!-- ══════════════════════════════════════════════════
+       3D & ANİMASYON SİSTEMİ
+  ══════════════════════════════════════════════════ -->
+  <script>
+  (function() {
+    'use strict';
+
+    /* ── GSAP Eklentileri ── */
+    if (typeof gsap !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger, TextPlugin);
+    }
+
+    /* ── Düşük Güçlü Cihaz Tespiti ── */
+    // window.innerWidth 0 olabilir (iframe/headless) — bu durumda düşük güçlü sayma
+    const __vw = window.innerWidth || document.documentElement.clientWidth || 1024;
+    const isMobile = __vw > 0 && __vw < 768;
+
+    /* ══════════════════════════════════════════════════
+       LENIS SMOOTH SCROLL
+    ══════════════════════════════════════════════════ */
+    function initLenis() {
+      if (typeof Lenis === 'undefined' || typeof gsap === 'undefined') return;
+      const lenis = new Lenis({
+        duration: 1.25,
+        easing: function(t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+        smoothTouch: false
+      });
+      gsap.ticker.add(function(time) { lenis.raf(time * 1000); });
+      gsap.ticker.lagSmoothing(0);
+      lenis.on('scroll', function() { if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.update(); });
+
+      /* Anchor linkleri Lenis ile override et */
+      document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+        a.addEventListener('click', function(e) {
+          var href = a.getAttribute('href');
+          var target = document.querySelector(href);
+          if (target) { e.preventDefault(); lenis.scrollTo(target, { offset: -80, duration: 1.4 }); }
+        });
+      });
+      window._lenis = lenis;
+    }
+
+    /* ══════════════════════════════════════════════════
+       SCROLL İLERLEME ÇUBUĞU
+    ══════════════════════════════════════════════════ */
+    function initScrollProgress() {
+      var bar = document.getElementById('scroll-progress');
+      if (!bar) return;
+      window.addEventListener('scroll', function() {
+        var scrolled = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+        bar.style.width = (Math.min(scrolled, 1) * 100) + '%';
+      }, { passive: true });
+    }
+
+    /* ══════════════════════════════════════════════════
+       ÖZEL İMLEÇ
+    ══════════════════════════════════════════════════ */
+    function initCursor() {
+      if (isMobile || typeof gsap === 'undefined') return;
+      var dot = document.getElementById('cursor-dot');
+      var follower = document.getElementById('cursor-follower');
+      if (!dot || !follower) return;
+
+      var mouseX = 0, mouseY = 0, fX = 0, fY = 0;
+
+      document.addEventListener('mousemove', function(e) {
+        mouseX = e.clientX; mouseY = e.clientY;
+        gsap.to(dot, { x: mouseX, y: mouseY, duration: 0.08, ease: 'none' });
+      });
+
+      (function animateFollower() {
+        fX += (mouseX - fX) * 0.11;
+        fY += (mouseY - fY) * 0.11;
+        gsap.set(follower, { x: fX, y: fY });
+        requestAnimationFrame(animateFollower);
+      })();
+
+      var hoverEls = 'a, button, .listing-card, .feature-card, .hero-stat-badge, .location-item, .social-link';
+      document.querySelectorAll(hoverEls).forEach(function(el) {
+        el.addEventListener('mouseenter', function() { document.body.classList.add('cursor-hover'); });
+        el.addEventListener('mouseleave', function() { document.body.classList.remove('cursor-hover'); });
+      });
+    }
+
+    /* ══════════════════════════════════════════════════
+       HERO ANİMASYON TİMLİNE (loader sonrası)
+    ══════════════════════════════════════════════════ */
+    function initHeroAnimation() {
+      if (typeof gsap === 'undefined') return;
+
+      // Editorial: karakter splitting yerine zarif fade + slide
+      // Splitting kullanmıyoruz — serif başlık tek parça daha zarif duruyor
+      var tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+
+      tl.from('#heroBadge', { opacity: 0, y: -14, duration: 0.8 })
+        .from('.hero-title', { opacity: 0, y: 28, duration: 1.1, ease: 'expo.out' }, '-=0.45')
+        .from('.hero-desc',  { opacity: 0, y: 18, duration: 0.95 }, '-=0.75')
+        .from('.hero-actions .btn', { opacity: 0, y: 14, stagger: 0.14, duration: 0.7 }, '-=0.55')
+        .from('.hero-feature', { opacity: 0, y: 10, stagger: 0.08, duration: 0.55 }, '-=0.45');
+    }
+
+    /* ══════════════════════════════════════════════════
+       SAYFA LOADER
+    ══════════════════════════════════════════════════ */
+    function initLoader() {
+      var loader = document.getElementById('page-loader');
+      var fill = document.getElementById('loaderBarFill');
+      if (!loader) return;
+
+      /* Bar animasyonu */
+      if (fill && typeof gsap !== 'undefined') {
+        gsap.to(fill, { width: '100%', duration: 1.6, ease: 'power2.out' });
+      } else if (fill) {
+        fill.style.transition = 'width 1.6s ease';
+        fill.style.width = '100%';
+      }
+
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          loader.classList.add('hidden');
+          initHeroAnimation();
+          initMagneticButtons();
+        }, 400);
+      });
+
+      /* Yedek: 3 saniye sonra mutlaka kapat */
+      setTimeout(function() { loader.classList.add('hidden'); }, 3200);
+    }
+
+    /* ══════════════════════════════════════════════════
+       NAVİGASYON — MANYETİK BUTONLAR
+    ══════════════════════════════════════════════════ */
+    function initMagneticButtons() {
+      if (isMobile || typeof gsap === 'undefined') return;
+      var selectors = '.nav-phone, .btn-primary, .whatsapp-btn, .call-btn';
+      document.querySelectorAll(selectors).forEach(function(btn) {
+        btn.addEventListener('mousemove', function(e) {
+          var rect = btn.getBoundingClientRect();
+          var x = e.clientX - rect.left - rect.width / 2;
+          var y = e.clientY - rect.top - rect.height / 2;
+          gsap.to(btn, { x: x * 0.22, y: y * 0.22, duration: 0.38, ease: 'power2.out' });
+        });
+        btn.addEventListener('mouseleave', function() {
+          gsap.to(btn, { x: 0, y: 0, duration: 0.65, ease: 'elastic.out(1, 0.4)' });
+        });
+      });
+    }
+
+    /* ══════════════════════════════════════════════════
+       İLAN KARTLARI — 3D TILT & SCROLL ENTRANCE
+       (app.js → renderListings() sonundan çağrılır)
+    ══════════════════════════════════════════════════ */
+    window.initCardAnimations = function() {
+      var cards = document.querySelectorAll('.listing-card');
+      if (!cards.length || typeof gsap === 'undefined') return;
+
+      /* Vanilla Tilt */
+      if (!isMobile && typeof VanillaTilt !== 'undefined') {
+        VanillaTilt.init(cards, {
+          max: 9, speed: 700, glare: true, 'max-glare': 0.12,
+          scale: 1.03, perspective: 1000
+        });
+      }
+
+      /* GSAP staggered entrance */
+      gsap.fromTo(cards,
+        { opacity: 0, y: 55, rotateX: 14 },
+        {
+          opacity: 1, y: 0, rotateX: 0,
+          stagger: 0.1, duration: 0.85, ease: 'power3.out',
+          scrollTrigger: { trigger: '#listings', start: 'top 78%', once: true }
+        }
+      );
+
+      /* Hover: imleç takibi güncelle */
+      cards.forEach(function(card) {
+        card.addEventListener('mouseenter', function() { document.body.classList.add('cursor-hover'); });
+        card.addEventListener('mouseleave', function() { document.body.classList.remove('cursor-hover'); });
+      });
+    };
+
+    /* ══════════════════════════════════════════════════
+       FEATURES — SAYAÇLAR & 3D ENTRANCE
+    ══════════════════════════════════════════════════ */
+    function initCounters() {
+      if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+      document.querySelectorAll('.counter-num[data-target]').forEach(function(el) {
+        var target = parseInt(el.dataset.target, 10);
+        ScrollTrigger.create({
+          trigger: el, start: 'top 85%', once: true,
+          onEnter: function() {
+            var obj = { val: 0 };
+            gsap.to(obj, {
+              val: target, duration: 2.2, ease: 'power2.out',
+              onUpdate: function() { el.textContent = Math.round(obj.val); }
+            });
+          }
+        });
+      });
+    }
+
+    function initFeaturesAnimation() {
+      if (typeof gsap === 'undefined') return;
+
+      gsap.fromTo('.feature-card',
+        { opacity: 0, y: 45, rotateX: 28 },
+        {
+          opacity: 1, y: 0, rotateX: 0,
+          stagger: 0.1, duration: 0.75, ease: 'back.out(1.3)',
+          scrollTrigger: { trigger: '#features', start: 'top 72%', once: true }
+        }
+      );
+
+      if (!isMobile && typeof VanillaTilt !== 'undefined') {
+        VanillaTilt.init(document.querySelectorAll('.feature-card'), {
+          max: 14, speed: 450, glare: false
+        });
+      }
+    }
+
+    /* ══════════════════════════════════════════════════
+       ABOUT — PARALLAX & REVEAL
+    ══════════════════════════════════════════════════ */
+    function initAboutAnimation() {
+      if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+      /* Reveal maske */
+      gsap.to('#aboutRevealMask', {
+        scaleX: 0, transformOrigin: 'right center',
+        duration: 1.3, ease: 'power4.inOut',
+        scrollTrigger: { trigger: '#about', start: 'top 62%', once: true }
+      });
+
+      /* Parallax */
+      gsap.to('.about-img-main img', {
+        yPercent: -12, ease: 'none',
+        scrollTrigger: { trigger: '#about', start: 'top bottom', end: 'bottom top', scrub: 1.8 }
+      });
+
+      /* Metin stagger */
+      gsap.from('.about-text .section-title, .about-text p, .about-check', {
+        opacity: 0, x: -35, stagger: 0.08, duration: 0.72, ease: 'power2.out',
+        scrollTrigger: { trigger: '.about-text', start: 'top 72%', once: true }
+      });
+
+      /* Badge pop */
+      gsap.from('.about-img-badge', {
+        opacity: 0, scale: 0.5, rotation: -12,
+        duration: 0.85, ease: 'back.out(1.9)',
+        scrollTrigger: { trigger: '.about-visual', start: 'top 67%', once: true }
+      });
+    }
+
+    /* ══════════════════════════════════════════════════
+       CONTACT & LOCATION ANİMASYONLARI
+    ══════════════════════════════════════════════════ */
+    function initContactAnimation() {
+      if (typeof gsap === 'undefined') return;
+
+      gsap.from('.contact-item', {
+        opacity: 0, x: -28, stagger: 0.1, duration: 0.65, ease: 'power2.out',
+        scrollTrigger: { trigger: '#contact', start: 'top 72%', once: true }
+      });
+      gsap.from('.contact-form', {
+        opacity: 0, y: 36, rotateX: 7, duration: 0.95, ease: 'power3.out',
+        scrollTrigger: { trigger: '.contact-form', start: 'top 78%', once: true }
+      });
+      gsap.from('.location-item', {
+        opacity: 0, y: 28, stagger: 0.09, duration: 0.6, ease: 'power2.out',
+        scrollTrigger: { trigger: '#location', start: 'top 82%', once: true }
+      });
+    }
+
+    /* ══════════════════════════════════════════════════
+       SECTION BAŞLIKLARI GENEL ENTRANCE
+    ══════════════════════════════════════════════════ */
+    function initSectionHeaders() {
+      if (typeof gsap === 'undefined') return;
+      document.querySelectorAll('.section-header').forEach(function(el) {
+        el.classList.remove('animate-on-scroll');
+        gsap.from(el, {
+          opacity: 0, y: 32, duration: 0.75, ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 80%', once: true }
+        });
+      });
+    }
+
+    /* ══════════════════════════════════════════════════
+       FOOTER ANİMASYONU
+    ══════════════════════════════════════════════════ */
+    function initFooterAnimation() {
+      if (typeof gsap === 'undefined') return;
+      gsap.from('#footer .footer-brand, #footer .footer-col', {
+        opacity: 0, y: 30, stagger: 0.12, duration: 0.7, ease: 'power2.out',
+        scrollTrigger: { trigger: '#footer', start: 'top 85%', once: true }
+      });
+    }
+
+    /* ══════════════════════════════════════════════════
+       BAŞLATMA
+    ══════════════════════════════════════════════════ */
+    /* DOM hazır olduğunda */
+    document.addEventListener('DOMContentLoaded', function() {
+      initLenis();
+      initScrollProgress();
+      initCursor();
+      initLoader();
+      initCounters();
+
+      /* GSAP ScrollTrigger bazlı animasyonları DOM hazır olunca başlat */
+      if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+        /* Biraz geciktir: app.js renderListings() tamamlanana kadar */
+        setTimeout(function() {
+          initFeaturesAnimation();
+          initAboutAnimation();
+          initContactAnimation();
+          initSectionHeaders();
+          initFooterAnimation();
+          ScrollTrigger.refresh();
+        }, 600);
+      }
+    });
+  })();
   </script>
 </body>
 </html>
