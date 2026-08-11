@@ -1,0 +1,21 @@
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Bagimliliklar
+node_modules/
+
+# Ortam degiskenleri / gizli anahtarlar
+.env
+.env.*
+*serviceAccount*.json
+*-firebase-adminsdk-*.json
+
+# Editor / isletim sistemi
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+*.swp

@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // İlan listesi — herkes okuyabilir, admin panelden yazılabilir
+    match /listings/{doc} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // İletişim formu — herkes gönderebilir, okuma kapalı (sadece Firebase Console'dan görülür)
+    match /contacts/{doc} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+
+    // Site ayarları (logo, başlık, telefon vb) — herkes okuyabilir, admin panelden yazılabilir
+    // Bu sayede logo tüm tarayıcılarda/cihazlarda aynı görünür
+    match /settings/{doc} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
