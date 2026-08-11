@@ -95,14 +95,15 @@ function renderListings() {
     const fid    = escapeHtml(l.firestoreId);
     return `
       <div class="listing-card" data-id="${fid}">
+        ${isLoggedIn() ? `
         <div class="card-admin-controls">
-          <button class="card-admin-btn edit"   onclick="editListing('${fid}')"    title="Düzenle">
+          <button class="card-admin-btn edit"   data-act="edit"   title="Düzenle">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
-          <button class="card-admin-btn delete" onclick="confirmDelete('${fid}')" title="Sil">
+          <button class="card-admin-btn delete" data-act="delete" title="Sil">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
           </button>
-        </div>
+        </div>` : ''}
         <div class="listing-img">
           <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(l.title)}" loading="lazy"
                onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=80'" />
@@ -133,11 +134,33 @@ function renderListings() {
       </div>`;
   }).join('');
 
+  /* Kartlar yeni basıldı — ayarlardaki telefon numarasını buradaki
+     wa.me linklerine de uygula. applyBranding sayfa açılışında
+     çalışıyor, o sırada bu kartlar henüz DOM'da değildi. */
+  if (typeof window.__applyPhone === 'function') window.__applyPhone();
+
   /* 3D kart animasyonlarını tetikle */
   if (typeof window.initCardAnimations === 'function') {
     requestAnimationFrame(window.initCardAnimations);
   }
 }
+
+/* Kart yönetim butonları olay delegasyonuyla bağlanır.
+   Eskiden onclick="editListing('${fid}')" biçimindeydi: HTML ayrıştırıcısı
+   onclick değerini JS'e vermeden ÖNCE &#39; entity'sini gerçek apostrofa
+   çözdüğü için escapeHtml koruma sağlamıyordu. Doküman ID'si saldırgan
+   tarafından seçilebildiğinde JS enjeksiyonu oluşuyordu.
+   data-id ise öznitelik değeri olarak okunur, JS bağlamına hiç girmez. */
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.card-admin-btn');
+  if (!btn) return;
+  const card = btn.closest('.listing-card');
+  if (!card) return;
+  const id = card.dataset.id;
+  if (!id) return;
+  if (btn.dataset.act === 'edit') editListing(id);
+  else if (btn.dataset.act === 'delete') confirmDelete(id);
+});
 
 /* ── Modal yardımcıları ── */
 function openModal(id)  { document.getElementById(id).classList.add('open'); }

@@ -1255,7 +1255,10 @@
 
       // Telefon ayarını sitedeki tüm tel: ve wa.me linklerine uygula.
       // Bu olmadan panelden numara değiştirmek hiçbir şeyi değiştirmiyordu.
+      var sonTelefon = null;
       function applyPhone(phone) {
+        if (typeof phone === 'string' && phone.trim()) sonTelefon = phone;
+        else phone = sonTelefon;                        // argümansız çağrı: sonuncuyu tekrar uygula
         if (typeof phone !== 'string' || !phone.trim()) return;
         var digits = phone.replace(/\D/g, '');
         if (digits.length < 10) return;                     // anlamsız girdi
@@ -1327,6 +1330,10 @@
         }
       }
       window.__applyBranding = applyBranding;
+      /* İlan kartları sayfa açılışından SONRA basılıyor ve içlerinde
+         wa.me linkleri var. renderListings bunu çağırıp yeni kartlara
+         da güncel numarayı uyguluyor. */
+      window.__applyPhone = function() { applyPhone(); };
 
       // 1) localStorage önbelleğinden anında uygula — ilk boyamada gecikme olmasın
       try {
