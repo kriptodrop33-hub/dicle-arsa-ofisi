@@ -11,7 +11,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <!-- Klasik: Montserrat (başlıklar) + Inter (gövde) -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Fraunces: yüksek kontrastlı, optik boyutlu display serif. SOFT ekseni
+       terminalleri yumuşatır (toprak/arazi işine uygun sıcaklık), WONK ekseni
+       karakteristik alternatif harfleri açar. Karla: sıcak grotesk gövde.
+       İkisi de latin-ext içerir — ş ğ ı İ ç ö ü tam desteklenir. -->
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..700&family=Karla:ital,wght@0,300..700;1,400..600&display=swap" rel="stylesheet" />
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -61,9 +65,17 @@
       --glass-border:rgba(255,255,255,0.18);
       --glass-blur:  blur(12px);
       --grad-border: linear-gradient(135deg, var(--gold), var(--green-mid));
-      /* Tipografi sistem — klasik sans-serif */
-      --font-serif:  'Montserrat', system-ui, sans-serif;   /* başlıklar (eski isim korundu) */
-      --font-sans:   'Inter', 'Open Sans', system-ui, sans-serif;
+      /* ── Tipografi ──────────────────────────────────────────────────
+         Değişken adları geriye dönük uyum için korundu (100+ yerde
+         kullanılıyor) ama değerleri gerçek editoryal eşleşmeyle
+         değiştirildi. Önceden Montserrat + Inter idi: "Editorial
+         Premium" iddiasındaki bir tasarımda geometrik sans + nötr
+         arayüz fontu, sıradan görünmesinin başlıca sebebiydi. */
+      --font-serif:  'Fraunces', 'Georgia', 'Times New Roman', serif;  /* display */
+      --font-sans:   'Karla', system-ui, -apple-system, sans-serif;    /* gövde */
+      /* Fraunces eksen ayarları — tek yerden yönetilir */
+      --wonk-off:    'SOFT' 24, 'WONK' 0;
+      --wonk-on:     'SOFT' 30, 'WONK' 1;
     }
 
     /* ── Reset ── */
@@ -72,9 +84,41 @@
     @media (max-width: 1024px) { html { font-size: 16px; } }
     @media (max-width: 480px)  { html { font-size: 15px; } }
     body { font-family: var(--font-sans); color: var(--ink); background: var(--cream-pale); overflow-x: hidden; font-weight: 400; line-height: 1.65; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-    h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 700; letter-spacing: -0.01em; }
-    h1 em, h2 em, h3 em, h4 em { font-style: normal; font-weight: 700; color: var(--gold); }
+    /* Fraunces yüksek kontrastlı bir serif: Montserrat'ın ihtiyaç duyduğu
+       kalın ağırlık ve gevşek harf aralığı burada hantal durur. Ağırlık
+       600'e, harf aralığı negatife çekildi; optik boyutlandırma açık. */
+    h1, h2, h3, h4 {
+      font-family: var(--font-serif);
+      font-weight: 600;
+      letter-spacing: -0.022em;
+      font-optical-sizing: auto;
+      font-variation-settings: var(--wonk-off);
+    }
+    /* Vurgu artık GERÇEKTEN italik — Fraunces'in italiği bu tasarımın
+       en karakteristik parçası. Önceden font-style:normal ile italik
+       iptal ediliyordu, vurgu yalnızca renkten ibaret kalıyordu. */
+    h1 em, h2 em, h3 em, h4 em {
+      font-style: italic;
+      font-weight: 500;
+      color: var(--gold);
+      font-variation-settings: var(--wonk-on);
+    }
     a { text-decoration: none; color: inherit; }
+    /* Sabit navbar çapa hedeflerinin üstünü kesiyordu — menüden bir
+       bölüme atlayınca başlık barın altında kalıyordu. */
+    section[id] { scroll-margin-top: 96px; }
+
+    /* ── Izgara taşma güvenliği ───────────────────────────────────────
+       CSS Grid'de bir iz varsayılan olarak min-content genişliğinin
+       altına inemez; uzun başlık veya bölünemeyen içerik dar ekranda
+       kolonu şişirir. body'de overflow-x:hidden olduğu için sonuç
+       kaydırma çubuğu değil, KESİLEN metin oluyor — fark edilmesi zor.
+       Aşağıdaki iki kural bunu kaynağında kapatır. */
+    .contact-grid > *, .about-grid > *, .features-grid > *,
+    .listings-grid > *, .location-grid > *, .prefooter-grid > *,
+    .hero-grid > *, .tour-grid > * { min-width: 0; }
+    /* Uzun Türkçe yer adları (Marmaraereğlisi) dar ekranda taşabiliyor */
+    .section-title, .tour-title, .hero-title { overflow-wrap: break-word; hyphens: auto; }
     img { display: block; width: 100%; object-fit: cover; }
     ul { list-style: none; }
     ::selection { background: var(--gold); color: var(--white); }
@@ -83,16 +127,34 @@
     @media (max-width: 768px) { .container { padding: 0 20px; } }
     .section-header { text-align: center; margin: 0 auto 72px; max-width: 760px; }
     .section-header .section-sub { margin: 22px auto 0; }
+    /* Etiket iki yanında tire karakteriyle yazılıyordu ("— PORTFÖY —");
+       yazı tipiyle aynı ağırlıkta olduğu için tipografik değil, süs
+       gibi duruyordu. Yerine gerçek saç teli çizgiler geldi: ince,
+       altın, metinden bağımsız hizalanıyor. */
     .section-eyebrow {
-      display: inline-block; font-family: var(--font-sans);
-      font-size: clamp(0.78rem, 1.2vw, 0.85rem);
-      font-weight: 500; letter-spacing: 0.32em; text-transform: uppercase;
-      color: var(--gold); margin-bottom: 22px;
+      display: inline-flex; align-items: center; gap: 14px;
+      font-family: var(--font-sans);
+      font-size: clamp(0.68rem, 1vw, 0.74rem);
+      font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 20px;
     }
-    .section-eyebrow::before { content:'— '; opacity: 0.6; margin-right: 4px; }
-    .section-eyebrow::after  { content:' —'; opacity: 0.6; margin-left: 4px; }
-    .section-title { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3rem); font-weight: 700; color: var(--green-dark); line-height: 1.15; letter-spacing: -0.015em; }
-    .section-title em { font-style: normal; font-weight: 700; color: var(--gold); }
+    .section-eyebrow::before,
+    .section-eyebrow::after {
+      content: ''; display: block; width: 30px; height: 1px;
+      background: currentColor; opacity: 0.55;
+    }
+    .section-title {
+      font-family: var(--font-serif); font-size: clamp(2.1rem, 4.2vw, 3.3rem);
+      font-weight: 600; color: var(--green-dark); line-height: 1.1;
+      letter-spacing: -0.028em; font-optical-sizing: auto;
+      font-variation-settings: var(--wonk-off);
+    }
+    /* h1-h4'teki ile aynı düzeltme: font-style:normal italiği iptal
+       ediyordu, vurgu yalnızca renk farkından ibaret kalıyordu. */
+    .section-title em {
+      font-style: italic; font-weight: 500; color: var(--gold);
+      font-variation-settings: var(--wonk-on);
+    }
     .section-sub { font-family: var(--font-sans); font-size: clamp(1.05rem, 1.6vw, 1.2rem); color: var(--text-mid); max-width: 620px; line-height: 1.75; font-weight: 400; }
     @media (max-width: 768px) {
       .section-header { margin-bottom: 48px; }
@@ -116,30 +178,133 @@
     @keyframes pulse    { 0%,100% { transform:scale(1); } 50% { transform:scale(1.06); } }
     @keyframes float    { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-12px); } }
     @keyframes scrollArrow { 0%,100% { transform:translateY(0); opacity:1; } 50% { transform:translateY(8px); opacity:.5; } }
-    .animate-on-scroll { opacity:0; transform:translateY(30px); transition: opacity .7s ease, transform .7s ease; }
-    .animate-on-scroll.visible { opacity:1; transform:translateY(0); }
+    /* Giriş animasyonu. Önceden düz `ease` ile 30px kayıyordu ve bir
+       ızgaradaki tüm kartlar aynı anda beliriyordu — hareket topluca
+       olduğu için göze "efekt" olarak değil, gecikme olarak çarpıyordu.
+       Artık expo yumuşamasıyla ve kademeli. */
+    .animate-on-scroll {
+      opacity: 0; transform: translateY(26px);
+      transition: opacity .85s var(--ease-expo), transform .85s var(--ease-expo);
+      will-change: opacity, transform;
+    }
+    .animate-on-scroll.visible { opacity: 1; transform: none; }
+    /* Aynı ızgaradaki kardeşler sırayla girer — 70ms'lik kayma yeterli;
+       daha uzunu sabırsızlandırıyor. */
+    .listings-grid > .animate-on-scroll:nth-child(1),
+    .features-grid > .animate-on-scroll:nth-child(1) { transition-delay: 0ms; }
+    .listings-grid > .animate-on-scroll:nth-child(2),
+    .features-grid > .animate-on-scroll:nth-child(2) { transition-delay: 70ms; }
+    .listings-grid > .animate-on-scroll:nth-child(3),
+    .features-grid > .animate-on-scroll:nth-child(3) { transition-delay: 140ms; }
+    .listings-grid > .animate-on-scroll:nth-child(4),
+    .features-grid > .animate-on-scroll:nth-child(4) { transition-delay: 210ms; }
+    .listings-grid > .animate-on-scroll:nth-child(n+5) { transition-delay: 280ms; }
+    /* Hareket azaltma tercihi: her şey anında görünür, kayma yok. */
+    @media (prefers-reduced-motion: reduce) {
+      .animate-on-scroll { opacity: 1; transform: none; transition: none; }
+      .animate-on-scroll.visible { transition: none; }
+    }
+
+    /* ── ÜST KÜNYE ŞERİDİ ─────────────────────────────────────────────
+       Konum, Instagram ve telefon her zaman görünür. Sayfanın en
+       tepesinde ince bir çizgi; aşağı kaydırınca yukarı kayıp
+       kayboluyor ve navbar tek başına kalıyor. */
+    .nav-topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1001;
+      height: 38px; display: flex; align-items: center;
+      background: var(--green-dark);
+      border-bottom: 1px solid rgba(212,184,118,0.22);
+      transition: transform .5s var(--ease-expo), opacity .4s ease;
+      will-change: transform;
+    }
+    .nav-topbar.hidden { transform: translateY(-100%); opacity: 0; }
+    .nav-topbar .container { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .topbar-item {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--font-sans); font-size: 0.68rem; font-weight: 500;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(244,237,224,0.72); transition: color .3s ease; white-space: nowrap;
+    }
+    .topbar-item svg { width: 13px; height: 13px; flex-shrink: 0; opacity: .85; }
+    .topbar-item:hover { color: var(--gold-soft); }
+    .topbar-right { display: flex; align-items: center; gap: 26px; }
+    .topbar-sep { width: 1px; height: 13px; background: rgba(212,184,118,0.28); }
+    @media (max-width: 860px) {
+      .nav-topbar { height: 34px; }
+      .topbar-loc { display: none; }
+      .nav-topbar .container { justify-content: center; }
+      .topbar-right { gap: 18px; }
+    }
 
     /* ── NAVBAR (editorial — şeffaf üzerinde başlar) ── */
-    #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 24px 0; transition: var(--transition); background: transparent; }
-    #navbar.scrolled { background: rgba(244,237,224,0.96); backdrop-filter: blur(14px); padding: 14px 0; box-shadow: 0 1px 0 rgba(31,74,42,0.06); }
+    #navbar { position: fixed; top: 38px; left: 0; right: 0; z-index: 1000; padding: 22px 0; transition: top .5s var(--ease-expo), padding .4s var(--ease-expo), background .4s ease, box-shadow .4s ease; background: transparent; }
+    .nav-topbar.hidden + #navbar { top: 0; }
+    /* Kaydırılmış durumda: krem zemin + blur + altın saç teli çizgi.
+       Önceden yalnızca 1px'lik soluk bir gölge vardı, bar zeminden
+       ayrışmıyor ve düz duruyordu. */
+    #navbar.scrolled {
+      background: rgba(250,245,235,0.82);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      padding: 12px 0;
+      box-shadow: 0 1px 0 rgba(184,149,74,0.28), 0 12px 34px -18px rgba(31,74,42,0.42);
+    }
+    @media (max-width: 860px) { #navbar { top: 34px; } }
     .nav-inner { display: flex; align-items: center; justify-content: space-between; }
     .nav-logo { display: flex; align-items: center; gap: 14px; }
     .nav-logo-mark { width: 44px; height: 44px; border-radius: 0; background: transparent; border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
     #navbar.scrolled .nav-logo-mark { background: var(--green-dark); border-color: var(--green-dark); }
     .nav-logo-mark svg { width: 26px; height: 26px; }
-    .nav-logo-text { font-family: var(--font-serif); font-weight: 700; font-size: 1rem; color: var(--white); transition: var(--transition); line-height: 1.15; letter-spacing: 0.02em; }
-    .nav-logo-text span { font-family: var(--font-sans); font-size: 0.55rem; font-weight: 500; display: block; letter-spacing: 0.32em; opacity: 0.7; margin-top: 4px; color: var(--gold-soft); }
+    .nav-logo-text { font-family: var(--font-serif); font-weight: 600; font-size: 1.08rem; color: var(--white); transition: var(--transition); line-height: 1.1; letter-spacing: -0.015em; font-optical-sizing: auto; font-variation-settings: var(--wonk-off); }
+    .nav-logo-text span { font-family: var(--font-sans); font-size: 0.54rem; font-weight: 500; display: block; letter-spacing: 0.34em; opacity: 0.72; margin-top: 5px; color: var(--gold-soft); }
     #navbar.scrolled .nav-logo-text { color: var(--green-dark); }
     .nav-links { display: flex; align-items: center; gap: 36px; }
-    .nav-links a { font-family: var(--font-sans); font-size: 0.72rem; font-weight: 500; color: rgba(255,255,255,0.9); letter-spacing: 0.22em; text-transform: uppercase; transition: var(--transition); position: relative; }
-    .nav-links a::after { content:''; position: absolute; bottom: -6px; left: 0; right: 0; height: 1px; background: var(--gold); transform: scaleX(0); transition: var(--transition); transform-origin: left; }
-    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a { font-family: var(--font-sans); font-size: 0.72rem; font-weight: 500; color: rgba(255,255,255,0.82); letter-spacing: 0.2em; text-transform: uppercase; transition: color .35s ease; position: relative; }
+    /* Altın çizgi soldan çizilir, çıkışta SAĞA doğru toplanır — gidiş ve
+       dönüş aynı yönde olduğunda hareket mekanik duruyordu. */
+    .nav-links a::after {
+      content:''; position: absolute; bottom: -7px; left: 0; right: 0; height: 1px;
+      background: var(--gold); transform: scaleX(0); transform-origin: right;
+      transition: transform .45s var(--ease-expo);
+    }
+    .nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
     .nav-links a:hover { color: var(--white); }
-    #navbar.scrolled .nav-links a { color: var(--ink); }
-    #navbar.scrolled .nav-links a:hover { color: var(--green-dark); }
-    .nav-phone { background: transparent !important; color: var(--white) !important; padding: 11px 22px !important; border-radius: 2px !important; font-family: var(--font-sans) !important; font-weight: 500 !important; font-size: 0.72rem !important; letter-spacing: 0.22em !important; text-transform: uppercase !important; display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.5); transition: var(--transition); }
-    .nav-phone svg { width: 12px; height: 12px; }
-    .nav-phone:hover { background: var(--white) !important; color: var(--green-dark) !important; }
+    /* Kaydırma takibiyle işaretlenen aktif bölüm — kullanıcı sayfanın
+       neresinde olduğunu görüyor. Önceden hiçbir aktif durum yoktu. */
+    .nav-links a.active { color: var(--white); }
+    .nav-links a.active::after { transform: scaleX(1); transform-origin: left; }
+    #navbar.scrolled .nav-links a { color: rgba(42,38,34,0.68); }
+    #navbar.scrolled .nav-links a:hover,
+    #navbar.scrolled .nav-links a.active { color: var(--green-dark); }
+    /* Telefon işin birincil eylemi — altın dolgu ile diğer linklerden
+       ayrılıyor. Önceden şeffaf çerçeveliydi ve nav linklerinden
+       ayırt edilemiyordu. */
+    .nav-phone {
+      background: var(--gold) !important; color: var(--green-dark) !important;
+      padding: 12px 24px !important; border-radius: 2px !important;
+      font-family: var(--font-sans) !important; font-weight: 700 !important;
+      font-size: 0.72rem !important; letter-spacing: 0.16em !important;
+      text-transform: uppercase !important;
+      display: inline-flex; align-items: center; gap: 9px;
+      border: 1px solid var(--gold);
+      position: relative; overflow: hidden;
+      transition: background .35s ease, border-color .35s ease, box-shadow .45s var(--ease-expo), transform .35s var(--ease-expo);
+      box-shadow: 0 2px 0 rgba(31,74,42,0.14);
+    }
+    .nav-phone svg { width: 13px; height: 13px; position: relative; z-index: 2; }
+    .nav-phone span, .nav-phone { z-index: 1; }
+    /* Işık süpürmesi — altın yüzeyde parlama hissi */
+    .nav-phone::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.55) 50%, transparent 65%);
+      transform: translateX(-120%); transition: transform .75s var(--ease-expo);
+    }
+    .nav-phone:hover::before { transform: translateX(120%); }
+    .nav-phone:hover {
+      background: var(--gold-soft) !important; border-color: var(--gold-soft);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 26px -12px rgba(184,149,74,0.85), 0 2px 0 rgba(31,74,42,0.14);
+    }
     #navbar.scrolled .nav-phone { background: var(--green-dark) !important; color: var(--cream) !important; border-color: var(--green-dark); }
     #navbar.scrolled .nav-phone:hover { background: var(--green-mid) !important; border-color: var(--green-mid); }
     .hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; padding: 8px; width: 40px; height: 40px; align-items: center; justify-content: center; }
@@ -189,7 +354,94 @@
         linear-gradient(180deg, rgba(20,40,25,0.05) 0%, rgba(20,40,25,0.55) 100%);
     }
     .hero-particles { display: none; }
-    .hero-content { position: relative; z-index: 5; max-width: 880px; padding: 80px 0; }
+    /* ── HERO IZGARASI ────────────────────────────────────────────────
+       Önceden içerik 880px'lik tek bir kolona sıkışıyor, geniş
+       ekranlarda sağdaki yaklaşık %40'lık alan tamamen boş kalıyordu.
+       Artık asimetrik iki kolon: solda anlatı, sağda fiyat rayı. */
+    .hero-grid {
+      position: relative; z-index: 5;
+      display: grid; grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 72px; align-items: center; padding: 96px 0 80px;
+    }
+    .hero-content { position: relative; z-index: 5; max-width: 720px; }
+
+    /* ── FİYAT RAYI ── */
+    .hero-rail {
+      position: relative;
+      padding: 32px 30px 30px;
+      background: rgba(18,40,22,0.44);
+      backdrop-filter: blur(18px) saturate(1.3);
+      -webkit-backdrop-filter: blur(18px) saturate(1.3);
+      border: 1px solid rgba(212,184,118,0.32);
+      border-radius: 3px;
+      box-shadow: 0 30px 70px -32px rgba(6,18,8,0.9);
+    }
+    /* Üst kenarda altın vurgu çizgisi */
+    .hero-rail::before {
+      content: ''; position: absolute; top: -1px; left: 26px; right: 26px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+    .hero-rail-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    .hero-rail-label {
+      font-family: var(--font-sans); font-size: 0.6rem; font-weight: 700;
+      letter-spacing: 0.26em; text-transform: uppercase; color: var(--gold-soft);
+    }
+    .hero-rail-pin {
+      font-family: var(--font-sans); font-size: 0.6rem; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(244,237,224,0.72);
+      border: 1px solid rgba(212,184,118,0.34); padding: 4px 10px; border-radius: 2px;
+    }
+    .hero-rail-price { display: flex; align-items: baseline; gap: 6px; }
+    .hero-rail-num {
+      font-family: var(--font-serif); font-weight: 600; font-size: 3.1rem;
+      line-height: 1; color: var(--white); letter-spacing: -0.035em;
+      font-optical-sizing: auto; font-variation-settings: var(--wonk-on);
+      /* Rakamlar sabit genişlikte — hizalama kaymaz */
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    .hero-rail-cur { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 500; color: var(--gold); font-style: italic; }
+    .hero-rail-unit {
+      font-family: var(--font-sans); font-size: 0.78rem; font-weight: 500;
+      color: rgba(244,237,224,0.66); letter-spacing: 0.05em; margin-top: 8px;
+    }
+    .hero-rail-rule { height: 1px; background: rgba(212,184,118,0.24); margin: 22px 0 18px; }
+    .hero-rail-facts { display: flex; flex-direction: column; gap: 11px; }
+    .hero-rail-facts li { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+    .hero-rail-facts span {
+      font-family: var(--font-sans); font-size: 0.74rem; font-weight: 400;
+      color: rgba(244,237,224,0.6); letter-spacing: 0.04em;
+    }
+    /* Noktalı bağlantı çizgisi — klasik editoryal künye/fiyat listesi işareti */
+    .hero-rail-facts li::before {
+      content: ''; flex: 1 1 auto; height: 0; order: 2;
+      border-bottom: 1px dotted rgba(212,184,118,0.3); transform: translateY(-4px);
+    }
+    .hero-rail-facts span { order: 1; }
+    .hero-rail-facts b {
+      order: 3;
+      font-family: var(--font-sans); font-size: 0.82rem; font-weight: 700;
+      color: var(--white); letter-spacing: 0.01em; white-space: nowrap;
+    }
+    .hero-rail-cta {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      margin-top: 26px; padding-top: 18px;
+      border-top: 1px solid rgba(212,184,118,0.24);
+      font-family: var(--font-sans); font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-soft);
+      transition: color .35s ease;
+    }
+    .hero-rail-cta svg { width: 16px; height: 16px; transition: transform .45s var(--ease-expo); }
+    .hero-rail-cta:hover { color: var(--white); }
+    .hero-rail-cta:hover svg { transform: translateX(6px); }
+
+    @media (max-width: 1080px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 40px; padding: 120px 0 70px; }
+      /* Mobilde ray gizlenmiyor — fiyat en değerli bilgi. Yatay,
+         kompakt bir şeride dönüşüyor. */
+      .hero-rail { max-width: 460px; padding: 24px 22px; }
+      .hero-rail-num { font-size: 2.5rem; }
+    }
     /* Eyebrow — Christie's tarzı küçük büyük harfli üst etiket */
     .hero-badge {
       display: inline-block;
@@ -235,19 +487,28 @@
     }
     .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
     /* Hero altı featureları — sadece minimum gerekli, görsel olarak ince */
+    /* Dört güven rozeti. Flex + wrap ile 3+1 şeklinde kırılıp dengesiz
+       duruyordu; 2×2 ızgara kasıtlı görünüyor ve dar kolona sığıyor. */
     .hero-features {
-      display: flex; gap: 36px; margin-top: 64px; flex-wrap: wrap;
-      padding-top: 36px; border-top: 1px solid rgba(255,255,255,0.15);
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 32px; margin-top: 56px;
+      padding-top: 32px; border-top: 1px solid rgba(212,184,118,0.28);
+      max-width: 560px;
     }
     .hero-feature {
-      display: flex; align-items: center; gap: 12px;
-      color: rgba(255,255,255,0.88);
+      display: flex; align-items: center; gap: 11px;
+      color: rgba(255,255,255,0.86);
       font-family: var(--font-sans);
-      font-size: clamp(0.78rem, 1vw, 0.86rem);
+      font-size: clamp(0.74rem, 0.92vw, 0.8rem);
       font-weight: 500;
-      letter-spacing: 0.18em; text-transform: uppercase;
+      letter-spacing: 0.15em; text-transform: uppercase;
     }
-    .hero-feature svg { width: 18px; height: 18px; color: var(--gold-soft); flex-shrink: 0; }
+    .hero-feature svg {
+      width: 15px; height: 15px; color: var(--gold); flex-shrink: 0;
+      padding: 3px; border: 1px solid rgba(212,184,118,0.4); border-radius: 50%;
+      box-sizing: content-box;
+    }
+    @media (max-width: 560px) { .hero-features { grid-template-columns: 1fr; gap: 13px; } }
     /* Scroll cue — minimal */
     .scroll-down {
       position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
@@ -445,11 +706,15 @@
     /* Contact — Mobil */
     @media (max-width: 900px) {
       #contact { padding: 80px 0; }
-      .contact-grid { grid-template-columns: 1fr; gap: 56px; }
+      /* minmax(0,1fr) — düz "1fr" aslında minmax(AUTO,1fr) demektir ve iz,
+         içeriğinin min-content genişliğinin altına inemez. Burada kolon
+         375px'lik ekranda 428px'e şişiyor, body'deki overflow-x:hidden
+         yüzünden kaydırma çubuğu çıkmıyor ama metin kesiliyordu. */
+      .contact-grid { grid-template-columns: minmax(0, 1fr); gap: 56px; }
       .contact-form { padding: 36px 26px; }
     }
     @media (max-width: 480px) {
-      .form-row { grid-template-columns: 1fr; gap: 0; }
+      .form-row { grid-template-columns: minmax(0, 1fr); gap: 0; }
       .contact-info > p { font-size: 1rem; }
     }
     .contact-item-sub { font-family: var(--font-sans); font-size: 0.78rem; color: var(--text-light); margin-top: 4px; font-weight: 300; }
@@ -462,8 +727,14 @@
     .contact-form { background: var(--white); padding: 56px 48px; border-radius: 0; border: 1px solid var(--cream-deep); }
     .form-title { font-family: var(--font-serif); font-size: 1.4rem; font-weight: 700; color: var(--green-dark); margin-bottom: 10px; line-height: 1.2; }
     .form-sub { font-family: var(--font-sans); color: var(--text-mid); font-size: 0.92rem; margin-bottom: 36px; font-weight: 300; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+    /* minmax(0,1fr): düz 1fr, input'un varsayılan min-content genişliği
+       (tarayıcıya göre ~20 karakter) yüzünden dar ekranda izi şişiriyor
+       ve form alanları kapsayıcının dışına taşıyordu. */
+    .form-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; min-width: 0; }
+    /* Input'lar kapsayıcıyı asla aşmaz — box-sizing zaten border-box,
+       eksik olan min-width sıfırlamasıydı. */
+    .form-group input, .form-group select, .form-group textarea { min-width: 0; max-width: 100%; }
     .form-group label { font-family: var(--font-sans); font-size: 0.68rem; font-weight: 500; color: var(--text-light); letter-spacing: 0.22em; text-transform: uppercase; }
     .form-group input, .form-group select, .form-group textarea {
       padding: 14px 0; border: none; border-bottom: 1px solid var(--cream-deep); border-radius: 0;
@@ -914,10 +1185,31 @@
     /* ════════════════════════════════════════
        HERO — 3D & CANVAS KATMANLARI
     ════════════════════════════════════════ */
+    /* Hero perdesi. Önceki hali 160 derecelik tek yönlü, %92'ye varan düz
+       bir yeşil yıkamaydı: fotoğraf tamamen boğuluyor, hero düz bir renk
+       bloğu gibi görünüyordu. Artık dört katman var — metnin durduğu sol
+       taraf okunaklı kalacak kadar koyu, sağ taraf fotoğrafın nefes
+       almasına izin verecek kadar açık. */
     .hero-gradient-overlay {
       position: absolute; inset: 0; z-index: 1;
-      background: linear-gradient(160deg, rgba(20,55,22,.92) 0%, rgba(30,65,32,.80) 45%, rgba(10,20,10,.70) 100%);
+      background:
+        /* 1) Sol taraf okunabilirlik perdesi */
+        linear-gradient(96deg, rgba(12,30,16,0.90) 0%, rgba(14,34,18,0.62) 38%, rgba(16,38,20,0.20) 72%, rgba(16,38,20,0.10) 100%),
+        /* 2) Alt vinyet — kaydırma ipucu ve bölüm geçişi için */
+        linear-gradient(180deg, rgba(10,24,12,0.42) 0%, transparent 26%, transparent 58%, rgba(8,20,10,0.78) 100%),
+        /* 3) Üstte navbar için hafif koyulaşma */
+        linear-gradient(180deg, rgba(8,20,10,0.55) 0%, transparent 18%),
+        /* 4) Sıcak altın ışık — sağ üstten gelen güneş hissi */
+        radial-gradient(120% 90% at 88% 12%, rgba(212,184,118,0.16) 0%, transparent 55%);
     }
+    /* Film grenli doku — düz gradyanlara derinlik ve sıcaklık katar.
+       SVG gürültüsü satır içi data URI, ek istek yok. */
+    #hero::after {
+      content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+      opacity: 0.42; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    }
+    @media (prefers-reduced-motion: reduce) { #hero::after { opacity: 0.28; } }
     .hero-content { z-index: 5; position: relative; }
     .scroll-down { z-index: 5; position: absolute; }
     .hero-stats { z-index: 5; }
@@ -980,12 +1272,18 @@
     /* ════════════════════════════════════════
        NAVBAR — GLASS MORPHISM & 3D LOGO
     ════════════════════════════════════════ */
+    /* Soğuk beyaz cam yerine sıcak krem. Sayfanın zemini --cream-pale
+       (#faf5eb); saf beyaz bir bar üstünde yüzen yabancı bir katman gibi
+       duruyor ve altın–yeşil paletle çelişiyordu. Alt kenardaki altın
+       saç teli çizgi barı zeminden ayırıyor. */
     #navbar.scrolled {
-      background: rgba(255,255,255,0.88) !important;
-      backdrop-filter: blur(24px) saturate(1.8) !important;
-      -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
-      padding: 10px 0 !important;
-      box-shadow: 0 2px 32px rgba(0,0,0,0.1), inset 0 -1px 0 rgba(0,0,0,0.06) !important;
+      background: rgba(250,245,235,0.86) !important;
+      backdrop-filter: blur(22px) saturate(1.5) !important;
+      -webkit-backdrop-filter: blur(22px) saturate(1.5) !important;
+      padding: 12px 0 !important;
+      box-shadow:
+        inset 0 -1px 0 rgba(184,149,74,0.32),
+        0 14px 38px -22px rgba(31,74,42,0.5) !important;
     }
     .nav-logo-mark {
       transform-style: preserve-3d;
@@ -1063,6 +1361,125 @@
     .feature-card { transform-style: preserve-3d; }
     /* hover transform — Vanilla Tilt yönetir; sadece shadow güncellenir */
     .feature-card:hover { box-shadow: var(--shadow-lg) !important; }
+
+    /* ════════════════════════════════════════
+       ÜCRETSİZ ARAZİ TURU — koyu bant
+    ════════════════════════════════════════ */
+    #tour {
+      position: relative; padding: 108px 0; overflow: hidden;
+      background: var(--green-dark);
+      color: var(--cream);
+    }
+    /* Topografik kontur dokusu — arazi işine ait, ucuz bir "pattern"
+       değil; çok düşük opaklıkta, yalnızca yüzeye derinlik katıyor. */
+    #tour::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+      background-image:
+        radial-gradient(60% 55% at 82% 18%, rgba(212,184,118,0.14) 0%, transparent 60%),
+        repeating-radial-gradient(circle at 82% 18%, transparent 0 34px, rgba(212,184,118,0.055) 34px 35px);
+    }
+    #tour .container { position: relative; z-index: 2; }
+    .tour-grid { display: grid; grid-template-columns: minmax(0, 1fr) 372px; gap: 84px; align-items: start; }
+
+    .tour-eyebrow {
+      display: inline-block; font-family: var(--font-sans); font-size: 0.64rem;
+      font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 22px;
+    }
+    .tour-eyebrow::before { content: ''; display: inline-block; width: 26px; height: 1px; background: var(--gold); vertical-align: middle; margin-right: 12px; }
+    .tour-title {
+      font-family: var(--font-serif); font-weight: 600;
+      font-size: clamp(2.2rem, 4.4vw, 3.5rem); line-height: 1.06;
+      letter-spacing: -0.03em; color: var(--white);
+      font-optical-sizing: auto; font-variation-settings: var(--wonk-off);
+    }
+    .tour-title em { font-style: italic; font-weight: 500; color: var(--gold); font-variation-settings: var(--wonk-on); }
+    .tour-desc {
+      font-family: var(--font-sans); font-size: 1.03rem; line-height: 1.8;
+      color: rgba(244,237,224,0.74); max-width: 560px; margin-top: 26px;
+    }
+
+    /* Numaralı adımlar — dikey altın çizgi üzerinde */
+    .tour-steps { margin-top: 52px; display: flex; flex-direction: column; gap: 30px; position: relative; }
+    .tour-steps::before { content: ''; position: absolute; left: 21px; top: 12px; bottom: 12px; width: 1px; background: linear-gradient(180deg, var(--gold), rgba(212,184,118,0.12)); }
+    .tour-steps li { display: flex; gap: 24px; align-items: flex-start; position: relative; }
+    .tour-step-no {
+      flex-shrink: 0; width: 43px; height: 43px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--green-dark); border: 1px solid rgba(212,184,118,0.5);
+      font-family: var(--font-serif); font-size: 0.86rem; font-weight: 600;
+      color: var(--gold); font-variant-numeric: lining-nums tabular-nums;
+      position: relative; z-index: 2;
+    }
+    .tour-steps h3 {
+      font-family: var(--font-serif); font-size: 1.16rem; font-weight: 600;
+      color: var(--white); letter-spacing: -0.015em; margin-bottom: 5px;
+    }
+    .tour-steps p { font-family: var(--font-sans); font-size: 0.9rem; line-height: 1.65; color: rgba(244,237,224,0.62); }
+
+    /* Randevu kartı */
+    .tour-card {
+      background: rgba(250,245,235,0.055);
+      border: 1px solid rgba(212,184,118,0.3);
+      border-radius: 3px; padding: 30px 28px;
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    .tour-card-top { margin-bottom: 16px; }
+    .tour-card-badge {
+      font-family: var(--font-sans); font-size: 0.6rem; font-weight: 700;
+      letter-spacing: 0.26em; text-transform: uppercase; color: var(--gold);
+    }
+    .tour-card-lead {
+      font-family: var(--font-serif); font-size: 1.28rem; font-weight: 500;
+      line-height: 1.35; color: var(--white); letter-spacing: -0.02em; margin-bottom: 24px;
+    }
+    .tour-card-phone {
+      display: flex; align-items: center; justify-content: center; gap: 11px;
+      background: var(--gold); color: var(--green-dark);
+      font-family: var(--font-sans); font-weight: 700; font-size: 0.92rem;
+      letter-spacing: 0.06em; padding: 16px 20px; border-radius: 2px;
+      transition: background .35s ease, transform .35s var(--ease-expo), box-shadow .45s var(--ease-expo);
+    }
+    .tour-card-phone svg { width: 17px; height: 17px; }
+    .tour-card-phone:hover { background: var(--gold-soft); transform: translateY(-2px); box-shadow: 0 14px 30px -14px rgba(212,184,118,0.9); }
+    .tour-card-wa {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-top: 11px; padding: 14px 20px; border-radius: 2px;
+      border: 1px solid rgba(212,184,118,0.42); color: var(--gold-soft);
+      font-family: var(--font-sans); font-weight: 600; font-size: 0.8rem;
+      letter-spacing: 0.08em; transition: background .35s ease, color .35s ease, border-color .35s ease;
+    }
+    .tour-card-wa svg { width: 16px; height: 16px; }
+    .tour-card-wa:hover { background: rgba(212,184,118,0.14); color: var(--white); border-color: var(--gold); }
+    .tour-card-rule { height: 1px; background: rgba(212,184,118,0.22); margin: 24px 0 18px; }
+    .tour-card-notes { display: flex; flex-direction: column; gap: 10px; }
+    .tour-card-notes li {
+      position: relative; padding-left: 22px;
+      font-family: var(--font-sans); font-size: 0.83rem; color: rgba(244,237,224,0.72);
+    }
+    .tour-card-notes li::before {
+      content: ''; position: absolute; left: 0; top: 8px;
+      width: 9px; height: 5px; border-left: 1.5px solid var(--gold);
+      border-bottom: 1.5px solid var(--gold); transform: rotate(-45deg);
+    }
+    .tour-card-ig {
+      display: flex; align-items: center; gap: 10px; margin-top: 24px; padding-top: 18px;
+      border-top: 1px solid rgba(212,184,118,0.22);
+      font-family: var(--font-sans); font-size: 0.76rem; font-weight: 600;
+      color: rgba(244,237,224,0.6); letter-spacing: 0.03em; transition: color .35s ease;
+    }
+    .tour-card-ig svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .tour-card-ig:hover { color: var(--gold); }
+
+    @media (max-width: 1080px) {
+      .tour-grid { grid-template-columns: 1fr; gap: 48px; }
+      .tour-card { max-width: 460px; }
+    }
+    @media (max-width: 768px) {
+      #tour { padding: 76px 0; }
+      .tour-steps { gap: 24px; }
+      .tour-desc { font-size: 0.98rem; }
+    }
 
     /* ════════════════════════════════════════
        ABOUT — PARALLAX & REVEAL MASKE
@@ -1360,6 +1777,27 @@
   </div>
 
   <!-- NAVBAR -->
+  <!-- ÜST KÜNYE ŞERİDİ — konum, Instagram, telefon her zaman erişilebilir -->
+  <div class="nav-topbar" id="navTopbar">
+    <div class="container">
+      <span class="topbar-item topbar-loc">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Tekirdağ · Marmara Ereğlisi · Çeşmeli
+      </span>
+      <div class="topbar-right">
+        <a href="https://www.instagram.com/diclearsaofisiii1/" target="_blank" rel="noopener" class="topbar-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" stroke="none"/></svg>
+          Arazi Videoları
+        </a>
+        <span class="topbar-sep"></span>
+        <a href="tel:+905332516036" class="topbar-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 010 .18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.18 6.18l1.28-1.28a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          0533 251 60 36
+        </a>
+      </div>
+    </div>
+  </div>
+
   <nav id="navbar">
     <div class="container">
       <div class="nav-inner">
@@ -1379,6 +1817,7 @@
         <ul class="nav-links">
           <li><a href="#hero">Anasayfa</a></li>
           <li><a href="#listings">Arsalar</a></li>
+          <li><a href="#tour">Arazi Turu</a></li>
           <li><a href="#features">Avantajlar</a></li>
           <li><a href="#about">Hakkımızda</a></li>
           <li>
@@ -1402,6 +1841,7 @@
     <!-- Yumuşak gradient overlay -->
     <div class="hero-gradient-overlay"></div>
     <div class="container">
+     <div class="hero-grid">
       <div class="hero-content">
         <div class="hero-badge" id="heroBadge">
           Tekirdağ Marmaraereğlisi · Çeşmeli
@@ -1434,10 +1874,37 @@
           </div>
           <div class="hero-feature">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            Pazar Günü Servis
+            Ücretsiz Arazi Servisi
           </div>
         </div>
       </div>
+
+      <!-- FİYAT RAYI — hero'nun sağındaki ölü alanı gerçek veriyle doldurur.
+           Arsa alıcısının ilk sorduğu üç şey burada: kaça, ne kadar, nereye
+           yakın. Rakamlar Instagram'daki güncel ilanlardan alındı. -->
+      <aside class="hero-rail" aria-label="Öne çıkan fırsat">
+        <div class="hero-rail-top">
+          <span class="hero-rail-label">Öne Çıkan Fırsat</span>
+          <span class="hero-rail-pin">Çeşmeli</span>
+        </div>
+        <div class="hero-rail-price">
+          <span class="hero-rail-num">599.000</span>
+          <span class="hero-rail-cur">₺</span>
+        </div>
+        <div class="hero-rail-unit">1 dönüm · 1.000 m² · tapulu</div>
+        <div class="hero-rail-rule"></div>
+        <ul class="hero-rail-facts">
+          <li><span>İstanbul</span><b>45 dk</b></li>
+          <li><span>Denize</span><b>5 dk</b></li>
+          <li><span>E-5 yoluna</span><b>300 m</b></li>
+          <li><span>Parsel aralığı</span><b>300 – 1.000 m²</b></li>
+        </ul>
+        <a href="#listings" class="hero-rail-cta">
+          Tüm portföyü gör
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </aside>
+     </div>
     </div>
     <div class="scroll-down">
       <span>Aşağı Kaydır</span>
@@ -1506,6 +1973,81 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 01.04 2.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.18 6.18l1.28-1.28a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
           0533 251 60 36 — Hemen Arayın
         </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       ÜCRETSİZ ARAZİ TURU
+       Instagram'daki her gönderide geçen ama sitede hiç yer almayan
+       ayrışma noktası. Krem bölümler arasında koyu yeşil tam genişlik
+       bant — sayfanın tekrar eden "ortalanmış başlık + ızgara" ritmini
+       bilinçli olarak kırıyor.
+       ══════════════════════════════════════════════════════════════════ -->
+  <section id="tour">
+    <div class="container">
+      <div class="tour-grid">
+
+        <div class="tour-lead animate-on-scroll">
+          <span class="tour-eyebrow">Ücretsiz Hizmet</span>
+          <h2 class="tour-title">Arsayı <em>görmeden</em><br>karar vermeyin</h2>
+          <p class="tour-desc">
+            Fotoğraf ve harita bir yere kadar. Parselin sınırını, yola cephesini,
+            denize bakışını ve komşu yapılaşmayı yerinde görmek gerekir.
+            Sizi Marmaraereğlisi'ne biz götürüyoruz — yol ve gezi tamamen ücretsiz,
+            hiçbir satın alma zorunluluğu yok.
+          </p>
+
+          <ol class="tour-steps">
+            <li>
+              <span class="tour-step-no">01</span>
+              <div>
+                <h3>Arayın veya yazın</h3>
+                <p>Hangi bölge ve bütçeyle ilgilendiğinizi konuşalım.</p>
+              </div>
+            </li>
+            <li>
+              <span class="tour-step-no">02</span>
+              <div>
+                <h3>Gün belirleyelim</h3>
+                <p>Size uygun bir güne randevu verelim, kalabalık olmasın.</p>
+              </div>
+            </li>
+            <li>
+              <span class="tour-step-no">03</span>
+              <div>
+                <h3>Araziyi gezin</h3>
+                <p>Parselleri yerinde gösterelim, tapu ve imar durumunu birlikte inceleyelim.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <aside class="tour-card animate-on-scroll">
+          <div class="tour-card-top">
+            <span class="tour-card-badge">Randevu</span>
+          </div>
+          <p class="tour-card-lead">Gezi için tek yapmanız gereken aramak.</p>
+          <a href="tel:+905332516036" class="tour-card-phone">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 01.04 2.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.18 6.18l1.28-1.28a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+            0533 251 60 36
+          </a>
+          <a href="https://wa.me/905332516036?text=Merhaba%2C%20%C3%BCcretsiz%20arazi%20turu%20i%C3%A7in%20randevu%20almak%20istiyorum." target="_blank" rel="noopener" class="tour-card-wa">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+            WhatsApp'tan yazın
+          </a>
+          <div class="tour-card-rule"></div>
+          <ul class="tour-card-notes">
+            <li>Yol ve gezi ücretsiz</li>
+            <li>Satın alma zorunluluğu yok</li>
+            <li>Tapu ve imar bilgisi yerinde</li>
+          </ul>
+          <a href="https://www.instagram.com/diclearsaofisiii1/" target="_blank" rel="noopener" class="tour-card-ig">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" stroke="none"/></svg>
+            Arazi videolarını Instagram'da izleyin
+          </a>
+        </aside>
+
       </div>
     </div>
   </section>

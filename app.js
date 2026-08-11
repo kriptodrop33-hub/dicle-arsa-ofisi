@@ -504,8 +504,52 @@ applyAdminMode();
 loadListings().then(data => { listings = data; renderListings(); });
 
 /* ── Navbar scroll + animasyonlar ── */
-const navbar = document.getElementById('navbar');
-window.addEventListener('scroll', () => { navbar.classList.toggle('scrolled', window.scrollY > 60); });
+/* ── Navbar durumu: kaydırma sınıfı, üst şerit ve aktif bölüm takibi ──
+   Üçü de tek bir scroll dinleyicisinde ve requestAnimationFrame ile
+   sınırlandırılmış halde çalışıyor; her scroll olayında layout okumak
+   kaydırmayı takardı. */
+const navbar    = document.getElementById('navbar');
+const navTopbar = document.getElementById('navTopbar');
+const navLinks  = [...document.querySelectorAll('.nav-links a[href^="#"]')];
+const navHedefleri = navLinks
+  .map(a => ({ link: a, bolum: document.querySelector(a.getAttribute('href')) }))
+  .filter(x => x.bolum);
+
+let navBekliyor = false;
+
+function navDurumGuncelle() {
+  const y = window.scrollY;
+
+  navbar.classList.toggle('scrolled', y > 60);
+  // Üst şerit yalnızca sayfanın tepesinde görünür; aşağı inince
+  // navbar'a yer açmak için yukarı kayar.
+  if (navTopbar) navTopbar.classList.toggle('hidden', y > 120);
+
+  /* Aktif bölüm: navbar yüksekliği kadar aşağıdaki noktanın hangi
+     bölüme denk geldiğine bakılıyor. En son eşleşen kazanır, böylece
+     bölümler üst üste binse bile doğru olan işaretlenir. */
+  const isaret = y + 140;
+  let aktif = null;
+  for (const { link, bolum } of navHedefleri) {
+    if (bolum.offsetTop <= isaret) aktif = link;
+  }
+  // Sayfa sonundaysa son bölümü işaretle — kısa bölümler asla
+  // eşiği geçemeyebilir.
+  if (y + window.innerHeight >= document.body.scrollHeight - 4 && navHedefleri.length) {
+    aktif = navHedefleri[navHedefleri.length - 1].link;
+  }
+  navLinks.forEach(a => a.classList.toggle('active', a === aktif));
+
+  navBekliyor = false;
+}
+
+window.addEventListener('scroll', () => {
+  if (navBekliyor) return;
+  navBekliyor = true;
+  requestAnimationFrame(navDurumGuncelle);
+}, { passive: true });
+
+navDurumGuncelle();
 
 const hamburger  = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobileMenu');
