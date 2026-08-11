@@ -14,6 +14,13 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
+
+/* Oturum yalnızca sekme açık kaldığı sürece sürer. Ortak bir bilgisayarda
+   sekme kapanınca yönetici oturumu da kapanır. */
+auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+  .catch(e => console.warn('Auth kalıcılık ayarı uygulanamadı:', e));
+
 let storage;
 try { storage = firebase.storage(); } catch(e) { console.warn('Storage kullanılamıyor:', e); }
 
@@ -26,9 +33,6 @@ const DEFAULT_LISTINGS = [
   { title: 'Konteyner Bungalov Koyabilir 300 m²', size: '300 m²',  price: '399.000', priceLabel: 'Toplam Fiyat',    location: 'Marmaraereğlisi / Çeşmeli',                  parcel: '170/10', tag: "new|🏕️ BUNGALOV UYGUN", features: "Prefabrik OK, E-5'e Yakın, Tapulu",    image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=700&q=80', description: '', order: 4 },
   { title: 'Özel Kampanya — 1 Dönüm Fırsat',      size: '1000 m²', price: '619.000', priceLabel: 'Kampanya Fiyatı', location: 'Marmaraereğlisi / Çeşmeli',                  parcel: '170/10', tag: 'hot|🔥 KAMPANYA',        features: 'Hemen Tapu, Yatırımlık, Müstakil',      image: 'https://images.unsplash.com/photo-1464093515883-ec948246accb?w=700&q=80', description: '', order: 5 }
 ];
-
-const PW_KEY      = 'dicle_admin_pw_v1';
-const SESSION_KEY = 'dicle_admin_session_v1';
 
 let listings     = [];
 let editingId    = null;
@@ -181,53 +185,88 @@ function showToast(msg, isError) {
   setTimeout(() => t.classList.remove('show'), 2400);
 }
 
-/* ── Admin giriş / çıkış ── */
-function hashStr(s) {
-  let h = 5381;
-  for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
-  return (h >>> 0).toString(16);
-}
-function getStoredPwHash() { return localStorage.getItem(PW_KEY) || hashStr('admin123'); }
-function isLoggedIn()      { return sessionStorage.getItem(SESSION_KEY) === '1'; }
-function applyAdminMode()  { document.body.classList.toggle('admin-mode', isLoggedIn()); }
+/* ── Admin giriş / çıkış — Firebase Authentication ────────────────────
+   Önceki sistem tamamen istemci tarafındaydı: parola hash'i (tuzsuz
+   32-bit DJB2) localStorage'da tutuluyor, oturum sessionStorage'daki bir
+   bayrakla işaretleniyordu. Varsayılan parola 'admin123' idi ve tarayıcı
+   konsoluna tek satır yazan herkes yönetici olabiliyordu; yetki yalnızca
+   CSS ile gizleniyordu.
+
+   Artık oturumu Firebase doğruluyor ve Firestore kuralları admin UID'sini
+   kontrol ediyor. İstemciye hiçbir yetki kararı bırakılmıyor: birisi
+   arayüzü zorla açsa bile veritabanı yazma isteğini reddeder. */
+function isLoggedIn()     { return !!auth.currentUser; }
+function applyAdminMode() { document.body.classList.toggle('admin-mode', isLoggedIn()); }
 
 function openLoginModal() {
   if (isLoggedIn()) { showToast('Zaten giriş yaptınız'); return; }
-  document.getElementById('loginPassword').value = '';
+  const em = document.getElementById('loginEmail');
+  const pw = document.getElementById('loginPassword');
+  if (em) em.value = '';
+  if (pw) pw.value = '';
   openModal('loginModal');
-  setTimeout(() => document.getElementById('loginPassword').focus(), 100);
+  setTimeout(() => { if (em) em.focus(); }, 100);
 }
-function doLogin() {
-  const pw = document.getElementById('loginPassword').value;
-  if (!pw) return;
-  if (hashStr(pw) === getStoredPwHash()) {
-    sessionStorage.setItem(SESSION_KEY, '1');
-    applyAdminMode();
+
+async function doLogin() {
+  const email = (document.getElementById('loginEmail').value || '').trim();
+  const pw    = document.getElementById('loginPassword').value;
+  if (!email || !pw) { showToast('E-posta ve şifre gerekli', true); return; }
+
+  const btn = document.getElementById('loginSubmitBtn');
+  const eskiMetin = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Giriş yapılıyor...'; }
+  try {
+    await auth.signInWithEmailAndPassword(email, pw);
     closeModal('loginModal');
     showToast('✓ Yönetim moduna girildi');
-  } else {
-    showToast('Şifre hatalı', true);
+  } catch (e) {
+    showToast(girisHatasiMetni(e.code), true);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = eskiMetin; }
   }
 }
-function adminLogout() {
-  sessionStorage.removeItem(SESSION_KEY);
+
+/* Firebase hata kodunu kullanıcıya gösterilebilir metne çevirir.
+   Kimlik bilgisi hatalarının hepsi aynı mesajı döndürür — hangi
+   e-postanın kayıtlı olduğunu ele vermemek için. */
+function girisHatasiMetni(kod) {
+  switch (kod) {
+    case 'auth/too-many-requests':      return 'Çok fazla deneme yapıldı. Bir süre bekleyip tekrar deneyin.';
+    case 'auth/network-request-failed': return 'Bağlantı hatası. İnternetinizi kontrol edin.';
+    case 'auth/invalid-email':          return 'Geçersiz e-posta adresi';
+    default:                            return 'E-posta veya şifre hatalı';
+  }
+}
+
+async function adminLogout() {
+  try { await auth.signOut(); showToast('Çıkış yapıldı'); }
+  catch (e) { showToast('Çıkış yapılamadı: ' + (e.message || e), true); }
+}
+
+/* Parola artık uygulamada tutulmuyor, dolayısıyla uygulama içinden
+   değiştirilmiyor. Firebase'in kendi sıfırlama akışı kullanılıyor:
+   bağlantı yöneticinin e-postasına gider. */
+async function sendPasswordReset() {
+  const alan  = document.getElementById('loginEmail');
+  const email = auth.currentUser ? auth.currentUser.email : (alan ? alan.value.trim() : '');
+  if (!email) { showToast('Önce e-posta adresinizi girin', true); return; }
+  try {
+    await auth.sendPasswordResetEmail(email);
+    showToast('✓ Sıfırlama bağlantısı e-postanıza gönderildi');
+    closeModal('loginModal');
+  } catch (e) {
+    showToast('Gönderilemedi: ' + girisHatasiMetni(e.code), true);
+  }
+}
+
+/* Oturum durumu değişince arayüzü tazele. Sayfa yenilendiğinde
+   auth.currentUser hemen dolmaz — Firebase oturumu çözene kadar null'dır.
+   Bu yüzden yönetim arayüzü doğrudan değil, buradan tetiklenir. */
+auth.onAuthStateChanged(() => {
   applyAdminMode();
-  showToast('Çıkış yapıldı');
-}
-function openChangePwModal() {
-  document.getElementById('newPassword1').value = '';
-  document.getElementById('newPassword2').value = '';
-  openModal('changePwModal');
-}
-function doChangePassword() {
-  const p1 = document.getElementById('newPassword1').value;
-  const p2 = document.getElementById('newPassword2').value;
-  if (!p1 || p1.length < 4) { showToast('Şifre en az 4 karakter olmalı', true); return; }
-  if (p1 !== p2) { showToast('Şifreler eşleşmiyor', true); return; }
-  localStorage.setItem(PW_KEY, hashStr(p1));
-  closeModal('changePwModal');
-  showToast('✓ Şifre değiştirildi');
-}
+  if (listings.length) renderListings();   // yönetim butonları giriş durumuna göre basılır
+});
 
 /* ── İlan CRUD ── */
 function openListingModal() {

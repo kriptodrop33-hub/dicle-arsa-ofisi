@@ -15,6 +15,7 @@
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
   <!-- 3D & Animation Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
@@ -1866,9 +1867,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Yeni İlan Ekle
       </button>
-      <button class="admin-btn admin-btn-pw" onclick="openChangePwModal()">
+      <button class="admin-btn admin-btn-pw" onclick="sendPasswordReset()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><circle cx="12" cy="16" r="1"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-        Şifre Değiştir
+        Şifre Sıfırla
       </button>
       <button class="admin-btn admin-btn-out" onclick="adminLogout()">Çıkış</button>
     </div>
@@ -1889,30 +1890,19 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><circle cx="12" cy="16" r="1"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
       </div>
       <h3>Yönetim Paneli</h3>
-      <p>İlanları düzenlemek için şifre girin</p>
-      <input type="password" id="loginPassword" placeholder="Şifre" onkeydown="if(event.key==='Enter')doLogin()" style="text-align:center;font-size:1rem;letter-spacing:2px;" />
+      <p>İlanları düzenlemek için giriş yapın</p>
+      <input type="email" id="loginEmail" placeholder="E-posta" autocomplete="username"
+             onkeydown="if(event.key==='Enter')document.getElementById('loginPassword').focus()"
+             style="text-align:center;font-size:1rem;margin-bottom:10px;" />
+      <input type="password" id="loginPassword" placeholder="Şifre" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')doLogin()"
+             style="text-align:center;font-size:1rem;letter-spacing:2px;" />
       <div class="modal-footer" style="justify-content:center;border:none;">
         <button class="modal-btn modal-btn-cancel" onclick="closeModal('loginModal')">İptal</button>
-        <button class="modal-btn modal-btn-save" onclick="doLogin()">Giriş Yap</button>
+        <button class="modal-btn modal-btn-save" id="loginSubmitBtn" onclick="doLogin()">Giriş Yap</button>
       </div>
-      <div class="login-hint">İlk giriş için varsayılan şifre: <strong>admin123</strong> (sonra değiştirin)</div>
-    </div>
-  </div>
-
-  <!-- Change Password Modal -->
-  <div class="modal-backdrop" id="changePwModal">
-    <div class="modal login-modal">
-      <button class="modal-close" onclick="closeModal('changePwModal')" style="position:absolute;right:20px;top:20px;">&times;</button>
-      <div class="lock-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><circle cx="12" cy="16" r="1"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-      </div>
-      <h3>Şifre Değiştir</h3>
-      <p>Yeni yönetim şifrenizi girin</p>
-      <input type="password" id="newPassword1" placeholder="Yeni şifre" style="margin-bottom:10px;" />
-      <input type="password" id="newPassword2" placeholder="Yeni şifre (tekrar)" />
-      <div class="modal-footer" style="justify-content:center;border:none;">
-        <button class="modal-btn modal-btn-cancel" onclick="closeModal('changePwModal')">İptal</button>
-        <button class="modal-btn modal-btn-save" onclick="doChangePassword()">Kaydet</button>
+      <div class="login-hint">
+        <a href="#" onclick="event.preventDefault();sendPasswordReset()">Şifremi unuttum</a>
       </div>
     </div>
   </div>
