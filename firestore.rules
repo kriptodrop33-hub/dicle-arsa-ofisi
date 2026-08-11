@@ -2,23 +2,57 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // İlan listesi — herkes okuyabilir, admin panelden yazılabilir
+    /* ══════════════════════════════════════════════════════════════════
+       GEÇİCİ KİLİT — Firebase Authentication kurulana kadar geçerlidir.
+
+       Yazma tamamen kapalı. Okuma açık olduğu için site ziyaretçiler
+       için normal çalışmaya devam eder: ilanlar, logo, başlık, telefon
+       hepsi görünür. Yalnızca admin paneli yazamaz.
+
+       Auth kurulup admin UID alındığında bu dosya isAdmin() tabanlı
+       kurallarla değiştirilecek.
+
+       Önceki hali: /listings ve /settings için "allow write: if true"
+       idi; internetteki herkes kimlik doğrulamasız yazabiliyordu.
+       ══════════════════════════════════════════════════════════════════ */
+
+    // İlanlar — okuma herkese açık, yazma kapalı
     match /listings/{doc} {
-      allow read: if true;
-      allow write: if true;
+      allow read:  if true;
+      allow write: if false;
     }
 
-    // İletişim formu — herkes gönderebilir, okuma kapalı (sadece Firebase Console'dan görülür)
+    // Site ayarları (logo, başlık, telefon, tema) — okuma herkese açık
+    match /settings/{doc} {
+      allow read:  if true;
+      allow write: if false;
+    }
+
+    /* İletişim formu — müşteri talepleri gelmeye DEVAM etmeli, bu yüzden
+       create açık bırakıldı. Alan adları app.js'teki gönderimle birebir
+       eşleşir (from_name, from_phone, sqm, budget, message + createdAt);
+       başka bir alan gönderilirse yazma reddedilir.
+       Boyut sınırları, dev yüklerle doküman şişirme ve kota tüketmeye
+       karşı koruma sağlar. Okuma kapalı — talepler yalnızca Firebase
+       Console'dan görülür. */
     match /contacts/{doc} {
-      allow create: if true;
+      allow create: if request.resource.data.keys().hasOnly(['from_name', 'from_phone', 'sqm', 'budget', 'message', 'createdAt'])
+                    && request.resource.data.from_name  is string
+                    && request.resource.data.from_name.size()  <= 100
+                    && request.resource.data.from_phone is string
+                    && request.resource.data.from_phone.size() <= 30
+                    && request.resource.data.sqm        is string
+                    && request.resource.data.sqm.size()        <= 50
+                    && request.resource.data.budget     is string
+                    && request.resource.data.budget.size()     <= 50
+                    && request.resource.data.message    is string
+                    && request.resource.data.message.size()    <= 2000;
       allow read, update, delete: if false;
     }
 
-    // Site ayarları (logo, başlık, telefon vb) — herkes okuyabilir, admin panelden yazılabilir
-    // Bu sayede logo tüm tarayıcılarda/cihazlarda aynı görünür
-    match /settings/{doc} {
-      allow read: if true;
-      allow write: if true;
+    // Tanımlanmamış her yol kapalı
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
