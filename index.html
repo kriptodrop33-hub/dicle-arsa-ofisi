@@ -1198,9 +1198,88 @@
   <!-- BRANDING SENKRONİZASYONU: 1) localStorage cache ile anında göster, 2) Firestore'dan global güncel veriyi çek -->
   <script>
     (function() {
-      // Branding'i (logo, text, subtext) DOM'a uygula
+      /* ── Güvenli DOM yardımcıları ──────────────────────────────────
+         settings/site dokümanı Firestore'dan geliyor. Bu veri DOM'a
+         innerHTML ile basılırsa, dokümana yazabilen herkes her
+         ziyaretçinin tarayıcısında kod çalıştırabilir. Bu yüzden
+         aşağıdaki yollarda innerHTML KULLANILMAZ. Yeni bir marka alanı
+         eklerken bu kuralı koru. */
+
+      // Yalnızca https ve base64 görsel şemalarına izin ver.
+      // javascript:, data:text/html gibi şemalar ve tırnak kaçışı ile
+      // öznitelik kırma denemeleri burada elenir.
+      function safeLogoSrc(src) {
+        if (typeof src !== 'string') return null;
+        return /^(https:\/\/|data:image\/(png|jpe?g|webp|gif);base64,)/i.test(src) ? src : null;
+      }
+
+      function setLogoImg(el, src, size, radius) {
+        if (!el) return false;
+        var safe = safeLogoSrc(src);
+        if (!safe) return false;
+        el.textContent = '';                    // mevcut içeriği temizle
+        var img = document.createElement('img');
+        img.src = safe;                         // öznitelik olarak set edilir, ayrıştırılmaz
+        img.alt = 'Logo';
+        img.style.cssText = 'width:' + size + 'px;height:' + size + 'px;object-fit:contain;border-radius:' + radius + 'px;display:block;';
+        el.appendChild(img);
+        return true;
+      }
+
+      // Hero başlığında <br> ve <em> biçimlendirmesine izin veriliyor.
+      // Beyaz liste yaklaşımı: önce her şeyi kaçır, sonra yalnızca bu
+      // iki etiketi geri aç. Öznitelik yazmak mümkün değil, çünkü
+      // etiket adından sonra yalnızca boşluk ve / kabul ediliyor.
+      function sanitizeRichText(str) {
+        if (typeof str !== 'string') return '';
+        var esc = str
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        return esc.replace(/&lt;(\/?)(br|em)\s*\/?&gt;/gi, function(_, slash, tag) {
+          return '<' + slash + tag.toLowerCase() + '>';
+        });
+      }
+
+      // Navbar VE footer'daki tüm marka yazılarını günceller.
+      // Eskiden tekil querySelector kullanılıyordu; footer eski adda kalıyordu.
+      function setBrandText(name, subtitle) {
+        document.querySelectorAll('.nav-logo-text').forEach(function(el) {
+          el.textContent = name;
+          if (subtitle) {
+            var sp = document.createElement('span');
+            sp.textContent = subtitle;
+            el.appendChild(sp);
+          }
+        });
+      }
+
+      // Telefon ayarını sitedeki tüm tel: ve wa.me linklerine uygula.
+      // Bu olmadan panelden numara değiştirmek hiçbir şeyi değiştirmiyordu.
+      function applyPhone(phone) {
+        if (typeof phone !== 'string' || !phone.trim()) return;
+        var digits = phone.replace(/\D/g, '');
+        if (digits.length < 10) return;                     // anlamsız girdi
+        var intl = digits.length === 10 ? '90' + digits
+                 : digits.charAt(0) === '0' ? '9' + digits
+                 : digits;
+        document.querySelectorAll('a[href^="tel:"]').forEach(function(a) {
+          a.href = 'tel:+' + intl;
+          // Yalnızca düz metin bağlantılarda görünen numarayı da değiştir;
+          // ikon/svg içerenlerin yapısını bozma.
+          if (a.children.length === 0) a.textContent = phone;
+        });
+        document.querySelectorAll('a[href*="wa.me/"]').forEach(function(a) {
+          a.href = a.href.replace(/wa\.me\/\d+/, 'wa.me/' + intl);
+        });
+      }
+
+      /* ── Tek giriş noktası ──────────────────────────────────────────
+         Marka/ayar verisini DOM'a uygulayan TEK fonksiyon burasıdır.
+         Başka yerden .nav-logo-text / .hero-title / #navLogoMark'a
+         yazma; yarış durumu ve titreme oluşuyor. */
       function applyBranding(s) {
         if (!s) return;
+
         if (s.siteName) {
           var lt = document.getElementById('loaderText');
           if (lt) lt.textContent = s.siteName;
@@ -1209,52 +1288,54 @@
           var ls = document.getElementById('loaderSubtext');
           if (ls) ls.textContent = s.siteSubtitle;
         }
+
         if (s.logo) {
-          var box = document.getElementById('loaderLogoBox');
-          if (box) {
-            box.innerHTML = '<img src="' + s.logo + '" alt="Logo" style="width:64px;height:64px;object-fit:contain;border-radius:14px;display:block;">';
-          }
+          setLogoImg(document.getElementById('loaderLogoBox'), s.logo, 64, 14);
           var setNav = function() {
-            var nav = document.getElementById('navLogoMark');
-            if (nav) {
-              nav.innerHTML = '<img src="' + s.logo + '" alt="Logo" style="width:44px;height:44px;object-fit:contain;border-radius:8px;">';
-              return true;
-            }
-            return false;
+            return setLogoImg(document.getElementById('navLogoMark'), s.logo, 44, 8);
           };
-          if (!setNav()) {
+          // Navbar bu script çalışırken henüz ayrıştırılmamış olabilir.
+          if (!document.getElementById('navLogoMark')) {
             var obs = new MutationObserver(function() {
-              if (setNav()) obs.disconnect();
+              if (document.getElementById('navLogoMark')) { setNav(); obs.disconnect(); }
             });
             obs.observe(document.documentElement, { childList: true, subtree: true });
             setTimeout(function() { obs.disconnect(); }, 5000);
+          } else {
+            setNav();
           }
         }
-        // Site adı header'ı (navbar yazısı) da güncellensin
-        var navText = document.querySelector('.nav-logo-text');
-        if (navText && s.siteName) {
-          navText.innerHTML = s.siteName + '<span>' + (s.siteSubtitle || '') + '</span>';
-        }
-        // Hero başlığı (özelleştirilmişse uygula — innerHTML ile <em>, <br> render edilir)
+
+        if (s.siteName) setBrandText(s.siteName, s.siteSubtitle || '');
+
         if (s.heroTitle) {
           var ht = document.querySelector('.hero-title');
-          if (ht) ht.innerHTML = s.heroTitle;
+          if (ht) ht.innerHTML = sanitizeRichText(s.heroTitle);
         }
-        // Hero açıklaması
         if (s.heroDesc) {
           var hd = document.querySelector('.hero-desc');
           if (hd) hd.textContent = s.heroDesc;
         }
+
+        applyPhone(s.phone);
+
+        // Tema da ayarın parçası — böylece cihazlar arası senkron olur.
+        // ThemeSystem sayfa sonunda tanımlanıyor; localStorage yolunda
+        // henüz yok, Firestore yolunda (async) hazır oluyor.
+        if (s.theme && window.ThemeSystem && window.ThemeSystem.THEMES[s.theme]) {
+          window.ThemeSystem.applyTheme(s.theme);
+        }
       }
       window.__applyBranding = applyBranding;
 
-      // 1) localStorage önbelleğinden anında uygula (varsa)
+      // 1) localStorage önbelleğinden anında uygula — ilk boyamada gecikme olmasın
       try {
         var raw = localStorage.getItem('siteSettings');
         if (raw) applyBranding(JSON.parse(raw));
       } catch (e) { /* yok say */ }
 
-      // 2) Firestore'dan global güncel veriyi çek — tüm tarayıcılar/cihazlar aynı veriyi görür
+      // 2) Firestore'dan güncel veriyi çek — tüm cihazlar aynı veriyi görür.
+      //    Bu her zaman localStorage'dan SONRA çalışır, dolayısıyla son söz onundur.
       var fsAttempts = 0;
       function fetchFromFirestore() {
         fsAttempts++;
@@ -2098,10 +2179,22 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
   </div>
 
   <script>
-    function applyThemeAndClose(themeName) {
-      ThemeSystem.applyTheme(themeName);
+    async function applyThemeAndClose(themeName) {
+      ThemeSystem.applyTheme(themeName);   // anında uygula, kullanıcı beklemesin
       closeModal('themeModal');
-      location.reload(); // Tema değiştiğinde sayfayı yenile
+
+      /* Temayı Firestore'a da yaz. Eskiden yalnızca localStorage'a
+         yazılıyordu: A cihazında Mavi seçilince B cihazı Yeşil kalıyordu
+         ve bu kalıcıydı. applyBranding okuma tarafında s.theme'i uyguluyor. */
+      try {
+        await firebase.firestore().collection('settings').doc('site')
+          .set({ theme: themeName }, { merge: true });
+      } catch (e) {
+        console.warn('Tema buluta kaydedilemedi (yalnızca bu cihazda geçerli):', e);
+        if (typeof showToast === 'function') {
+          showToast('⚠️ Tema yalnızca bu cihaza kaydedildi.', true);
+        }
+      }
     }
 
     function openSettingsModal() {
@@ -2177,36 +2270,46 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
 
     async function saveSettings() {
       try {
-        const settings = {
-          ...ThemeSystem.getSiteSettings(),
-          siteName: document.getElementById('siteName').value || 'DİCLE ARSA OFİSİ',
-          siteSubtitle: document.getElementById('siteSubtitle').value || 'NESİPOĞULLARI',
-          heroTitle: document.getElementById('heroTitle').value.replace(/\n/g, '<br>') || 'Hayalinizdeki<br><em>Yere</em> Sahip Olun',
-          heroDesc: document.getElementById('heroDesc').value || '',
-          phone: document.getElementById('phone').value || '0533 251 60 36',
-          logo: window.uploadedLogo || ThemeSystem.getSiteSettings().logo,
-        };
+        const dbRef = firebase.firestore().collection('settings').doc('site');
 
-        // localStorage'a önbellek olarak kaydet (hızlı sonraki açılışlar için)
+        /* Taban veri Firestore'dan okunur, localStorage'dan DEĞİL.
+           Eskiden taban ThemeSystem.getSiteSettings() idi; gizli sekmede
+           veya önbelleği temizlenmiş cihazda bu sabit varsayılanları
+           döndürüyor, ardından gelen merge yazımı Firestore'daki gerçek
+           logoyu/başlığı null'a çeviriyordu. Sessiz ve geri alınamaz
+           veri kaybıydı. */
+        let base = {};
         try {
-          ThemeSystem.saveSiteSettings(settings);
-        } catch (quotaErr) {
-          // Quota dolu — devam et, Firestore zaten kalıcı kayıt yeri
-          console.warn('localStorage kotası dolu, yalnızca Firestore\'a kaydedilecek');
+          const snap = await dbRef.get();
+          if (snap.exists) base = snap.data() || {};
+        } catch (readErr) {
+          console.error('Firestore ayar okuma hatası:', readErr);
+          showToast('⚠️ Mevcut ayarlar okunamadı, kayıt iptal edildi.', true);
+          return;
         }
+
+        const settings = {
+          ...base,
+          siteName:     document.getElementById('siteName').value || 'DİCLE ARSA OFİSİ',
+          siteSubtitle: document.getElementById('siteSubtitle').value || 'NESİPOĞULLARI',
+          heroTitle:    document.getElementById('heroTitle').value.replace(/\n/g, '<br>') || 'Hayalinizdeki<br><em>Yere</em> Sahip Olun',
+          heroDesc:     document.getElementById('heroDesc').value || '',
+          phone:        document.getElementById('phone').value || '0533 251 60 36',
+          logo:         window.uploadedLogo || base.logo || null,
+          theme:        base.theme || 'green',
+        };
 
         // ANA KAYIT: Firestore — tüm tarayıcılar/cihazlar buradan okur
         try {
-          const dbRef = firebase.firestore().collection('settings').doc('site');
           await dbRef.set({
-            siteName: settings.siteName,
+            siteName:     settings.siteName,
             siteSubtitle: settings.siteSubtitle,
-            heroTitle: settings.heroTitle,
-            heroDesc: settings.heroDesc,
-            phone: settings.phone,
-            logo: settings.logo || null,
-            theme: settings.theme || 'green',
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            heroTitle:    settings.heroTitle,
+            heroDesc:     settings.heroDesc,
+            phone:        settings.phone,
+            logo:         settings.logo,
+            theme:        settings.theme,
+            updatedAt:    firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
         } catch (fsErr) {
           console.error('Firestore kayıt hatası:', fsErr);
@@ -2214,32 +2317,24 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
           return;
         }
 
-        // Update navbar logo immediately
-        updateNavbarLogo(settings.logo);
+        // Yalnızca Firestore kaydı başarılıysa yerel önbelleği tazele
+        try {
+          ThemeSystem.saveSiteSettings(settings);
+        } catch (quotaErr) {
+          console.warn('localStorage kotası dolu, yalnızca Firestore\'a kaydedildi');
+        }
 
-        // Update hero content
-        const logoText = document.querySelector('.nav-logo-text');
-        if (logoText) {
-          logoText.innerHTML = `${settings.siteName}<span>${settings.siteSubtitle}</span>`;
-        }
-        const heroTitle = document.querySelector('.hero-title');
-        if (heroTitle) {
-          heroTitle.innerHTML = settings.heroTitle;
-        }
-        const heroDesc = document.querySelector('.hero-desc');
-        if (heroDesc) {
-          heroDesc.textContent = settings.heroDesc;
-        }
+        /* DOM güncellemesi tek yerden: applyBranding. Eskiden burada
+           .nav-logo-text ve .hero-title'a ayrıca innerHTML ile yazılıyordu;
+           hem kod iki kopyaydı hem de XSS yüzeyi ikinci kez açılıyordu. */
+        if (window.__applyBranding) window.__applyBranding(settings);
 
         showToast('✅ Ayarlar kaydedildi!');
         window.uploadedLogo = null;
 
-        // Close modal with slight delay to ensure all updates are done
         setTimeout(() => {
           const modal = document.getElementById('settingsModal');
-          if (modal) {
-            modal.classList.remove('open');
-          }
+          if (modal) modal.classList.remove('open');
         }, 150);
       } catch (e) {
         console.error('Ayarlar kaydedilirken hata:', e);
@@ -2247,15 +2342,23 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
       }
     }
 
-    function updateNavbarLogo(logoBase64) {
+    function updateNavbarLogo(logoSrc) {
       const navLogoMark = document.getElementById('navLogoMark');
       if (!navLogoMark) return;
+      navLogoMark.textContent = '';
 
-      if (logoBase64) {
-        // Yüklü logo varsa IMG göster
-        navLogoMark.innerHTML = `<img src="${logoBase64}" style="width: 44px; height: 44px; object-fit: contain; border-radius: 8px;">`;
+      // Şema doğrulaması: yalnızca https ve base64 görsel kabul edilir
+      const safe = typeof logoSrc === 'string' &&
+        /^(https:\/\/|data:image\/(png|jpe?g|webp|gif);base64,)/i.test(logoSrc) ? logoSrc : null;
+
+      if (safe) {
+        const img = document.createElement('img');
+        img.src = safe;
+        img.alt = 'Logo';
+        img.style.cssText = 'width:44px;height:44px;object-fit:contain;border-radius:8px;';
+        navLogoMark.appendChild(img);
       } else {
-        // Yoksa orijinal SVG'yi geri koy
+        // Sabit yedek işaret — kullanıcı verisi içermez, statik biçimlendirme
         navLogoMark.innerHTML = `<svg viewBox="0 0 32 32" fill="none">
           <path d="M16 4 L4 26 L28 26 Z" fill="#c9a961" opacity=".95"/>
           <path d="M16 12 L10 24 L22 24 Z" fill="#7ab648"/>
@@ -2264,13 +2367,11 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
       }
     }
 
-    // Sayfa yüklendiğinde navbar logosunu güncelle
-    document.addEventListener('DOMContentLoaded', () => {
-      const settings = ThemeSystem.getSiteSettings();
-      if (settings.logo) {
-        updateNavbarLogo(settings.logo);
-      }
-    }, { once: true });
+    /* Not: Sayfa açılışında logoyu uygulayan ayrı bir DOMContentLoaded
+       dinleyicisi VARDI ve kaldırıldı. Aynı düğüme üçüncü bir yoldan
+       yazıyordu; Firestore yanıtı hızlı geldiğinde eski logoyu yeni
+       logonun üzerine bindiriyor ve yenilemeden düzelmiyordu.
+       Açılış uygulaması artık yalnızca applyBranding'in işi. */
 
     // Admin bar'a tema ve ayarlar butonları ekle
     document.addEventListener('DOMContentLoaded', () => {
