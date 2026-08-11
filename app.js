@@ -16,13 +16,22 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-/* Oturum yalnızca sekme açık kaldığı sürece sürer. Ortak bir bilgisayarda
-   sekme kapanınca yönetici oturumu da kapanır. */
-auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+/* Oturum tarayıcı kapansa bile sürer (Firebase varsayılanı).
+   Güvenliği oturum süresi değil, Firestore kuralları sağlıyor: yetki
+   her istekte sunucuda admin UID'sine karşı denetleniyor. Ortak veya
+   halka açık bir bilgisayardan panele girilecekse bu satır
+   Persistence.SESSION yapılmalı — o zaman sekme kapanınca oturum biter. */
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
   .catch(e => console.warn('Auth kalıcılık ayarı uygulanamadı:', e));
 
+/* Firebase Storage bu projede KURULU DEĞİL (Console > Storage > Get Started
+   hiç yapılmamış), ayrıca storage-compat SDK'sı da yüklenmiyor. Bu yüzden
+   ilan fotoğrafları base64 olarak ilan dokümanına gömülüyor — bkz.
+   gorseliBase64Yap. Storage kurulursa: SDK etiketini index.html'e ekle,
+   storage.rules'u deploy et, aşağıdaki satır kendiliğinden çalışmaya başlar
+   ve uploadImageToStorage birincil yol olur. */
 let storage;
-try { storage = firebase.storage(); } catch(e) { console.warn('Storage kullanılamıyor:', e); }
+try { storage = firebase.storage(); } catch (e) { /* beklenen durum — base64 yedeği kullanılıyor */ }
 
 /* ── Default listings (Firestore boşsa seed et) ── */
 const DEFAULT_LISTINGS = [
@@ -46,12 +55,25 @@ function escapeHtml(s) {
 async function loadListings() {
   try {
     const snap = await db.collection('listings').orderBy('order', 'asc').get();
-    if (snap.empty) {
-      await seedDefaultListings();
-      const snap2 = await db.collection('listings').orderBy('order', 'asc').get();
-      return snap2.docs.map(d => ({ ...d.data(), firestoreId: d.id }));
-    }
-    return snap.docs.map(d => ({ ...d.data(), firestoreId: d.id }));
+    if (!snap.empty) return snap.docs.map(d => ({ ...d.data(), firestoreId: d.id }));
+
+    /* Koleksiyon boş. İki farklı durum olabilir: proje yeni kurulmuş ve
+       hiç ilan girilmemiş, ya da yönetici tüm ilanları BİLEREK silmiş.
+       Eskiden ayrım yapılmıyordu: yönetici hepsini silince bir sonraki
+       sayfa açılışında 6 demo ilan Firestore'a geri yazılıyor, "Henüz
+       ilan eklenmemiş" boş durumu hiç görünmüyordu.
+
+       Artık settings/site üzerinde bir "seeded" bayrağı tutuluyor;
+       bir kez tohumlandıysa bir daha yapılmaz. Tohumlama yazma
+       gerektirdiği için zaten yalnızca giriş yapmış yönetici deneyebilir
+       — ziyaretçi için boşuna bir reddedilen istek üretilmiyor. */
+    if (!isLoggedIn()) return [];
+    const ayar = await db.collection('settings').doc('site').get();
+    if (ayar.exists && (ayar.data() || {}).seeded) return [];
+
+    await seedDefaultListings();
+    const snap2 = await db.collection('listings').orderBy('order', 'asc').get();
+    return snap2.docs.map(d => ({ ...d.data(), firestoreId: d.id }));
   } catch (err) {
     console.error('Firestore yükleme hatası:', err);
     return DEFAULT_LISTINGS.map((l, i) => ({ ...l, firestoreId: String(i) }));
@@ -61,6 +83,9 @@ async function loadListings() {
 async function seedDefaultListings() {
   const batch = db.batch();
   DEFAULT_LISTINGS.forEach(listing => batch.set(db.collection('listings').doc(), listing));
+  // Bayrak ilanlarla AYNI batch'te yazılıyor: ikisi birlikte başarılı olur
+  // ya da ikisi birden geri alınır. Yarım tohumlanmış durum oluşmaz.
+  batch.set(db.collection('settings').doc('site'), { seeded: true }, { merge: true });
   await batch.commit();
 }
 
@@ -400,24 +425,74 @@ async function handleImageUpload(e) {
     if (urlEl) urlEl.value = '';
     showToast('✓ Fotoğraf yüklendi');
   } catch (err) {
-    console.warn('Storage yüklenemedi, yerel önizleme kullanılıyor:', err);
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const img = new Image();
-      img.onload = () => {
-        const scale  = Math.min(1, 1200 / img.width);
-        const canvas = document.createElement('canvas');
-        canvas.width  = Math.round(img.width  * scale);
-        canvas.height = Math.round(img.height * scale);
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-        currentImage = canvas.toDataURL('image/jpeg', 0.82);
-        showImagePreview(currentImage);
-        showToast('✓ Fotoğraf hazır (yerel)');
-      };
-      img.src = ev.target.result;
-    };
-    reader.readAsDataURL(file);
+    console.warn('Storage yüklenemedi, base64 yedeğine düşülüyor:', err);
+    gorseliBase64Yap(file);
   }
+}
+
+/* Firebase Storage bu projede kurulu olmadığı için fotoğraflar base64
+   olarak ilan dokümanına gömülüyor. Firestore doküman sınırı 1 MB ve
+   base64 ham veriyi ~1.37 kat büyütüyor; bu yüzden görsel, hedef boyutun
+   altına inene kadar önce kaliteden sonra çözünürlükten kısılıyor.
+   Sığmazsa kullanıcıya açıkça hata gösterilir — eskiden hiçbir hata
+   yakalayıcı yoktu, bozuk veya desteklenmeyen dosyada (HEIC gibi)
+   sessizce hiçbir şey olmuyor, kullanıcı fotoğrafsız kaydediyordu. */
+const BASE64_HEDEF_BAYT = 700 * 1024;   // 1MB sınırına diğer alanlar için pay bırakır
+
+function gorseliBase64Yap(file) {
+  const reader = new FileReader();
+
+  reader.onerror = () => {
+    showToast('⚠️ Dosya okunamadı. Başka bir fotoğraf deneyin.', true);
+  };
+
+  reader.onload = ev => {
+    const img = new Image();
+
+    img.onerror = () => {
+      showToast('⚠️ Bu görsel açılamadı. JPG veya PNG deneyin (HEIC desteklenmiyor).', true);
+    };
+
+    img.onload = () => {
+      let genislik = 1200;
+      let veri     = null;
+
+      // Önce kaliteyi, yetmezse genişliği kademeli düşür
+      for (const olcek of [1200, 900, 700]) {
+        genislik = olcek;
+        for (const kalite of [0.82, 0.7, 0.6, 0.5]) {
+          const aday = canvasaCiz(img, genislik, kalite);
+          if (aday.length <= BASE64_HEDEF_BAYT) { veri = aday; break; }
+          veri = aday;   // sığmasa da en küçüğünü elde tut
+        }
+        if (veri && veri.length <= BASE64_HEDEF_BAYT) break;
+      }
+
+      if (!veri || veri.length > BASE64_HEDEF_BAYT) {
+        showToast('⚠️ Fotoğraf çok büyük, sıkıştırılamadı. Daha küçük bir görsel seçin.', true);
+        return;
+      }
+
+      currentImage = veri;
+      showImagePreview(currentImage);
+      const urlEl = document.getElementById('lImageUrl');
+      if (urlEl) urlEl.value = '';
+      showToast('✓ Fotoğraf hazır');
+    };
+
+    img.src = ev.target.result;
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function canvasaCiz(img, hedefGenislik, kalite) {
+  const scale   = Math.min(1, hedefGenislik / img.width);
+  const canvas  = document.createElement('canvas');
+  canvas.width  = Math.round(img.width  * scale);
+  canvas.height = Math.round(img.height * scale);
+  canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/jpeg', kalite);
 }
 function previewUrlImage() {
   const url = document.getElementById('lImageUrl').value.trim();
@@ -446,8 +521,9 @@ document.querySelectorAll('.animate-on-scroll').forEach(el => scrollObserver.obs
 async function submitForm(e) {
   e.preventDefault();
   const btn = e.target.querySelector('.form-submit');
-  btn.textContent = 'Gönderiliyor...';
-  btn.disabled = true;
+  const eskiMetin = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = 'Gönderiliyor...'; btn.disabled = true; }
+
   const inputs = e.target.querySelectorAll('input, select, textarea');
   const formData = {
     from_name:  inputs[0]?.value || '',
@@ -457,19 +533,41 @@ async function submitForm(e) {
     message:    inputs[4]?.value || ''
   };
 
+  /* Talep iki bağımsız kanala gidiyor: Firestore kaydı ve EmailJS
+     bildirimi. En az biri başarılı olmalı. İkisi de başarısızsa
+     kullanıcıya "gönderildi" DENMEZ — talep gerçekten kaybolmuştur.
+     Eskiden iki hata da yutuluyor ve her durumda başarı ekranı
+     gösteriliyordu; müşteri ulaştığını sanıyor, talep hiçbir yere
+     ulaşmıyordu. */
+  let firestoreOk = false;
+  let emailOk     = false;
+
   try {
+    /* Firestore alan adları EmailJS şablonundakilerden FARKLI:
+       from_name/from_phone yerine name/phone yazılıyor. firestore.rules
+       bu adlara göre doğrulama yapıyor — biri değişirse diğeri de
+       değişmeli, yoksa yazma reddedilir. */
     await saveContactToFirestore({
       name: formData.from_name, phone: formData.from_phone,
       sqm: formData.sqm, budget: formData.budget, message: formData.message
     });
+    firestoreOk = true;
   } catch (err) { console.error('Firestore kayıt hatası:', err); }
 
   try {
     await emailjs.send('service_7cgih6y', 'template_nkzkcp5', formData);
+    emailOk = true;
   } catch (err) { console.warn('EmailJS hatası:', err); }
 
+  if (!firestoreOk && !emailOk) {
+    if (btn) { btn.textContent = eskiMetin; btn.disabled = false; }
+    showToast('⚠️ Talebiniz gönderilemedi. Lütfen telefonla ulaşın.', true);
+    return;
+  }
+
   e.target.style.display = 'none';
-  document.getElementById('formSuccess').style.display = 'block';
+  const basari = document.getElementById('formSuccess');
+  if (basari) basari.style.display = 'block';
 }
 
 /* Akıcı kaydırma burada DEĞİL — index.html'deki Lenis sürümü kullanılıyor.

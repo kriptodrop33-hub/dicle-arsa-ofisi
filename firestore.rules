@@ -36,22 +36,28 @@ service cloud.firestore {
     }
 
     /* İletişim formu — herkes gönderebilir, alan adları ve boyutlar
-       doğrulanır. Alan adları app.js'teki gönderimle birebir eşleşir;
-       başka bir alan gönderilirse yazma reddedilir. Boyut sınırları dev
-       yüklerle doküman şişirme ve kota tüketmeye karşı koruma sağlar.
-       Talepleri yalnızca admin okuyabilir. */
+       doğrulanır. Başka bir alan gönderilirse yazma reddedilir; boyut
+       sınırları dev yüklerle doküman şişirme ve kota tüketmeye karşı
+       koruma sağlar. Talepleri yalnızca admin okuyabilir.
+
+       DİKKAT — alan adları: app.js'te submitForm, EmailJS şablonu için
+       from_name/from_phone kullanır ama Firestore'a yazarken bunları
+       name/phone olarak yeniden eşler (saveContactToFirestore çağrısı).
+       Buradaki liste FIRESTORE'a yazılan adlarla eşleşmeli, EmailJS
+       şablonundakiyle değil. Karıştırılırsa form sessizce kırılır:
+       yazma reddedilir, hata yutulur, kullanıcı "gönderildi" görür. */
     match /contacts/{doc} {
-      allow create: if request.resource.data.keys().hasOnly(['from_name', 'from_phone', 'sqm', 'budget', 'message', 'createdAt'])
-                    && request.resource.data.from_name  is string
-                    && request.resource.data.from_name.size()  <= 100
-                    && request.resource.data.from_phone is string
-                    && request.resource.data.from_phone.size() <= 30
-                    && request.resource.data.sqm        is string
-                    && request.resource.data.sqm.size()        <= 50
-                    && request.resource.data.budget     is string
-                    && request.resource.data.budget.size()     <= 50
-                    && request.resource.data.message    is string
-                    && request.resource.data.message.size()    <= 2000;
+      allow create: if request.resource.data.keys().hasOnly(['name', 'phone', 'sqm', 'budget', 'message', 'createdAt'])
+                    && request.resource.data.name    is string
+                    && request.resource.data.name.size()    <= 100
+                    && request.resource.data.phone   is string
+                    && request.resource.data.phone.size()   <= 30
+                    && request.resource.data.sqm     is string
+                    && request.resource.data.sqm.size()     <= 50
+                    && request.resource.data.budget  is string
+                    && request.resource.data.budget.size()  <= 50
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() <= 2000;
       allow read:   if isAdmin();
       allow update, delete: if isAdmin();
     }

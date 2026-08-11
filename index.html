@@ -16,7 +16,11 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
+  <!-- Google Analytics kaldirildi: firebase-analytics-compat.js yukleniyordu ama
+       firebase.analytics() hicbir yerde cagrilmadigi icin hic baslamamisti (compat SDK
+       otomatik baslamaz). Istenirse bu etiket geri eklenip app.js icinde
+       firebase.analytics() cagrilmali; o durumda KVKK gerekcesiyle cerez/izin
+       bildirimi de eklenmeli. measurementId app.js firebaseConfig icinde duruyor. -->
   <!-- 3D & Animation Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
@@ -1059,42 +1063,6 @@
     .feature-card { transform-style: preserve-3d; }
     /* hover transform — Vanilla Tilt yönetir; sadece shadow güncellenir */
     .feature-card:hover { box-shadow: var(--shadow-lg) !important; }
-
-    /* İstatistik sayaçları */
-    .features-stats-row {
-      display: flex; justify-content: center;
-      gap: 56px; margin-bottom: 60px; flex-wrap: wrap;
-    }
-    .feature-counter {
-      text-align: center; display: flex;
-      flex-direction: column; align-items: center;
-    }
-    .counter-row { display: flex; align-items: baseline; gap: 3px; }
-    .counter-num {
-      font-family: 'Montserrat', sans-serif; font-weight: 900;
-      font-size: 3.2rem; line-height: 1;
-      background: linear-gradient(135deg, var(--green-dark), var(--green-accent));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .feature-counter:nth-child(1) .counter-num { background: linear-gradient(135deg, var(--green-dark), var(--green-accent)); -webkit-background-clip: text; background-clip: text; }
-    .feature-counter:nth-child(2) .counter-num { background: linear-gradient(135deg, var(--gold-deep), var(--gold)); -webkit-background-clip: text; background-clip: text; }
-    .feature-counter:nth-child(3) .counter-num { background: linear-gradient(135deg, var(--sky-deep), var(--sky)); -webkit-background-clip: text; background-clip: text; }
-    .feature-counter:nth-child(4) .counter-num { background: linear-gradient(135deg, var(--copper), var(--terracotta)); -webkit-background-clip: text; background-clip: text; }
-    .counter-plus {
-      font-family: 'Montserrat', sans-serif; font-weight: 900;
-      font-size: 1.8rem; color: var(--green-accent);
-      -webkit-text-fill-color: var(--green-accent);
-    }
-    .feature-counter:nth-child(2) .counter-plus { color: var(--gold); -webkit-text-fill-color: var(--gold); }
-    .feature-counter:nth-child(3) .counter-plus { color: var(--sky); -webkit-text-fill-color: var(--sky); }
-    .feature-counter:nth-child(4) .counter-plus { color: var(--copper); -webkit-text-fill-color: var(--copper); }
-    .counter-label {
-      font-size: 0.8rem; color: var(--text-light);
-      letter-spacing: 0.8px; margin-top: 6px;
-      font-family: 'Montserrat', sans-serif; font-weight: 600;
-      text-transform: uppercase;
-    }
 
     /* ════════════════════════════════════════
        ABOUT — PARALLAX & REVEAL MASKE
@@ -2195,6 +2163,13 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
     }
 
     function openSettingsModal() {
+      /* Bekleyen logo seçimini temizle. Dosya seçilir seçilmez
+         window.uploadedLogo doluyor ama yalnızca BAŞARILI kayıtta
+         sıfırlanıyordu: kullanıcı logo seçip İptal'e bassa bile seçim
+         bellekte kalıyor, bir sonraki Kaydet'te istemeden yayına
+         giriyordu. */
+      window.uploadedLogo = null;
+
       const settings = ThemeSystem.getSiteSettings();
       document.getElementById('siteName').value = settings.siteName;
       document.getElementById('siteSubtitle').value = settings.siteSubtitle;
@@ -2577,23 +2552,6 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
     /* ══════════════════════════════════════════════════
        FEATURES — SAYAÇLAR & 3D ENTRANCE
     ══════════════════════════════════════════════════ */
-    function initCounters() {
-      if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-      document.querySelectorAll('.counter-num[data-target]').forEach(function(el) {
-        var target = parseInt(el.dataset.target, 10);
-        ScrollTrigger.create({
-          trigger: el, start: 'top 85%', once: true,
-          onEnter: function() {
-            var obj = { val: 0 };
-            gsap.to(obj, {
-              val: target, duration: 2.2, ease: 'power2.out',
-              onUpdate: function() { el.textContent = Math.round(obj.val); }
-            });
-          }
-        });
-      });
-    }
-
     function initFeaturesAnimation() {
       if (typeof gsap === 'undefined') return;
 
@@ -2700,7 +2658,6 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
       initScrollProgress();
       initCursor();
       initLoader();
-      initCounters();
 
       /* GSAP ScrollTrigger bazlı animasyonları DOM hazır olunca başlat */
       if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
