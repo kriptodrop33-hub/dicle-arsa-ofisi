@@ -410,9 +410,6 @@ async function submitForm(e) {
   document.getElementById('formSuccess').style.display = 'block';
 }
 
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener('click', e => {
-    const target = document.querySelector(a.getAttribute('href'));
-    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-  });
-});
+/* Akıcı kaydırma burada DEĞİL — index.html'deki Lenis sürümü kullanılıyor.
+   İkisi birden bağlıyken aynı tıklamada iki kaydırma motoru yarışıyor,
+   Lenis sürümü ayrıca sabit navbar için offset:-80 uyguluyor. */
