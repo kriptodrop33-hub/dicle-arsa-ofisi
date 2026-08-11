@@ -1926,328 +1926,6 @@
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
   </a>
 
-  <script>
-    void (function () { return; /* moved to app.js */
-    /* ════════ LISTINGS DATA + RENDER ════════ */
-    const DEFAULT_LISTINGS = [
-      { id: 1, title: '1 Dönüm (1000 m²) Yatırımlık Arsa', size: '1000 m²', price: '700.000', priceLabel: 'Toplam Fiyat', location: 'Marmaraereğlisi / Çeşmeli — Çarlı Manzaralı', parcel: '170/10', tag: 'hot|🔥 ÖNE ÇIKAN', features: 'Elektrik / Su, Tapulu, Yatırımlık', image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=80', description: '' },
-      { id: 2, title: '300 m² Konumu Mükemmel Arsa', size: '300 m²', price: '349.000', priceLabel: 'Toplam Fiyat', location: 'Marmaraereğlisi / Çeşmeli', parcel: '170/10', tag: 'deal|💎 ŞOK FİYAT', features: 'Kadastro Yolu, Taksit ✓, Tapulu', image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=700&q=80', description: '' },
-      { id: 3, title: 'Deniz Manzaralı 300 m² Arsa', size: '300 m²', price: '450.000', priceLabel: 'Toplam Fiyat', location: 'Marmaraereğlisi / Çeşmeli — 266/31', parcel: '266/31', tag: 'new|🌊 DENİZ MANZARALI', features: 'Denize Komşu, Tapulu, Manzaralı', image: 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=700&q=80', description: '' },
-      { id: 4, title: 'Villa İmarlı 300 m² Arsa', size: '300 m²', price: '499.000', priceLabel: 'Toplam Fiyat', location: 'Marmaraereğlisi / Çeşmeli', parcel: '170/10', tag: 'villa|🏡 VİLLA İMARLI', features: 'Villa İmarlı, Altyapı Var, E-5 Yakını', image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=700&q=80', description: '' },
-      { id: 5, title: 'Konteyner Bungalov Koyabilir 300 m²', size: '300 m²', price: '399.000', priceLabel: 'Toplam Fiyat', location: 'Marmaraereğlisi / Çeşmeli', parcel: '170/10', tag: 'new|🏕️ BUNGALOV UYGUN', features: 'Prefabrik OK, E-5\'e Yakın, Tapulu', image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=700&q=80', description: '' },
-      { id: 6, title: 'Özel Kampanya — 1 Dönüm Fırsat', size: '1000 m²', price: '619.000', priceLabel: 'Kampanya Fiyatı', location: 'Marmaraereğlisi / Çeşmeli', parcel: '170/10', tag: 'hot|🔥 KAMPANYA', features: 'Hemen Tapu, Yatırımlık, Müstakil', image: 'https://images.unsplash.com/photo-1464093515883-ec948246accb?w=700&q=80', description: '' }
-    ];
-
-    const STORAGE_KEY = 'dicle_listings_v1';
-    const PW_KEY = 'dicle_admin_pw_v1';
-    const SESSION_KEY = 'dicle_admin_session_v1';
-
-    function loadListings() {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) return JSON.parse(stored);
-      } catch (e) {}
-      return [...DEFAULT_LISTINGS];
-    }
-    function saveListings(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
-
-    let listings = loadListings();
-    let editingId = null;
-    let currentImage = '';
-
-    function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-    function renderListings() {
-      const grid = document.getElementById('listingsGrid');
-      if (!grid) return;
-      if (listings.length === 0) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-light);">Henüz ilan eklenmemiş. Yönetim panelinden ekleyebilirsiniz.</div>';
-        return;
-      }
-      grid.innerHTML = listings.map(l => {
-        const [tagClass, tagText] = (l.tag || '|').split('|');
-        const tagHtml = tagText ? `<span class="tag tag-${tagClass}">${escapeHtml(tagText)}</span>` : '';
-        const features = (l.features||'').split(',').map(f => f.trim()).filter(Boolean).slice(0,3);
-        const featuresHtml = features.map(f => `<span class="listing-spec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> ${escapeHtml(f)}</span>`).join('');
-        const waMsg = encodeURIComponent(`Merhaba, "${l.title}" (${l.size} - ${l.price} ₺) ilanı hakkında bilgi almak istiyorum.`);
-        const imgSrc = l.image || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=80';
-        return `
-          <div class="listing-card animate-on-scroll visible" data-id="${l.id}">
-            <div class="card-admin-controls">
-              <button class="card-admin-btn edit" onclick="editListing(${l.id})" title="Düzenle">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </button>
-              <button class="card-admin-btn delete" onclick="confirmDelete(${l.id})" title="Sil">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-              </button>
-            </div>
-            <div class="listing-img">
-              <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(l.title)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=80'" />
-              <div class="listing-tags">${tagHtml}</div>
-              ${l.parcel ? `<div class="listing-parcel">${escapeHtml(l.parcel)}</div>` : ''}
-            </div>
-            <div class="listing-body">
-              <div class="listing-location">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                ${escapeHtml(l.location || '')}
-              </div>
-              <div class="listing-title">${escapeHtml(l.title)}</div>
-              <div class="listing-specs">
-                <span class="listing-spec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg> ${escapeHtml(l.size)}</span>
-                ${featuresHtml}
-              </div>
-              <div class="listing-footer">
-                <div class="listing-price">
-                  <div class="listing-price-label">${escapeHtml(l.priceLabel || 'Toplam Fiyat')}</div>
-                  <div class="listing-price-total">${escapeHtml(l.price)} <small>₺</small></div>
-                </div>
-                <a href="https://wa.me/905332516036?text=${waMsg}" target="_blank" class="btn-card">
-                  Bilgi Al
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                </a>
-              </div>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    /* ════════ MODAL HELPERS ════════ */
-    function openModal(id) { document.getElementById(id).classList.add('open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-    document.addEventListener('click', e => {
-      if (e.target.classList && e.target.classList.contains('modal-backdrop')) e.target.classList.remove('open');
-    });
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open'));
-      if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); openLoginModal(); }
-    });
-
-    function showToast(msg, isError) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.toggle('error', !!isError);
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2400);
-    }
-
-    /* ════════ AUTH ════════ */
-    function hashStr(s) {
-      let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
-      return (h >>> 0).toString(16);
-    }
-    function getStoredPwHash() {
-      return localStorage.getItem(PW_KEY) || hashStr('admin123');
-    }
-    function isLoggedIn() { return sessionStorage.getItem(SESSION_KEY) === '1'; }
-    function applyAdminMode() { document.body.classList.toggle('admin-mode', isLoggedIn()); }
-
-    function openLoginModal() {
-      if (isLoggedIn()) { showToast('Zaten giriş yaptınız'); return; }
-      document.getElementById('loginPassword').value = '';
-      openModal('loginModal');
-      setTimeout(() => document.getElementById('loginPassword').focus(), 100);
-    }
-    function doLogin() {
-      const pw = document.getElementById('loginPassword').value;
-      if (!pw) return;
-      if (hashStr(pw) === getStoredPwHash()) {
-        sessionStorage.setItem(SESSION_KEY, '1');
-        applyAdminMode();
-        closeModal('loginModal');
-        showToast('✓ Yönetim moduna girildi');
-      } else {
-        showToast('Şifre hatalı', true);
-      }
-    }
-    function adminLogout() {
-      sessionStorage.removeItem(SESSION_KEY);
-      applyAdminMode();
-      showToast('Çıkış yapıldı');
-    }
-    function openChangePwModal() {
-      document.getElementById('newPassword1').value = '';
-      document.getElementById('newPassword2').value = '';
-      openModal('changePwModal');
-    }
-    function doChangePassword() {
-      const p1 = document.getElementById('newPassword1').value;
-      const p2 = document.getElementById('newPassword2').value;
-      if (!p1 || p1.length < 4) { showToast('Şifre en az 4 karakter olmalı', true); return; }
-      if (p1 !== p2) { showToast('Şifreler eşleşmiyor', true); return; }
-      localStorage.setItem(PW_KEY, hashStr(p1));
-      closeModal('changePwModal');
-      showToast('✓ Şifre değiştirildi');
-    }
-
-    /* ════════ LISTING CRUD ════════ */
-    function openListingModal() {
-      if (!isLoggedIn()) { openLoginModal(); return; }
-      editingId = null;
-      currentImage = '';
-      document.getElementById('listingModalTitle').textContent = 'Yeni İlan Ekle';
-      document.getElementById('listingDeleteBtn').style.display = 'none';
-      ['lTitle','lSize','lPrice','lFeatures','lDescription','lImageUrl'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('lPriceLabel').value = 'Toplam Fiyat';
-      document.getElementById('lLocation').value = 'Marmaraereğlisi / Çeşmeli';
-      document.getElementById('lParcel').value = '170/10';
-      document.getElementById('lTag').value = '';
-      resetImageUploader();
-      openModal('listingModal');
-    }
-    function editListing(id) {
-      const l = listings.find(x => x.id === id);
-      if (!l) return;
-      editingId = id;
-      currentImage = l.image || '';
-      document.getElementById('listingModalTitle').textContent = 'İlanı Düzenle';
-      document.getElementById('listingDeleteBtn').style.display = '';
-      document.getElementById('lTitle').value = l.title || '';
-      document.getElementById('lSize').value = l.size || '';
-      document.getElementById('lPrice').value = l.price || '';
-      document.getElementById('lPriceLabel').value = l.priceLabel || 'Toplam Fiyat';
-      document.getElementById('lLocation').value = l.location || '';
-      document.getElementById('lParcel').value = l.parcel || '';
-      document.getElementById('lTag').value = l.tag || '';
-      document.getElementById('lFeatures').value = l.features || '';
-      document.getElementById('lDescription').value = l.description || '';
-      document.getElementById('lImageUrl').value = (l.image && l.image.startsWith('data:')) ? '' : (l.image || '');
-      showImagePreview(l.image);
-      openModal('listingModal');
-    }
-    function saveListing() {
-      const title = document.getElementById('lTitle').value.trim();
-      const size = document.getElementById('lSize').value.trim();
-      const price = document.getElementById('lPrice').value.trim();
-      if (!title || !size || !price) { showToast('Başlık, m² ve fiyat zorunlu', true); return; }
-      const urlInput = document.getElementById('lImageUrl').value.trim();
-      const image = currentImage || urlInput || '';
-      const data = {
-        title, size, price,
-        priceLabel: document.getElementById('lPriceLabel').value.trim() || 'Toplam Fiyat',
-        location: document.getElementById('lLocation').value.trim(),
-        parcel: document.getElementById('lParcel').value.trim(),
-        tag: document.getElementById('lTag').value,
-        features: document.getElementById('lFeatures').value.trim(),
-        description: document.getElementById('lDescription').value.trim(),
-        image
-      };
-      if (editingId) {
-        const idx = listings.findIndex(x => x.id === editingId);
-        listings[idx] = { ...listings[idx], ...data };
-        showToast('✓ İlan güncellendi');
-      } else {
-        data.id = Date.now();
-        listings.unshift(data);
-        showToast('✓ İlan eklendi');
-      }
-      saveListings(listings);
-      renderListings();
-      closeModal('listingModal');
-    }
-    function confirmDelete(id) {
-      const l = listings.find(x => x.id === id);
-      if (!l) return;
-      if (confirm(`"${l.title}" ilanını silmek istediğinize emin misiniz?`)) {
-        listings = listings.filter(x => x.id !== id);
-        saveListings(listings);
-        renderListings();
-        showToast('İlan silindi');
-      }
-    }
-    function deleteListing() {
-      if (!editingId) return;
-      const l = listings.find(x => x.id === editingId);
-      if (confirm(`"${l.title}" ilanını silmek istediğinize emin misiniz?`)) {
-        listings = listings.filter(x => x.id !== editingId);
-        saveListings(listings);
-        renderListings();
-        closeModal('listingModal');
-        showToast('İlan silindi');
-      }
-    }
-
-    /* ════════ IMAGE UPLOAD ════════ */
-    function resetImageUploader() {
-      const u = document.getElementById('imageUploader');
-      u.classList.remove('has-image');
-      u.innerHTML = `<div class="image-uploader-prompt" id="imagePrompt">📷 <strong>Tıklayın</strong> ve bilgisayardan fotoğraf seçin<br><small style="opacity:.7;">veya aşağıya görsel URL'si yapıştırın</small></div><input type="file" id="imageFile" accept="image/*" onchange="handleImageUpload(event)" />`;
-    }
-    function showImagePreview(src) {
-      if (!src) { resetImageUploader(); return; }
-      const u = document.getElementById('imageUploader');
-      u.classList.add('has-image');
-      u.innerHTML = `<img src="${escapeHtml(src)}" alt="önizleme" /><input type="file" id="imageFile" accept="image/*" onchange="handleImageUpload(event)" />`;
-    }
-    function handleImageUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 4 * 1024 * 1024) { showToast('Dosya 4MB\'dan büyük olamaz', true); return; }
-      const reader = new FileReader();
-      reader.onload = ev => {
-        // Resize to max 1200px width and re-encode as JPEG for smaller storage
-        const img = new Image();
-        img.onload = () => {
-          const maxW = 1200;
-          const scale = Math.min(1, maxW / img.width);
-          const w = Math.round(img.width * scale);
-          const h = Math.round(img.height * scale);
-          const canvas = document.createElement('canvas');
-          canvas.width = w; canvas.height = h;
-          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          currentImage = canvas.toDataURL('image/jpeg', 0.82);
-          showImagePreview(currentImage);
-          document.getElementById('lImageUrl').value = '';
-        };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-    function previewUrlImage() {
-      const url = document.getElementById('lImageUrl').value.trim();
-      if (url && /^https?:\/\//.test(url)) { currentImage = url; showImagePreview(url); }
-    }
-
-    /* ════════ INIT ════════ */
-    renderListings();
-    applyAdminMode();
-
-    /* ════════ ORIGINAL SCRIPTS ════════ */
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-      navbar.classList.toggle('scrolled', window.scrollY > 60);
-    });
-
-    const hamburger = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobileMenu');
-    function toggleMobile() { hamburger.classList.toggle('open'); mobileMenu.classList.toggle('open'); }
-    function closeMobile() { hamburger.classList.remove('open'); mobileMenu.classList.remove('open'); }
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
-      });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
-
-    function submitForm(e) {
-      e.preventDefault();
-      const btn = e.target.querySelector('.form-submit');
-      btn.textContent = 'Gönderiliyor...';
-      btn.disabled = true;
-      setTimeout(() => {
-        e.target.style.display = 'none';
-        document.getElementById('formSuccess').style.display = 'block';
-      }, 1200);
-    }
-
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', e => {
-        const target = document.querySelector(a.getAttribute('href'));
-        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-      });
-    });
-  }()); /* end IIFE */
-  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>emailjs.init("SCzc_UmeUAmiu-1_k");</script>
@@ -2255,8 +1933,124 @@
 
   <!-- Tema Sistemi -->
   <script>
-const THEMES = {green: {name:'🌿 Yeşil (Varsayılan)',colors:{'--green-dark':'#1e4d20','--green-mid':'#2C5F2E','--green-light':'#4a8f3f','--green-accent':'#7ab648','--gold':'#c9a961','--cream':'#f5f0e8','--cream-dark':'#ede5d4','--text-dark':'#1a1a1a','--text-mid':'#444','--text-light':'#777','--white':'#ffffff'}},blue:{name:'🔵 Mavi',colors:{'--green-dark':'#0d47a1','--green-mid':'#1565c0','--green-light':'#1976d2','--green-accent':'#42a5f5','--gold':'#64b5f6','--cream':'#e3f2fd','--cream-dark':'#bbdefb','--text-dark':'#0d47a1','--text-mid':'#1565c0','--text-light':'#64b5f6','--white':'#ffffff'}},gold:{name:'✨ Altın',colors:{'--green-dark':'#b8860b','--green-mid':'#daa520','--green-light':'#ffd700','--green-accent':'#ffa500','--gold':'#f0e68c','--cream':'#fffacd','--cream-dark':'#eee8aa','--text-dark':'#8b6914','--text-mid':'#b8860b','--text-light':'#daa520','--white':'#ffffff'}},dark:{name:'🌙 Koyu',colors:{'--green-dark':'#1a1a1a','--green-mid':'#2d2d2d','--green-light':'#404040','--green-accent':'#4a9eff','--gold':'#ffa500','--cream':'#1e1e1e','--cream-dark':'#2a2a2a','--text-dark':'#e0e0e0','--text-mid':'#b0b0b0','--text-light':'#808080','--white':'#1a1a1a'}},purple:{name:'💜 Mor',colors:{'--green-dark':'#4a148c','--green-mid':'#6a1b9a','--green-light':'#7b1fa2','--green-accent':'#ab47bc','--gold':'#ce93d8','--cream':'#f3e5f5','--cream-dark':'#e1bee7','--text-dark':'#4a148c','--text-mid':'#6a1b9a','--text-light':'#ab47bc','--white':'#ffffff'}},red:{name:'❤️ Kırmızı',colors:{'--green-dark':'#b71c1c','--green-mid':'#c62828','--green-light':'#d32f2f','--green-accent':'#f44336','--gold':'#ef9a9a','--cream':'#ffebee','--cream-dark':'#ffcdd2','--text-dark':'#b71c1c','--text-mid':'#c62828','--text-light':'#f44336','--white':'#ffffff'}}};
-function applyTheme(t){const e=THEMES[t]||THEMES.green;Object.entries(e.colors).forEach((([e,a])=>{document.documentElement.style.setProperty(e,a)})),localStorage.setItem('selectedTheme',t),localStorage.setItem('siteSettings',JSON.stringify({...getSiteSettings(),theme:t}))}function getSiteSettings(){return JSON.parse(localStorage.getItem('siteSettings'))||{siteName:'DİCLE ARSA OFİSİ',siteSubtitle:'NESİPOĞULLARI',heroTitle:'Hayalinizdeki<br><em>Yere</em> Sahip Olun',heroDesc:'Trakya\'nın incisi Marmaraereğlisi\'nde, denize komşu, E-5 yoluna yakın, tapulu yatırımlık ve villa imarlı arsalar.',phone:'0533 251 60 36',logo:null,theme:'green'}}function saveSiteSettings(t){localStorage.setItem('siteSettings',JSON.stringify(t))}function uploadImageAsBase64(t,e){if(!t)return;const a=new FileReader;a.onload=t=>{e(t.target.result)},a.readAsDataURL(t)}function getListings(){return JSON.parse(localStorage.getItem('listings'))||[]}function saveListings(t){localStorage.setItem('listings',JSON.stringify(t))}function addListing(t){const e=getListings();return e.id=Date.now(),e.push(t),saveListings(e),t}function updateListing(t,e){let a=getListings();a=a.map((a=>a.id===t?{...a,...e}:a)),saveListings(a)}function deleteListing(t){let e=getListings();e=e.filter((e=>e.id!==t)),saveListings(e)}function updateSiteUI(){const t=getSiteSettings(),e=document.querySelector('.nav-logo-text');e&&(e.innerHTML=`${t.siteName}<span>${t.siteSubtitle}</span>`);const a=document.querySelector('.hero-title');a&&(a.innerHTML=t.heroTitle);const n=document.querySelector('.hero-desc');n&&(n.textContent=t.heroDesc)}document.addEventListener('DOMContentLoaded',(()=>{const t=localStorage.getItem('selectedTheme')||'green';applyTheme(t),updateSiteUI()})),window.ThemeSystem={applyTheme,getSiteSettings,saveSiteSettings,uploadImageAsBase64,getListings,saveListings,addListing,updateListing,deleteListing,THEMES};
+/* ════════ TEMA SİSTEMİ ════════
+   Not: Her tema :root'ta tanımlı DEĞİŞKENLERİN TAMAMINI set etmelidir.
+   Eksik bırakılan değişken Editorial Premium değerinde kalır ve palet
+   yarım uygulanır (koyu temada metin okunamaz hale gelirdi). */
+const THEMES = {
+  green: {
+    name: '🌿 Yeşil (Varsayılan)',
+    colors: {
+      '--green-dark': '#1f4a2a', '--green-mid': '#2f6b3d', '--green-light': '#4a8f3f', '--green-accent': '#7ab648',
+      '--gold': '#b8954a', '--gold-soft': '#d4b876',
+      '--cream': '#f4ede0', '--cream-deep': '#e8ddc5', '--cream-pale': '#faf5eb',
+      '--text-dark': '#1a1a1a', '--text-mid': '#555555', '--text-light': '#888888',
+      '--white': '#ffffff', '--ink': '#2a2622'
+    }
+  },
+  blue: {
+    name: '🔵 Mavi',
+    colors: {
+      '--green-dark': '#123a63', '--green-mid': '#1b5a94', '--green-light': '#2f7fc4', '--green-accent': '#5aa9e6',
+      '--gold': '#4a7fa8', '--gold-soft': '#8fbcd9',
+      '--cream': '#eef4f9', '--cream-deep': '#d8e6f1', '--cream-pale': '#f7fafd',
+      '--text-dark': '#0f2b47', '--text-mid': '#3d5a75', '--text-light': '#7089a1',
+      '--white': '#ffffff', '--ink': '#16263a'
+    }
+  },
+  gold: {
+    name: '✨ Altın',
+    colors: {
+      '--green-dark': '#6b5218', '--green-mid': '#8f6f22', '--green-light': '#b8913a', '--green-accent': '#d9b45c',
+      '--gold': '#b8954a', '--gold-soft': '#e0c98c',
+      '--cream': '#faf3e0', '--cream-deep': '#efe2c2', '--cream-pale': '#fdf9ee',
+      '--text-dark': '#2b2110', '--text-mid': '#5c4a24', '--text-light': '#8a7746',
+      '--white': '#ffffff', '--ink': '#332811'
+    }
+  },
+  dark: {
+    name: '🌙 Koyu',
+    /* Koyu temada açık/koyu anlamları ters çevrilir: yüzey değişkenleri
+       (--cream*, --white) koyulaşır, metin değişkenleri (--text-*, --ink) açılır. */
+    colors: {
+      '--green-dark': '#0e0e0f', '--green-mid': '#1c1d20', '--green-light': '#2a2c31', '--green-accent': '#7ab648',
+      '--gold': '#c9a961', '--gold-soft': '#8a7440',
+      '--cream': '#17181b', '--cream-deep': '#101113', '--cream-pale': '#1c1d20',
+      '--text-dark': '#f0ece4', '--text-mid': '#b8b2a6', '--text-light': '#8a857b',
+      '--white': '#17181b', '--ink': '#f0ece4'
+    }
+  },
+  purple: {
+    name: '💜 Mor',
+    colors: {
+      '--green-dark': '#3b1259', '--green-mid': '#5a1f82', '--green-light': '#7b35a8', '--green-accent': '#a86ecb',
+      '--gold': '#9c6bbf', '--gold-soft': '#c9a3de',
+      '--cream': '#f5eefa', '--cream-deep': '#e6d5f0', '--cream-pale': '#faf6fd',
+      '--text-dark': '#2a0e40', '--text-mid': '#523268', '--text-light': '#7d5f91',
+      '--white': '#ffffff', '--ink': '#33124d'
+    }
+  },
+  red: {
+    name: '❤️ Kırmızı',
+    colors: {
+      '--green-dark': '#6e1616', '--green-mid': '#93221f', '--green-light': '#c0392b', '--green-accent': '#e06055',
+      '--gold': '#b8954a', '--gold-soft': '#d9a89f',
+      '--cream': '#faeeec', '--cream-deep': '#f0d8d4', '--cream-pale': '#fdf7f6',
+      '--text-dark': '#2b0f0d', '--text-mid': '#5c2f2b', '--text-light': '#8a5a55',
+      '--white': '#ffffff', '--ink': '#331311'
+    }
+  }
+};
+
+const DEFAULT_SITE_SETTINGS = {
+  siteName:     'DİCLE ARSA OFİSİ',
+  siteSubtitle: 'NESİPOĞULLARI',
+  heroTitle:    'Hayalinizdeki<br><em>Yere</em> Sahip Olun',
+  heroDesc:     'Trakya\'nın incisi Marmaraereğlisi\'nde, denize komşu, E-5 yoluna yakın, tapulu yatırımlık ve villa imarlı arsalar.',
+  phone:        '0533 251 60 36',
+  logo:         null,
+  theme:        'green'
+};
+
+function applyTheme(name) {
+  const theme = THEMES[name] || THEMES.green;
+  Object.entries(theme.colors).forEach(([prop, val]) => {
+    document.documentElement.style.setProperty(prop, val);
+  });
+  /* Kota dolarsa veya depolama engelliyse tema yine uygulanmış olmalı;
+     hata çağrı zincirini kırmamalı. Yalnızca tema anahtarı yazılır —
+     siteSettings'in tamamını (base64 logo dahil) her seferinde yeniden
+     serileştirmek gereksiz ve kotayı tüketir. */
+  try { localStorage.setItem('selectedTheme', name); } catch (e) { /* yoksay */ }
+}
+
+function getSiteSettings() {
+  try {
+    return JSON.parse(localStorage.getItem('siteSettings')) || { ...DEFAULT_SITE_SETTINGS };
+  } catch (e) {
+    return { ...DEFAULT_SITE_SETTINGS };
+  }
+}
+
+function saveSiteSettings(settings) {
+  try { localStorage.setItem('siteSettings', JSON.stringify(settings)); } catch (e) { /* yoksay */ }
+}
+
+/* Yalnızca kullanıcı açıkça bir tema SEÇTİYSE uygula. Aksi halde
+   index.html :root'taki "Editorial Premium" paleti geçerli kalır —
+   eskiden burada koşulsuz applyTheme('green') çağrılıyor ve tasarım
+   paleti her açılışta inline style ile eziliyordu.
+   Marka (logo/başlık/telefon) uygulaması applyBranding'in işi; buradan
+   updateSiteUI çağrılmaz — o, HTML'deki gerçek metni kısa varsayılanla
+   eziyordu. */
+document.addEventListener('DOMContentLoaded', () => {
+  const stored = (function () {
+    try { return localStorage.getItem('selectedTheme'); } catch (e) { return null; }
+  }());
+  if (stored && THEMES[stored]) applyTheme(stored);
+});
+
+window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
   </script>
 
   <!-- Tema Seçim Modal -->
