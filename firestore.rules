@@ -3,38 +3,43 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     /* ══════════════════════════════════════════════════════════════════
-       GEÇİCİ KİLİT — Firebase Authentication kurulana kadar geçerlidir.
+       Yazma yetkisi tek bir Firebase Authentication hesabına bağlıdır.
 
-       Yazma tamamen kapalı. Okuma açık olduğu için site ziyaretçiler
-       için normal çalışmaya devam eder: ilanlar, logo, başlık, telefon
-       hepsi görünür. Yalnızca admin paneli yazamaz.
+       Yetki kararı tamamen sunucu tarafındadır: istemci kodu ne yaparsa
+       yapsın, arayüz zorla açılsa veya istek doğrudan API'ye atılsa bile
+       bu kural geçerlidir.
 
-       Auth kurulup admin UID alındığında bu dosya isAdmin() tabanlı
-       kurallarla değiştirilecek.
+       Önceki hali "allow write: if true" idi — kimlik doğrulaması yoktu,
+       internetteki herkes yazabiliyordu.
 
-       Önceki hali: /listings ve /settings için "allow write: if true"
-       idi; internetteki herkes kimlik doğrulamasız yazabiliyordu.
+       Admin hesabı değişirse aşağıdaki UID güncellenmeli. Birden fazla
+       yönetici gerekirse isAdmin() gövdesi bir /admins/{uid} koleksiyonu
+       kontrolüne çevrilebilir; tek yönetici için UID doğrudan gömülü
+       tutuluyor, böylece her istekte fazladan doküman okuması olmuyor.
        ══════════════════════════════════════════════════════════════════ */
 
-    // İlanlar — okuma herkese açık, yazma kapalı
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.uid == 'rz7BFfSrRycjqnlWx5ofqjiFEsr1';
+    }
+
+    // İlanlar — okuma herkese açık (site içeriği), yazma yalnızca admin
     match /listings/{doc} {
-      allow read:  if true;
-      allow write: if false;
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
     }
 
     // Site ayarları (logo, başlık, telefon, tema) — okuma herkese açık
     match /settings/{doc} {
-      allow read:  if true;
-      allow write: if false;
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
     }
 
-    /* İletişim formu — müşteri talepleri gelmeye DEVAM etmeli, bu yüzden
-       create açık bırakıldı. Alan adları app.js'teki gönderimle birebir
-       eşleşir (from_name, from_phone, sqm, budget, message + createdAt);
-       başka bir alan gönderilirse yazma reddedilir.
-       Boyut sınırları, dev yüklerle doküman şişirme ve kota tüketmeye
-       karşı koruma sağlar. Okuma kapalı — talepler yalnızca Firebase
-       Console'dan görülür. */
+    /* İletişim formu — herkes gönderebilir, alan adları ve boyutlar
+       doğrulanır. Alan adları app.js'teki gönderimle birebir eşleşir;
+       başka bir alan gönderilirse yazma reddedilir. Boyut sınırları dev
+       yüklerle doküman şişirme ve kota tüketmeye karşı koruma sağlar.
+       Talepleri yalnızca admin okuyabilir. */
     match /contacts/{doc} {
       allow create: if request.resource.data.keys().hasOnly(['from_name', 'from_phone', 'sqm', 'budget', 'message', 'createdAt'])
                     && request.resource.data.from_name  is string
@@ -47,7 +52,8 @@ service cloud.firestore {
                     && request.resource.data.budget.size()     <= 50
                     && request.resource.data.message    is string
                     && request.resource.data.message.size()    <= 2000;
-      allow read, update, delete: if false;
+      allow read:   if isAdmin();
+      allow update, delete: if isAdmin();
     }
 
     // Tanımlanmamış her yol kapalı
