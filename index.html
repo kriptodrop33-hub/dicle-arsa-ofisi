@@ -3331,16 +3331,101 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
          gayrimenkul sayfasında oyuncak hissi veriyor. Hover artık
          yalnızca CSS: kaldırma, altın kenar ve yavaş görsel yakınlaşma. */
 
-      /* Giriş animasyonu — rotateX kaldırıldı; kartlar aşağıdan sakince
-         yükseliyor, perspektifle savrulmuyor. */
-      gsap.fromTo(cards,
-        { opacity: 0, y: 34 },
-        {
-          opacity: 1, y: 0,
-          stagger: 0.08, duration: 0.7, ease: 'power2.out',
-          scrollTrigger: { trigger: '#listings', start: 'top 82%', once: true }
-        }
-      );
+      /* GİRİŞ ANİMASYONU — GSAP + ScrollTrigger'dan IntersectionObserver'a
+         taşındı.
+
+         Neden: renderListings birden fazla kez çalışabiliyor (oturum
+         durumu değişince yönetim butonlarını basmak için yeniden
+         render ediliyor). Her çağrıda GSAP kartlara opacity:0 yazıp
+         YENİ bir ScrollTrigger yaratıyordu. Sayfa tetikleme noktasını
+         çoktan geçmişse tetikleyici hiç ateşlenmiyor ve kartlar
+         başlangıç durumunda — yani GÖRÜNMEZ — kalıyordu. Sitenin tüm
+         ilanlarının kaybolması demek.
+
+         IntersectionObserver ekrandaki mevcut konuma göre çalışır,
+         "kaçırılmış tetikleyici" durumu oluşmaz. Üstelik altta bir
+         güvenlik zamanlayıcısı var: ne olursa olsun kartlar görünür
+         hale geliyor. İçerik hiçbir koşulda animasyona bağımlı olmamalı. */
+      if (window.__kartGozlemci) window.__kartGozlemci.disconnect();
+
+      var goster0 = function(c) {
+        c.style.transition = 'none';
+        c.style.opacity = '1';
+        c.style.transform = 'none';
+      };
+
+      /* Giriş animasyonu SAYFA BAŞINA BİR KEZ oynar. renderListings
+         yeniden çalıştığında (oturum durumu değişince yönetim butonlarını
+         basmak için) kartlar yeni DOM ögeleri olarak geliyor ve animasyon
+         baştan başlıyordu: her seferinde solup yeniden beliriyorlardı.
+         Bayrak, ilk gösterimden sonra kartların doğrudan görünür
+         basılmasını sağlıyor. */
+      if (window.__ilanlarGosterildi) {
+        cards.forEach(goster0);
+        return;
+      }
+      window.__ilanlarGosterildi = true;
+
+      cards.forEach(function(c, i) {
+        c.style.transition = 'none';
+        c.style.opacity = '0';
+        c.style.transform = 'translateY(28px)';
+        c.style.transitionDelay = Math.min(i, 5) * 70 + 'ms';
+      });
+
+      var goster = function(c) {
+        c.style.transition = 'opacity .7s cubic-bezier(0.16,1,0.3,1), transform .7s cubic-bezier(0.16,1,0.3,1)';
+        c.style.opacity = '1';
+        c.style.transform = 'none';
+      };
+
+      window.__kartGozlemci = new IntersectionObserver(function(girisler, gozlemci) {
+        girisler.forEach(function(g) {
+          if (!g.isIntersecting) return;
+          goster(g.target);
+          gozlemci.unobserve(g.target);
+        });
+      }, { threshold: 0.06, rootMargin: '0px 0px -8% 0px' });
+
+      cards.forEach(function(c) { window.__kartGozlemci.observe(c); });
+
+      /* Güvenlik ağı: gözlemci herhangi bir sebeple çalışmazsa kartlar
+         1.5 saniye sonra koşulsuz görünür olur.
+
+         GEÇİŞSİZ uygulanıyor (transition:none). Sebebi: arka planda
+         açılan bir sekmede tarayıcı kare üretmez, CSS geçişleri ortada
+         donar ve kart yarı saydam kalır. Instagram'dan gelen biri linke
+         basıp sekmeyi arka planda bıraktığında tam olarak bu oluyor.
+         Yedek yol animasyona hiç bağlı olmamalı — doğrudan son duruma
+         atlıyor. */
+      setTimeout(function() {
+        /* Koşulsuz. Erken çıkış kontrolü konulmamalı: gözlemci inline
+           opacity'yi zaten '1' yapmış olabilir ama GEÇİŞ hâlâ sürüyor
+           olabilir. "Zaten 1" diye atlamak, tam da temizlenmesi gereken
+           yarı saydam durumu bırakıyordu. Geçiş süresi (0.7s + en fazla
+           0.35s gecikme) 1.5 saniyeden kısa, dolayısıyla öndeki bir
+           sekmede animasyon zaten bitmiş olur — bu satırlar görüneni
+           değiştirmez, yalnızca takılı kalmayı engeller. */
+        cards.forEach(function(c) {
+          c.style.transition = 'none';
+          c.style.opacity = '1';
+          c.style.transform = 'none';
+        });
+      }, 1500);
+
+      /* Sekme sonradan öne gelirse (arka planda açılmıştı) donmuş
+         geçişleri temizle — yarı saydam kalmış kart bırakma. */
+      document.addEventListener('visibilitychange', function tazele() {
+        if (document.visibilityState !== 'visible') return;
+        cards.forEach(function(c) {
+          if (parseFloat(getComputedStyle(c).opacity) < 0.99) {
+            c.style.transition = 'none';
+            c.style.opacity = '1';
+            c.style.transform = 'none';
+          }
+        });
+        document.removeEventListener('visibilitychange', tazele);
+      });
 
       /* Hover: imleç takibi güncelle */
       cards.forEach(function(card) {
