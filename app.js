@@ -51,11 +51,27 @@ function escapeHtml(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+/* `order` alanı olmayan ilanlar listenin sonuna gider ama LİSTEDE KALIR.
+   Eşitlik durumunda başlığa göre sıralanır, böylece sıra her yüklemede
+   aynı olur — Firestore doküman sırası garanti değildir. */
+function siralaIlanlar(liste) {
+  return liste.sort(function (a, b) {
+    const x = typeof a.order === 'number' ? a.order : 9999;
+    const y = typeof b.order === 'number' ? b.order : 9999;
+    if (x !== y) return x - y;
+    return String(a.title || '').localeCompare(String(b.title || ''), 'tr');
+  });
+}
+
 /* ── Firestore: ilanları yükle ── */
 async function loadListings() {
   try {
-    const snap = await db.collection('listings').orderBy('order', 'asc').get();
-    if (!snap.empty) return snap.docs.map(d => ({ ...d.data(), firestoreId: d.id }));
+    /* orderBy KULLANILMIYOR. Firestore, sıralanan alanı TAŞIMAYAN
+       dokümanları sonuçtan tamamen düşürür: Console'dan elle eklenen
+       veya `order` alanı silinmiş bir ilan sitede hiç görünmez, üstelik
+       hata da vermez. Sıralama istemcide yapılıyor; 6-50 ilanda fark yok. */
+    const snap = await db.collection('listings').get();
+    if (!snap.empty) return siralaIlanlar(snap.docs.map(d => ({ ...d.data(), firestoreId: d.id })));
 
     /* Koleksiyon boş. İki farklı durum olabilir: proje yeni kurulmuş ve
        hiç ilan girilmemiş, ya da yönetici tüm ilanları BİLEREK silmiş.
@@ -72,8 +88,8 @@ async function loadListings() {
     if (ayar.exists && (ayar.data() || {}).seeded) return [];
 
     await seedDefaultListings();
-    const snap2 = await db.collection('listings').orderBy('order', 'asc').get();
-    return snap2.docs.map(d => ({ ...d.data(), firestoreId: d.id }));
+    const snap2 = await db.collection('listings').get();
+    return siralaIlanlar(snap2.docs.map(d => ({ ...d.data(), firestoreId: d.id })));
   } catch (err) {
     console.error('Firestore yükleme hatası:', err);
     return DEFAULT_LISTINGS.map((l, i) => ({ ...l, firestoreId: String(i) }));
@@ -115,7 +131,14 @@ function renderListings() {
   grid.innerHTML = listings.map(l => {
     const [tagClass, tagText] = (l.tag || '|').split('|');
     const tagHtml      = tagText ? `<span class="tag tag-${escapeHtml(tagClass)}">${escapeHtml(tagText)}</span>` : '';
-    const features     = (l.features || '').split(',').map(f => f.trim()).filter(Boolean).slice(0, 3);
+    /* slice(0,3) girilen özelliklerin yarısını sessizce siliyordu —
+       yönetici 6 özellik yazıp 3'ünün kaybolduğunu fark etmiyordu. */
+    const features     = (l.features || '').split(',').map(f => f.trim()).filter(Boolean).slice(0, 6);
+    /* Açıklama Firestore'a kaydediliyor ve düzenleme formunda geri
+       okunuyordu ama karta HİÇ basılmıyordu; yöneticinin yazdığı metni
+       ziyaretçi hiç görmüyordu. Satır sonları boşluğa çevriliyor,
+       kart yüksekliği CSS'te 3 satırla sınırlanıyor. */
+    const aciklama     = escapeHtml((l.description || '').replace(/\s*\n+\s*/g, ' ').trim());
     const featuresHtml = features.map(f =>
       `<span class="listing-spec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> ${escapeHtml(f)}</span>`
     ).join('');
@@ -145,6 +168,7 @@ function renderListings() {
             ${escapeHtml(l.location || '')}
           </div>
           <div class="listing-title">${escapeHtml(l.title)}</div>
+          ${aciklama ? `<p class="listing-desc">${aciklama}</p>` : ''}
           <div class="listing-specs">
             <span class="listing-spec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg> ${escapeHtml(l.size)}</span>
             ${featuresHtml}
@@ -199,8 +223,25 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop.open').forEach(m => m.classList.remove('open'));
-  if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); openLoginModal(); }
+  if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); yonetimeEris(); }
 });
+
+/* Yönetim erişimi iki yoldan açılır:
+   1) Adres sonuna #yonetim eklemek (telefonda "Ana Ekrana Ekle" ile
+      kısayol yapılabilir — Nurhayat Hanım için pratik yol)
+   2) Ctrl+Shift+A (masaüstü)
+   Kilit ikonu bunlar olmadan hiç görünmez, sıradan ziyaretçi
+   yönetim panelinin varlığını fark etmez. */
+function yonetimeEris() {
+  document.body.classList.add('yonetim-erisim');
+  openLoginModal();
+}
+
+if (location.hash === '#yonetim') {
+  document.body.classList.add('yonetim-erisim');
+  // Adresi temizle — paylaşılan bağlantıda #yonetim kalmasın
+  history.replaceState(null, '', location.pathname + location.search);
+}
 
 function showToast(msg, isError) {
   const t = document.getElementById('toast');
@@ -437,7 +478,13 @@ async function handleImageUpload(e) {
    Sığmazsa kullanıcıya açıkça hata gösterilir — eskiden hiçbir hata
    yakalayıcı yoktu, bozuk veya desteklenmeyen dosyada (HEIC gibi)
    sessizce hiçbir şey olmuyor, kullanıcı fotoğrafsız kaydediyordu. */
-const BASE64_HEDEF_BAYT = 700 * 1024;   // 1MB sınırına diğer alanlar için pay bırakır
+/* Hedef 700KB değil 150KB. Sınırlayıcı olan Firestore'un 1MB doküman
+   limiti DEĞİL, bant genişliği: fotoğraflar ilan dokümanına gömülü
+   olduğu için her ziyaretçi sayfayı açtığında HEPSİNİ indiriyor.
+   6 ilan × 700KB = 4.2MB; mobil bağlantıda kabul edilemez ve Firestore
+   ücretsiz kotasını da hızla tüketir.
+   Kalite kaybı görünmez: kart görseli 300px yüksekliğe kırpılıyor. */
+const BASE64_HEDEF_BAYT = 150 * 1024;
 
 function gorseliBase64Yap(file) {
   const reader = new FileReader();
@@ -458,7 +505,9 @@ function gorseliBase64Yap(file) {
       let veri     = null;
 
       // Önce kaliteyi, yetmezse genişliği kademeli düşür
-      for (const olcek of [1200, 900, 700]) {
+      // Kart görseli en fazla 380px genişlikte gösteriliyor; 900px kaynak
+      // yüksek yoğunluklu ekranlarda bile fazlasıyla yeterli.
+      for (const olcek of [900, 700, 560]) {
         genislik = olcek;
         for (const kalite of [0.82, 0.7, 0.6, 0.5]) {
           const aday = canvasaCiz(img, genislik, kalite);
