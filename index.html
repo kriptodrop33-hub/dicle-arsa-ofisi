@@ -252,6 +252,9 @@
       will-change: transform;
     }
     .nav-topbar.hidden { transform: translateY(-100%); opacity: 0; }
+    /* Mobil aksiyon çubuğu masaüstünde gizli — orada navbar'daki altın
+       telefon butonu zaten sürekli görünür durumda. */
+    .mobile-cta-bar { display: none; }
     .nav-topbar .container { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
     .topbar-item {
       display: inline-flex; align-items: center; gap: 8px;
@@ -1746,11 +1749,42 @@
       .section-title { font-size: clamp(1.85rem, 7.2vw, 2.4rem); }
       .section-sub { font-size: 1rem; }
 
-      /* SABİT WHATSAPP BUTONU: içeriğin üstünü kapatmasın diye
-         sayfaya alt boşluk; buton da biraz küçüldü. */
-      body { padding-bottom: 0; }
-      .float-whatsapp { width: 54px; height: 54px; bottom: 18px; right: 16px; }
-      #footer { padding-bottom: 92px; }
+      /* MOBİL AKSİYON ÇUBUĞU: yüzen WhatsApp butonunun yerini alır.
+         Yalnızca ikon olan yuvarlak buton ne yaptığını anlatmıyordu ve
+         arama seçeneği hiç yoktu. */
+      .float-whatsapp { display: none; }
+      .mobile-cta-bar {
+        display: grid; grid-template-columns: 1.45fr 1fr;
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 997;
+        border-top: 1px solid rgba(31,74,42,0.16);
+        box-shadow: 0 -6px 24px -12px rgba(31,74,42,0.5);
+        /* iPhone'da alt kavis/çubuk alanına taşmasın */
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        background: var(--green-dark);
+      }
+      .mcta {
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        min-height: 60px; padding: 10px 12px;
+        font-family: var(--font-sans); text-decoration: none;
+      }
+      .mcta svg { width: 21px; height: 21px; flex-shrink: 0; }
+      .mcta-metin { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+      .mcta-metin b { font-size: 0.97rem; font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; }
+      .mcta-alt { font-style: normal; font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: .72; }
+      .mcta-call { background: var(--gold); color: var(--green-dark); }
+      .mcta-wa   { background: #1f8f4e; color: #fff; }
+      .mcta:active { filter: brightness(0.93); }
+      /* Hat kapalıyken "Hemen ara" yerine saat aralığı gösterilir —
+         müşteri neden ulaşamadığını anlar, href değişmez (isteyen yine arar). */
+      .mcta-alt-kapali { display: none; }
+      body.hat-kapali .mcta-alt        { display: none; }
+      body.hat-kapali .mcta-alt-kapali { display: block; }
+      body.hat-kapali .mcta-call       { background: var(--gold-soft); }
+
+      /* Çubuğun altında kalan içerik olmasın */
+      #footer { padding-bottom: 104px; }
+      /* Yönetim modunda üstte admin bar var, çubuk yine de altta kalır */
+      body.admin-mode .mobile-cta-bar { bottom: 0; }
     }
 
     @media (max-width: 480px) {
@@ -1987,6 +2021,8 @@
         });
 
         var acik = suAnAcikMi(a, k);
+        // Mobil aksiyon çubuğu ve diğer durum bağımlı stiller bu sınıfa bakar
+        if (acik !== null) document.body.classList.toggle('hat-kapali', !acik);
         document.querySelectorAll('[data-hours-status]').forEach(function(el) {
           if (acik === null) { el.textContent = ''; return; }
           el.textContent = acik ? 'Şu an açık' : 'Şu an kapalı';
@@ -2808,6 +2844,31 @@
   <div class="toast" id="toast"></div>
 
   <!-- FLOATING WHATSAPP -->
+  <!-- ══════════════════════════════════════════════════════════════════
+       MOBİL AKSİYON ÇUBUĞU
+       Yalnızca mobilde görünür. Navbar'daki telefon butonu mobilde gizli
+       ve üst künye şeridi 120px kaydırmada kayboluyordu; geriye yazısız
+       yuvarlak bir yeşil ikon kalıyor, ARAMA seçeneği hiç sunulmuyordu.
+       Trafiğin çoğu Instagram'dan mobil geldiği ve sayfanın tek işi
+       telefon ettirmek olduğu için bu en değerli eklenti.
+       Numara [data-phone-text] taşıyor — panelden değişince burası da
+       kendiliğinden güncelleniyor.
+       ══════════════════════════════════════════════════════════════════ -->
+  <div class="mobile-cta-bar" id="mobileCtaBar">
+    <a href="tel:+905307615120" class="mcta mcta-call">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 01.04 2.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.18 6.18l1.28-1.28a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      <span class="mcta-metin">
+        <b data-phone-text>0530 761 51 20</b>
+        <em class="mcta-alt">Hemen ara</em>
+        <em class="mcta-alt mcta-alt-kapali">Şu an kapalı · <span data-hours-range>08:00 – 23:00</span></em>
+      </span>
+    </a>
+    <a href="https://wa.me/905307615120?text=Marmaraere%C4%9Flisi%20arsa%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener" class="mcta mcta-wa">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+      <span class="mcta-metin"><b>WhatsApp</b><em class="mcta-alt">Yazın</em></span>
+    </a>
+  </div>
+
   <a href="https://wa.me/905307615120?text=Marmaraereğlisi%20arsa%20hakkında%20bilgi%20almak%20istiyorum." target="_blank" class="float-whatsapp" aria-label="WhatsApp ile yazın">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
   </a>
