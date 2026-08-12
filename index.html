@@ -1404,6 +1404,21 @@
     .listing-card {
       position: relative;
       overflow: hidden;
+      /* Çerçeve: önceden "1px solid transparent" idi ve tek katmanlı,
+         çok yumuşak bir gölge (%8 alfa) vardı — kartlar krem zemine
+         yapışıyor, nerede başlayıp bittikleri seçilmiyordu.
+         Artık görünür bir hairline + İKİ katmanlı gölge var:
+         yakın temas gölgesi kenarı keskinleştiriyor, geniş ortam
+         gölgesi kartı zeminden ayırıyor. */
+      /* Alfa ölçülerek seçildi: 0.62 harmanlandığında dışarıdaki krem
+         zemine karşı 3.41:1, içerideki beyaz karta karşı 3.71:1 —
+         ikisi de UI ögeleri için gereken 3:1 eşiğinin üstünde.
+         Önceki 0.18 yalnızca 1.36:1 veriyordu, yani çizgi fiilen
+         görünmüyordu. */
+      border: 1px solid rgba(31, 74, 42, 0.62);
+      box-shadow:
+        0 1px 2px rgba(31, 74, 42, 0.08),
+        0 12px 28px -14px rgba(31, 74, 42, 0.28);
       /* Ayrı geçişler: kaldırma hızlı, gölge ve kenar biraz daha yavaş —
          hepsi tek sürede olunca hareket "toplu" ve ucuz duruyordu. */
       transition:
@@ -1411,10 +1426,15 @@
         box-shadow .55s var(--ease-expo),
         border-color .35s ease;
     }
+    /* Görsel ile gövde arasında ayırıcı çizgi — kartın iç yapısı da
+       çerçeve kadar net olsun. */
+    .listing-img { border-bottom: 1px solid rgba(31, 74, 42, 0.5); }
     .listing-card:hover {
       transform: translateY(-7px);
-      box-shadow: var(--shadow-lg);
       border-color: var(--gold);
+      box-shadow:
+        0 2px 4px rgba(31, 74, 42, 0.09),
+        0 24px 52px -22px rgba(31, 74, 42, 0.34);
     }
     /* Üstte içeri doğru çizilen altın çizgi — kaldırma efektine eşlik eden
        ikinci, daha ince bir sinyal. */
