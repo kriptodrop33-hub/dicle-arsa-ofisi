@@ -821,11 +821,19 @@
     /* Input'lar kapsayıcıyı asla aşmaz — box-sizing zaten border-box,
        eksik olan min-width sıfırlamasıydı. */
     .form-group input, .form-group select, .form-group textarea { min-width: 0; max-width: 100%; }
-    .form-group label { font-family: var(--font-sans); font-size: 0.68rem; font-weight: 500; color: var(--text-light); letter-spacing: 0.22em; text-transform: uppercase; }
+    /* Etiket rengi --text-light (#888) krem üzerinde 3,26:1 idi, okuma
+       eşiğinin altında. Hedef kitlenin yaş ortalaması yüksek; okunaklılık
+       burada estetikten önce geliyor. */
+    .form-group label { font-family: var(--font-sans); font-size: 0.7rem; font-weight: 600; color: var(--text-mid); letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; }
     .form-group input, .form-group select, .form-group textarea {
-      padding: 14px 0; border: none; border-bottom: 1px solid var(--cream-deep); border-radius: 0;
-      font-family: var(--font-sans); font-size: 0.95rem; color: var(--ink);
+      padding: 14px 0; border: none; border-bottom: 1.5px solid var(--text-light); border-radius: 0;
+      font-family: var(--font-sans); color: var(--ink);
       background: transparent; transition: var(--transition); outline: none;
+      /* iOS, 16px'in ALTINDAKİ bir alana odaklanınca sayfayı otomatik
+         yakınlaştırır ve kullanıcı elle geri uzaklaştırmak zorunda kalır.
+         Taban punto küçük ekranlarda 15px'e düştüğü için 0.95rem yetmiyordu;
+         max() ile 16px taban garanti altına alındı. */
+      font-size: max(16px, 0.95rem);
     }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
       border-bottom-color: var(--gold); box-shadow: none;
@@ -2554,19 +2562,26 @@
             <div class="form-title">Ücretsiz Bilgi Alın</div>
             <div class="form-sub">Form doldurun, en kısa sürede Nurhayat Hanım sizi arasın.</div>
             <form id="contactForm" onsubmit="submitForm(event)">
+              <!-- name/id/for/autocomplete: etiketler tıklanabilir olsun,
+                   telefon klavyesi doğru açılsın ve tarayıcı otomatik
+                   doldurma önerebilsin diye. maxlength değerleri
+                   firestore.rules'daki sınırlarla birebir aynı — form
+                   sunucuda reddedilmeden önce kullanıcıyı uyarır. -->
               <div class="form-row">
                 <div class="form-group">
-                  <label>Ad Soyad *</label>
-                  <input type="text" placeholder="Adınız Soyadınız" required />
+                  <label for="cfName">Ad Soyad *</label>
+                  <input type="text" id="cfName" name="name" autocomplete="name"
+                         maxlength="100" placeholder="Adınız Soyadınız" required />
                 </div>
                 <div class="form-group">
-                  <label>Telefon *</label>
-                  <input type="tel" placeholder="05XX XXX XX XX" required />
+                  <label for="cfPhone">Telefon *</label>
+                  <input type="tel" id="cfPhone" name="phone" autocomplete="tel"
+                         inputmode="tel" maxlength="30" placeholder="05XX XXX XX XX" required />
                 </div>
               </div>
               <div class="form-group">
-                <label>İlgilendiğiniz Metrekare</label>
-                <select>
+                <label for="cfSqm">İlgilendiğiniz Metrekare</label>
+                <select id="cfSqm" name="sqm">
                   <option value="">Seçiniz...</option>
                   <option>250 m² civarı</option>
                   <option>300 m² civarı</option>
@@ -2576,8 +2591,8 @@
                 </select>
               </div>
               <div class="form-group">
-                <label>Bütçeniz</label>
-                <select>
+                <label for="cfBudget">Bütçeniz</label>
+                <select id="cfBudget" name="budget">
                   <option value="">Seçiniz...</option>
                   <option>300.000 – 400.000 ₺</option>
                   <option>400.000 – 500.000 ₺</option>
@@ -2587,8 +2602,9 @@
                 </select>
               </div>
               <div class="form-group">
-                <label>Mesajınız</label>
-                <textarea placeholder="Aradığınız arsa özellikleri, gezi tercih ettiğiniz gün vb."></textarea>
+                <label for="cfMessage">Mesajınız</label>
+                <textarea id="cfMessage" name="message" maxlength="2000"
+                          placeholder="Aradığınız arsa özellikleri, gezi tercih ettiğiniz gün vb."></textarea>
               </div>
               <button type="submit" class="form-submit">Bilgi Talep Et</button>
               <div class="form-success" id="formSuccess">

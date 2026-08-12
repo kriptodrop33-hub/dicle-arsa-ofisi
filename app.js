@@ -617,13 +617,24 @@ async function submitForm(e) {
   const eskiMetin = btn ? btn.textContent : '';
   if (btn) { btn.textContent = 'Gönderiliyor...'; btn.disabled = true; }
 
-  const inputs = e.target.querySelectorAll('input, select, textarea');
+  /* Alanlar SIRA NUMARASIYLA değil ADIYLA okunuyor. Eskiden
+     inputs[0..4] kullanılıyordu: forma ileride bir alan eklenirse veya
+     sıra değişirse ad, telefon alanına yazılırdı ve bu SESSİZ bir hata
+     olurdu — kimse fark etmeden yanlış veri kaydedilirdi. */
+  const el = e.target.elements;
+  const al = (ad) => (el[ad] && typeof el[ad].value === 'string' ? el[ad].value.trim() : '');
+
+  /* İKİ AYRI ANAHTAR SETİ, ikisi de gerekli:
+     - from_name / from_phone  -> EmailJS şablonunun beklediği adlar
+     - name / phone / ...      -> firestore.rules'un beklediği adlar
+     Biri diğerinin yerine kullanılırsa ya mail boş gider ya da Firestore
+     yazmayı reddeder. Bu ayrım bilinçli, sadeleştirilmemeli. */
   const formData = {
-    from_name:  inputs[0]?.value || '',
-    from_phone: inputs[1]?.value || '',
-    sqm:        inputs[2]?.value || '',
-    budget:     inputs[3]?.value || '',
-    message:    inputs[4]?.value || ''
+    from_name:  al('name'),
+    from_phone: al('phone'),
+    sqm:        al('sqm'),
+    budget:     al('budget'),
+    message:    al('message')
   };
 
   /* Talep iki bağımsız kanala gidiyor: Firestore kaydı ve EmailJS
