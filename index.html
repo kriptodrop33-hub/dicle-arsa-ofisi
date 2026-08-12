@@ -11,11 +11,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <!-- Klasik: Montserrat (başlıklar) + Inter (gövde) -->
-  <!-- Fraunces: yüksek kontrastlı, optik boyutlu display serif. SOFT ekseni
-       terminalleri yumuşatır (toprak/arazi işine uygun sıcaklık), WONK ekseni
-       karakteristik alternatif harfleri açar. Karla: sıcak grotesk gövde.
-       İkisi de latin-ext içerir — ş ğ ı İ ç ö ü tam desteklenir. -->
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..700&family=Karla:ital,wght@0,300..700;1,400..600&display=swap" rel="stylesheet" />
+  <!-- Source Serif 4: ekran okumasi icin tasarlanmis, DUSUK kontrastli,
+       sakin bir serif. Fraunces'in yuksek kontrasti ve alternatif harf
+       bicimleri karakterliydi ama okumayi yoruyordu; hedef kitle yas
+       ortalamasi yuksek yatirimcilar.
+       Figtree: genis, acik harf bosluklu, cok okunakli govde fontu.
+       Ikisi de latin-ext icerir — s g i I c o u tam desteklenir. -->
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..600&family=Figtree:ital,wght@0,300..800;1,400..600&display=swap" rel="stylesheet" />
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -30,7 +32,10 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/TextPlugin.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
+  <!-- vanilla-tilt kaldırıldı: 3D eğme efekti kartların CSS hover'ını
+       eziyordu ve bu tür bir sayfada oyuncak duruyordu. Hover artık
+       tamamen CSS ile. -->
+
   <style>
     /* ── Editorial Premium — 3 RENK PALETİ ── */
     :root {
@@ -71,37 +76,39 @@
          değiştirildi. Önceden Montserrat + Inter idi: "Editorial
          Premium" iddiasındaki bir tasarımda geometrik sans + nötr
          arayüz fontu, sıradan görünmesinin başlıca sebebiydi. */
-      --font-serif:  'Fraunces', 'Georgia', 'Times New Roman', serif;  /* display */
-      --font-sans:   'Karla', system-ui, -apple-system, sans-serif;    /* gövde */
-      /* Fraunces eksen ayarları — tek yerden yönetilir */
-      --wonk-off:    'SOFT' 24, 'WONK' 0;
-      --wonk-on:     'SOFT' 30, 'WONK' 1;
+      --font-serif:  'Source Serif 4', Georgia, 'Times New Roman', serif;  /* başlıklar */
+      --font-sans:   'Figtree', system-ui, -apple-system, sans-serif;      /* gövde */
+      /* Fraunces'ten kalan eksen değişkenleri nötrlendi. Source Serif 4'te
+         SOFT/WONK ekseni yok; değişkenler 100+ yerde kullanıldığı için
+         silinmedi, "normal" değerine çekildi. */
+      --wonk-off:    'opsz' 32;
+      --wonk-on:     'opsz' 20;
     }
 
     /* ── Reset ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 17px; }                               /* 16 → 17 base — tüm rem'ler biraz büyür */
-    @media (max-width: 1024px) { html { font-size: 16px; } }
-    @media (max-width: 480px)  { html { font-size: 15px; } }
+    /* Taban punto. Hedef kitle yaş ortalaması yüksek yatırımcılar ve
+       trafiğin çoğu mobil; küçük ekranda 15px'e düşürmek metni okunmaz
+       kılıyordu. Mobilde 16px taban korunuyor. */
+    html { font-size: 17px; }
+    @media (max-width: 1024px) { html { font-size: 16.5px; } }
+    @media (max-width: 480px)  { html { font-size: 16px; } }
     body { font-family: var(--font-sans); color: var(--ink); background: var(--cream-pale); overflow-x: hidden; font-weight: 400; line-height: 1.65; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-    /* Fraunces yüksek kontrastlı bir serif: Montserrat'ın ihtiyaç duyduğu
-       kalın ağırlık ve gevşek harf aralığı burada hantal durur. Ağırlık
-       600'e, harf aralığı negatife çekildi; optik boyutlandırma açık. */
+    /* Source Serif 4 düşük kontrastlı ve geniş: Fraunces'in ihtiyaç duyduğu
+       sıkı harf aralığı burada harfleri birbirine yapıştırır. Aralık
+       gevşetildi, ağırlık 600'de tutuldu. */
     h1, h2, h3, h4 {
       font-family: var(--font-serif);
       font-weight: 600;
-      letter-spacing: -0.022em;
+      letter-spacing: -0.012em;
       font-optical-sizing: auto;
-      font-variation-settings: var(--wonk-off);
     }
-    /* Vurgu artık GERÇEKTEN italik — Fraunces'in italiği bu tasarımın
-       en karakteristik parçası. Önceden font-style:normal ile italik
-       iptal ediliyordu, vurgu yalnızca renkten ibaret kalıyordu. */
+    /* Vurgu italik + altın. Renk tek başına yeterli bir ayrım değil —
+       renk körlüğü olan kullanıcı için italik ikinci sinyali sağlıyor. */
     h1 em, h2 em, h3 em, h4 em {
       font-style: italic;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--gold);
-      font-variation-settings: var(--wonk-on);
     }
     a { text-decoration: none; color: inherit; }
     /* Sabit navbar çapa hedeflerinin üstünü kesiyordu — menüden bir
@@ -227,13 +234,34 @@
     }
     .topbar-item svg { width: 13px; height: 13px; flex-shrink: 0; opacity: .85; }
     .topbar-item:hover { color: var(--gold-soft); }
-    .topbar-right { display: flex; align-items: center; gap: 26px; }
+    .topbar-right { display: flex; align-items: center; gap: 22px; }
     .topbar-sep { width: 1px; height: 13px; background: rgba(212,184,118,0.28); }
-    @media (max-width: 860px) {
-      .nav-topbar { height: 34px; }
+    /* Hattın o an açık olup olmadığını gösteren nokta. Renk tek başına
+       yeterli sinyal değil — metin de yazılıyor ("Şu an açık"). */
+    .hours-dot {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.62rem; letter-spacing: 0.1em; text-transform: none;
+    }
+    .hours-dot::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: currentColor; flex-shrink: 0;
+    }
+    .hours-dot.is-open   { color: #7ab648; }
+    .hours-dot.is-closed { color: rgba(244,237,224,0.5); }
+    .hours-dot.is-open::before { box-shadow: 0 0 0 3px rgba(122,182,72,0.22); }
+
+    @media (max-width: 980px) {
       .topbar-loc { display: none; }
       .nav-topbar .container { justify-content: center; }
-      .topbar-right { gap: 18px; }
+      .topbar-right { gap: 16px; }
+    }
+    @media (max-width: 620px) {
+      .nav-topbar { height: 34px; }
+      /* Dar ekranda yalnızca en kritik iki bilgi kalır: saat durumu ve telefon */
+      .topbar-hours [data-hours-range] { display: none; }
+      .topbar-right .topbar-sep:first-of-type { display: none; }
+      .topbar-right > a:first-of-type { display: none; }  /* Instagram — menüde ve alt bilgide var */
+      .topbar-right { gap: 14px; }
     }
 
     /* ── NAVBAR (editorial — şeffaf üzerinde başlar) ── */
@@ -717,7 +745,14 @@
       .form-row { grid-template-columns: minmax(0, 1fr); gap: 0; }
       .contact-info > p { font-size: 1rem; }
     }
-    .contact-item-sub { font-family: var(--font-sans); font-size: 0.78rem; color: var(--text-light); margin-top: 4px; font-weight: 300; }
+    .contact-item-sub { font-family: var(--font-sans); font-size: 0.78rem; color: var(--text-light); margin-top: 4px; font-weight: 400; }
+    .contact-item-hours {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 7px;
+      font-family: var(--font-sans); font-size: 0.78rem; font-weight: 600; color: var(--green-mid);
+    }
+    /* Açık zeminde durum noktası — koyu zemindeki renkler burada okunmaz */
+    .contact-item-hours .hours-dot.is-open   { color: #2f6b3d; }
+    .contact-item-hours .hours-dot.is-closed { color: var(--text-light); }
     .contact-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
     .whatsapp-btn { display: inline-flex; align-items: center; gap: 10px; background: transparent; color: var(--green-dark); border: 1px solid var(--green-dark); padding: 14px 26px; border-radius: 2px; font-family: var(--font-sans); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; transition: var(--transition); }
     .whatsapp-btn:hover { background: var(--green-dark); color: var(--cream); }
@@ -1297,27 +1332,39 @@
        İLAN KARTLARI — 3D TILT & GLOW
     ════════════════════════════════════════ */
     .listings-grid { perspective: var(--perspective); }
+    /* Bu blok 3D tilt için yazılmıştı. preserve-3d ve overflow:visible
+       artık gereksiz; üstelik overflow:visible görselin karta kırpılmasını
+       engelliyordu, bu yüzden .listing-img'e ayrıca köşe yuvarlama
+       vermek gerekmişti. Tilt kalkınca kart tekrar kendi içine kırpıyor. */
     .listing-card {
-      transform-style: preserve-3d;
-      will-change: transform;
-      overflow: visible;
       position: relative;
+      overflow: hidden;
+      /* Ayrı geçişler: kaldırma hızlı, gölge ve kenar biraz daha yavaş —
+         hepsi tek sürede olunca hareket "toplu" ve ucuz duruyordu. */
+      transition:
+        transform .45s var(--ease-expo),
+        box-shadow .55s var(--ease-expo),
+        border-color .35s ease;
     }
-    /* Üst köşe yuvarlama — overflow:visible olunca img doğrudan kliplenmez */
-    .listing-img {
-      border-radius: var(--radius) var(--radius) 0 0;
+    .listing-card:hover {
+      transform: translateY(-7px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--gold);
     }
-    .listing-card::before {
-      content: ''; position: absolute; inset: -2px;
-      border-radius: calc(var(--radius) + 3px);
-      background: var(--grad-border);
-      opacity: 0; z-index: -1; filter: blur(6px);
-      transition: opacity 0.4s ease;
-      pointer-events: none;
+    /* Üstte içeri doğru çizilen altın çizgi — kaldırma efektine eşlik eden
+       ikinci, daha ince bir sinyal. */
+    .listing-card::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--gold); transform: scaleX(0); transform-origin: left;
+      transition: transform .5s var(--ease-expo); z-index: 3; pointer-events: none;
     }
-    .listing-card:hover::before { opacity: 0.65; }
-    /* hover box-shadow — transform Vanilla Tilt tarafından yönetilir */
-    .listing-card:hover { box-shadow: var(--shadow-lg) !important; }
+    .listing-card:hover::after { transform: scaleX(1); }
+    /* Dokunmatik cihazda hover durumu "yapışık" kalıyor — devre dışı */
+    @media (hover: none) {
+      .listing-card:hover { transform: none; }
+      .listing-card:hover::after { transform: scaleX(0); }
+      .listing-card:hover .listing-img img { transform: none; }
+    }
 
     /* ════════════════════════════════════════
        LOCATION STRIP — DÖNEN IŞIL & 3D İKON
@@ -1458,7 +1505,14 @@
     }
     .tour-card-wa svg { width: 16px; height: 16px; }
     .tour-card-wa:hover { background: rgba(212,184,118,0.14); color: var(--white); border-color: var(--gold); }
-    .tour-card-rule { height: 1px; background: rgba(212,184,118,0.22); margin: 24px 0 18px; }
+    .tour-card-hours {
+      display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+      margin-top: 16px;
+      font-family: var(--font-sans); font-size: 0.8rem; font-weight: 500;
+      color: rgba(244,237,224,0.7); letter-spacing: 0.03em;
+    }
+    .tour-card-hours svg { width: 15px; height: 15px; opacity: .8; flex-shrink: 0; }
+    .tour-card-rule { height: 1px; background: rgba(212,184,118,0.22); margin: 22px 0 18px; }
     .tour-card-notes { display: flex; flex-direction: column; gap: 10px; }
     .tour-card-notes li {
       position: relative; padding-left: 22px;
@@ -1567,6 +1621,114 @@
       0%   { box-shadow: 0 8px 24px rgba(37,211,102,.45), 0 0 0 0 rgba(37,211,102,0.4); }
       70%  { box-shadow: 0 8px 24px rgba(37,211,102,.45), 0 0 0 18px rgba(37,211,102,0); }
       100% { box-shadow: 0 8px 24px rgba(37,211,102,.45), 0 0 0 0 rgba(37,211,102,0); }
+    }
+    /* ══════════════════════════════════════════════════════════════════
+       MOBİL OPTİMİZASYON
+       Trafiğin çoğu Instagram'dan, yani telefondan geliyor. Amaç: daha
+       geniş, daha sade, daha büyük dokunma hedefleri.
+       Bu blok bilinçli olarak stil bloğunun SONUNDA — önceki mobil
+       kuralları ezmesi gerekiyor.
+       ══════════════════════════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      /* GENİŞLİK: kenar boşluğu 20 → 16px. Küçük ekranda 8px bile
+         gözle görülür genişlik kazandırıyor. */
+      .container { padding: 0 16px; }
+
+      /* DOKUNMA HEDEFLERİ: Apple ve Google'ın önerdiği alt sınır 44px.
+         Buton ve bağlantıların tamamı bu sınıra çekildi. */
+      .btn, .modal-btn, .whatsapp-btn, .call-btn,
+      .tour-card-phone, .tour-card-wa, .hero-rail-cta {
+        min-height: 52px; padding-top: 15px; padding-bottom: 15px;
+      }
+      .nav-links a, .mobile-menu a { padding: 6px 0; }
+
+      /* Üst şerit mobilde 34px'ti; içindeki telefon bağlantısının
+         dokunma yüksekliği 18px kalıyordu. Şerit 46px'e çıkarıldı ve
+         bağlantılar tüm yüksekliği kaplıyor. */
+      .nav-topbar { height: 46px; }
+      #navbar { top: 46px; }
+      .nav-topbar .topbar-item { min-height: 46px; align-items: center; }
+
+      /* Hamburger 40x40'tı — 48x48 alt sınıra çekildi */
+      .hamburger { width: 48px; height: 48px; margin-right: -8px; }
+
+      /* Alt bilgi ve kart içi metin bağlantıları: görünüm değişmeden
+         dokunulabilir alan büyütülüyor. */
+      .footer-col ul li a, .footer-contact-list li a, .tour-card-ig,
+      .contact-item-value a, .nav-logo {
+        display: inline-flex; align-items: center; min-height: 44px;
+      }
+      /* Alt bilgi menüsündeki satır aralığı, bağlantılar 44px'e çıkınca
+         iki katına çıkmasın diye sıkılaştırıldı. */
+      .footer-col ul { gap: 0; }
+      .footer-col ul li { margin: 0; }
+
+      /* SADELİK: dekoratif katmanlar mobilde hem yavaşlatıyor hem
+         dikkat dağıtıyor. */
+      #hero::after { display: none; }              /* film greni */
+      #tour::before { opacity: 0.28; }             /* topografi dokusu */
+      #cursor-dot, #cursor-ring { display: none !important; }  /* özel imleç */
+
+      /* HERO: dikey boşluk kısaldı, başlık büyüdü, aksiyon öne çıktı */
+      .hero-grid { padding: 104px 0 56px; gap: 32px; }
+      .hero-content { max-width: 100%; }
+      .hero-title { font-size: clamp(2.3rem, 10vw, 3rem); line-height: 1.08; }
+      .hero-desc { max-width: 100%; }
+      .hero-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+      .hero-actions .btn { width: 100%; justify-content: center; }
+      /* Fiyat rayı mobilde de kalıyor — fiyat en değerli bilgi — ama
+         tam genişlik ve daha kompakt. */
+      .hero-rail { max-width: 100%; padding: 22px 20px; }
+      .hero-features { margin-top: 36px; padding-top: 26px; }
+
+      /* İLAN KARTLARI: gövde boşluğu azaldı, içerik genişledi */
+      .listing-body { padding: 24px 20px 22px; }
+      .listing-img { height: 220px; }
+      .listing-title { font-size: 1.28rem; }
+
+      /* BÖLÜM BOŞLUKLARI: masaüstü için ayarlanmış geniş boşluklar
+         mobilde gereksiz kaydırma yaratıyor. */
+      .section-header { margin-bottom: 40px; }
+      .section-title { font-size: clamp(1.85rem, 7.2vw, 2.4rem); }
+      .section-sub { font-size: 1rem; }
+
+      /* SABİT WHATSAPP BUTONU: içeriğin üstünü kapatmasın diye
+         sayfaya alt boşluk; buton da biraz küçüldü. */
+      body { padding-bottom: 0; }
+      .float-whatsapp { width: 54px; height: 54px; bottom: 18px; right: 16px; }
+      #footer { padding-bottom: 92px; }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 0 14px; }
+      /* Tek kolona düşen her ızgarada boşluk sıkılaştırıldı */
+      .listings-grid, .features-grid { gap: 18px; }
+      .hero-rail-num { font-size: 2.2rem; }
+      .tour-steps { gap: 20px; }
+      .tour-step-no { width: 38px; height: 38px; font-size: 0.8rem; }
+      .tour-steps::before { left: 18.5px; }
+    }
+
+    /* Dokunmatik cihazlarda hover durumları "yapışıyor": kullanıcı bir
+       ögeye dokunduktan sonra hover stili parmağını çektiğinde de
+       kalıyor. Hover'a bağlı görsel değişimler yalnızca gerçek imleci
+       olan cihazlarda çalışsın. */
+    @media (hover: none) {
+      .nav-links a:hover::after { transform: scaleX(0); }
+      .nav-phone:hover { transform: none; box-shadow: 0 2px 0 rgba(31,74,42,0.14); }
+      .feature-card:hover { transform: none; }
+    }
+
+    /* Hareket azaltma tercihi olan kullanıcılar: kaydırma yumuşatma ve
+       süslü geçişler kapatılır. Vestibüler rahatsızlığı olan kişiler
+       için erişilebilirlik gereği. */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+      }
     }
   </style>
 </head>
@@ -1714,6 +1876,7 @@
         }
 
         applyPhone(s.phone);
+        applyHours(s.hoursOpen, s.hoursClose);
 
         // Tema da ayarın parçası — böylece cihazlar arası senkron olur.
         // ThemeSystem sayfa sonunda tanımlanıyor; localStorage yolunda
@@ -1722,7 +1885,60 @@
           window.ThemeSystem.applyTheme(s.theme);
         }
       }
+      /* ── Telefon hattı çalışma saatleri ────────────────────────────
+         Saatler Firestore'daki settings/site dokümanında tutuluyor ve
+         yönetim panelinden değiştirilebiliyor. Sayfada iki şey gösterilir:
+         saat aralığı ve o an hattın açık olup olmadığı.
+
+         Gece yarısını aşan aralıklar da desteklenir (örn. 20:00–02:00);
+         bu durumda "kapalı" penceresi aralığın dışında kalan zamandır. */
+      var saatBilgisi = { acilis: '08:00', kapanis: '23:00' };
+
+      function dakikaya(hhmm) {
+        var p = String(hhmm || '').split(':');
+        var s = parseInt(p[0], 10), d = parseInt(p[1], 10);
+        if (isNaN(s) || isNaN(d)) return null;
+        return s * 60 + d;
+      }
+
+      function suAnAcikMi(acilis, kapanis) {
+        var a = dakikaya(acilis), k = dakikaya(kapanis);
+        if (a === null || k === null) return null;
+        var simdi = new Date();
+        var m = simdi.getHours() * 60 + simdi.getMinutes();
+        // Gece yarısını aşan aralık: açılış > kapanış (20:00–02:00 gibi)
+        return a <= k ? (m >= a && m < k) : (m >= a || m < k);
+      }
+
+      function applyHours(acilis, kapanis) {
+        if (acilis) saatBilgisi.acilis = acilis;
+        if (kapanis) saatBilgisi.kapanis = kapanis;
+        var a = saatBilgisi.acilis, k = saatBilgisi.kapanis;
+
+        document.querySelectorAll('[data-hours-range]').forEach(function(el) {
+          el.textContent = a + ' – ' + k;
+        });
+
+        var acik = suAnAcikMi(a, k);
+        document.querySelectorAll('[data-hours-status]').forEach(function(el) {
+          if (acik === null) { el.textContent = ''; return; }
+          el.textContent = acik ? 'Şu an açık' : 'Şu an kapalı';
+          el.classList.toggle('is-open', acik);
+          el.classList.toggle('is-closed', !acik);
+        });
+        // Kapalıyken "hemen arayın" demek yerine ne zaman açılacağını söyle
+        document.querySelectorAll('[data-hours-note]').forEach(function(el) {
+          if (acik === null) { el.textContent = ''; return; }
+          el.textContent = acik
+            ? 'Hattımız şu an açık, hemen arayabilirsiniz.'
+            : 'Hattımız şu an kapalı. ' + a + '–' + k + ' arası arayabilir, dilerseniz WhatsApp\'tan yazabilirsiniz.';
+        });
+      }
+      // Durum dakika başı tazelenir — sayfa uzun süre açık kalırsa bayatlamasın
+      setInterval(function() { applyHours(); }, 60000);
+
       window.__applyBranding = applyBranding;
+      window.__applyHours = applyHours;
       /* İlan kartları sayfa açılışından SONRA basılıyor ve içlerinde
          wa.me linkleri var. renderListings bunu çağırıp yeni kartlara
          da güncel numarayı uyguluyor. */
@@ -1796,6 +2012,12 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" stroke="none"/></svg>
           Arazi Videoları
         </a>
+        <span class="topbar-sep"></span>
+        <span class="topbar-item topbar-hours">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span data-hours-range>08:00 – 23:00</span>
+          <span class="hours-dot" data-hours-status></span>
+        </span>
         <span class="topbar-sep"></span>
         <a href="tel:+905307615120" class="topbar-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.81 19.79 19.79 0 010 .18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.18 6.18l1.28-1.28a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
@@ -2044,6 +2266,11 @@
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
             WhatsApp'tan yazın
           </a>
+          <p class="tour-card-hours">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <span data-hours-range>08:00 – 23:00</span>
+            <span class="hours-dot" data-hours-status></span>
+          </p>
           <div class="tour-card-rule"></div>
           <ul class="tour-card-notes">
             <li>Yol ve gezi ücretsiz</li>
@@ -2170,6 +2397,10 @@
                 <div class="contact-item-label">Telefon</div>
                 <div class="contact-item-value"><a href="tel:+905307615120">0530 761 51 20</a></div>
                 <div class="contact-item-sub">Nurhayat Hanım — Satış Yetkilisi</div>
+                <div class="contact-item-hours">
+                  <span data-hours-range>08:00 – 23:00</span>
+                  <span class="hours-dot" data-hours-status></span>
+                </div>
               </div>
             </div>
             <div class="contact-item">
@@ -2596,6 +2827,8 @@ const DEFAULT_SITE_SETTINGS = {
   heroTitle:    'Hayalinizdeki<br><em>Yere</em> Sahip Olun',
   heroDesc:     'Trakya\'nın incisi Marmaraereğlisi\'nde, denize komşu, E-5 yoluna yakın, tapulu yatırımlık ve villa imarlı arsalar.',
   phone:        '0530 761 51 20',
+  hoursOpen:    '08:00',
+  hoursClose:   '23:00',
   logo:         null,
   theme:        'green'
 };
@@ -2677,6 +2910,17 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
         <textarea id="heroDesc" placeholder="Açıklama..."></textarea>
         <label>Telefon Numarası</label>
         <input type="tel" id="phone" placeholder="0530 761 51 20" />
+        <label>📞 Telefon Hattı Çalışma Saatleri</label>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="hoursOpen" style="font-size:0.72rem;opacity:.75;">Açılış</label>
+            <input type="time" id="hoursOpen" value="08:00" />
+          </div>
+          <div class="form-group">
+            <label for="hoursClose" style="font-size:0.72rem;opacity:.75;">Kapanış</label>
+            <input type="time" id="hoursClose" value="23:00" />
+          </div>
+        </div>
         <label>🎨 Logo Yükle (PNG/JPG)</label>
         <div style="border: 2px dashed #ccc; padding: 15px; border-radius: 8px; text-align: center; cursor: pointer;" onclick="document.getElementById('logoUpload').click()">
           <div id="logoPreview" style="display: none; margin-bottom: 10px;">
@@ -2726,6 +2970,8 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
       document.getElementById('heroTitle').value = settings.heroTitle.replace(/<br>/g, '\n');
       document.getElementById('heroDesc').value = settings.heroDesc;
       document.getElementById('phone').value = settings.phone;
+      document.getElementById('hoursOpen').value  = settings.hoursOpen  || '08:00';
+      document.getElementById('hoursClose').value = settings.hoursClose || '23:00';
 
       if (settings.logo) {
         document.getElementById('logoImg').src = settings.logo;
@@ -2817,6 +3063,8 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
           heroTitle:    document.getElementById('heroTitle').value.replace(/\n/g, '<br>') || 'Hayalinizdeki<br><em>Yere</em> Sahip Olun',
           heroDesc:     document.getElementById('heroDesc').value || '',
           phone:        document.getElementById('phone').value || '0530 761 51 20',
+          hoursOpen:    document.getElementById('hoursOpen').value  || '08:00',
+          hoursClose:   document.getElementById('hoursClose').value || '23:00',
           logo:         window.uploadedLogo || base.logo || null,
           theme:        base.theme || 'green',
         };
@@ -2829,6 +3077,8 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
             heroTitle:    settings.heroTitle,
             heroDesc:     settings.heroDesc,
             phone:        settings.phone,
+            hoursOpen:    settings.hoursOpen,
+            hoursClose:   settings.hoursClose,
             logo:         settings.logo,
             theme:        settings.theme,
             updatedAt:    firebase.firestore.FieldValue.serverTimestamp()
@@ -3074,21 +3324,21 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
       var cards = document.querySelectorAll('.listing-card');
       if (!cards.length || typeof gsap === 'undefined') return;
 
-      /* Vanilla Tilt */
-      if (!isMobile && typeof VanillaTilt !== 'undefined') {
-        VanillaTilt.init(cards, {
-          max: 9, speed: 700, glare: true, 'max-glare': 0.12,
-          scale: 1.03, perspective: 1000
-        });
-      }
+      /* 3D tilt kaldırıldı. İki sebep: (1) VanillaTilt karta inline
+         transform yazıyor ve CSS'teki hover kaldırma efektini (translateY
+         + görsel yakınlaşma) tamamen eziyordu — iki efekt birbiriyle
+         yarışıyordu. (2) Eğilen kart + parlama, ciddiyet bekleyen bir
+         gayrimenkul sayfasında oyuncak hissi veriyor. Hover artık
+         yalnızca CSS: kaldırma, altın kenar ve yavaş görsel yakınlaşma. */
 
-      /* GSAP staggered entrance */
+      /* Giriş animasyonu — rotateX kaldırıldı; kartlar aşağıdan sakince
+         yükseliyor, perspektifle savrulmuyor. */
       gsap.fromTo(cards,
-        { opacity: 0, y: 55, rotateX: 14 },
+        { opacity: 0, y: 34 },
         {
-          opacity: 1, y: 0, rotateX: 0,
-          stagger: 0.1, duration: 0.85, ease: 'power3.out',
-          scrollTrigger: { trigger: '#listings', start: 'top 78%', once: true }
+          opacity: 1, y: 0,
+          stagger: 0.08, duration: 0.7, ease: 'power2.out',
+          scrollTrigger: { trigger: '#listings', start: 'top 82%', once: true }
         }
       );
 
@@ -3105,20 +3355,16 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
     function initFeaturesAnimation() {
       if (typeof gsap === 'undefined') return;
 
+      /* rotateX:28 + back.out(1.3) kartları zıplatarak içeri sokuyordu.
+         Sakin bir yükselişle değiştirildi. */
       gsap.fromTo('.feature-card',
-        { opacity: 0, y: 45, rotateX: 28 },
+        { opacity: 0, y: 30 },
         {
-          opacity: 1, y: 0, rotateX: 0,
-          stagger: 0.1, duration: 0.75, ease: 'back.out(1.3)',
-          scrollTrigger: { trigger: '#features', start: 'top 72%', once: true }
+          opacity: 1, y: 0,
+          stagger: 0.08, duration: 0.65, ease: 'power2.out',
+          scrollTrigger: { trigger: '#features', start: 'top 80%', once: true }
         }
       );
-
-      if (!isMobile && typeof VanillaTilt !== 'undefined') {
-        VanillaTilt.init(document.querySelectorAll('.feature-card'), {
-          max: 14, speed: 450, glare: false
-        });
-      }
     }
 
     /* ══════════════════════════════════════════════════
