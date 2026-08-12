@@ -7,7 +7,13 @@
       "firestore.rules",
       "storage.rules",
       "firestore.indexes.json",
-      "**/.*"
+      "**/.*",
+      "**/.*/**",
+      ".git/**",
+      ".firebase/**",
+      ".claude/**",
+      "**/node_modules/**",
+      "*.md"
     ],
     "headers": [
       {
