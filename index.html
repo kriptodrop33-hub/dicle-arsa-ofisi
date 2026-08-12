@@ -1117,8 +1117,11 @@
     .admin-btn-out:hover { background: #8d1414; }
 
     /* Card admin overlay */
-    .listing-card.admin-card { position: relative; outline: 2px dashed transparent; }
-    body.admin-mode .listing-card { outline: 2px dashed rgba(44,95,46,.3); }
+    .listing-card.admin-card { position: relative; }
+    /* Yönetim modundaki kesikli yeşil dış çizgi kaldırıldı. Kartların
+       artık gerçek bir kenarlığı var ve yönetim modunda kartın üstünde
+       düzenle/sil butonları görünüyor; kesikli çizgi hem gereksiz hem de
+       kenarlıkla üst üste binip görüntüyü bozuyordu. */
     .card-admin-controls {
       position: absolute; top: 14px; right: 14px; display: none;
       gap: 6px; z-index: 5;
@@ -1424,15 +1427,18 @@
          Artık görünür bir hairline + İKİ katmanlı gölge var:
          yakın temas gölgesi kenarı keskinleştiriyor, geniş ortam
          gölgesi kartı zeminden ayırıyor. */
-      /* Alfa ölçülerek seçildi: 0.62 harmanlandığında dışarıdaki krem
-         zemine karşı 3.41:1, içerideki beyaz karta karşı 3.71:1 —
-         ikisi de UI ögeleri için gereken 3:1 eşiğinin üstünde.
-         Önceki 0.18 yalnızca 1.36:1 veriyordu, yani çizgi fiilen
-         görünmüyordu. */
-      border: 1px solid rgba(31, 74, 42, 0.62);
+      /* Kenarlık sıcak nötr tonda, yeşil değil. Yeşil çizgi kartı
+         "çerçeveli" değil "kutulu" gösteriyordu ve krem–altın paletin
+         içinde yabancı duruyordu. --ink tabanlı bu ton kağıt kenarı
+         hissi veriyor.
+         Görünürlük artık ağırlıklı olarak GÖLGEDEN geliyor: kalın bir
+         çizgi yerine sıkı bir temas gölgesi + geniş ortam gölgesi.
+         Kart zaten beyaz, zemin krem — asıl ayrım oradan çıkıyor. */
+      border: 1px solid rgba(42, 38, 34, 0.16);
       box-shadow:
-        0 1px 2px rgba(31, 74, 42, 0.08),
-        0 12px 28px -14px rgba(31, 74, 42, 0.28);
+        0 1px 1px rgba(42, 38, 34, 0.05),
+        0 2px 6px -1px rgba(42, 38, 34, 0.10),
+        0 16px 34px -18px rgba(31, 74, 42, 0.30);
       /* Ayrı geçişler: kaldırma hızlı, gölge ve kenar biraz daha yavaş —
          hepsi tek sürede olunca hareket "toplu" ve ucuz duruyordu. */
       transition:
@@ -1442,7 +1448,7 @@
     }
     /* Görsel ile gövde arasında ayırıcı çizgi — kartın iç yapısı da
        çerçeve kadar net olsun. */
-    .listing-img { border-bottom: 1px solid rgba(31, 74, 42, 0.5); }
+    .listing-img { border-bottom: 1px solid rgba(42, 38, 34, 0.12); }
     .listing-card:hover {
       transform: translateY(-7px);
       border-color: var(--gold);
