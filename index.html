@@ -202,11 +202,25 @@
     .btn-gold { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
     .btn-gold:hover { background: var(--gold); color: var(--white); transform: translateY(-2px); }
     /* Tag'ler — sade, sadece yeşil/altın varyasyonları */
-    .tag { display: inline-block; padding: 5px 14px; font-size: 0.65rem; font-weight: 600; font-family: var(--font-sans); letter-spacing: 0.16em; text-transform: uppercase; background: transparent; border: 1px solid currentColor; }
-    .tag-new   { color: var(--green-mid); border-color: var(--green-mid); }
-    .tag-hot   { color: var(--gold); border-color: var(--gold); }
-    .tag-deal  { color: var(--green-dark); background: var(--cream-deep); border-color: var(--cream-deep); }
-    .tag-villa { color: var(--gold); background: rgba(184,149,74,0.08); border-color: var(--gold); }
+    /* Rozetler ilan fotoğrafının ÜSTÜNDE duruyor. Zemin şeffaf ve yazı
+       ince altın olunca açık renkli fotoğraflarda (buğday tarlası, kumsal,
+       gökyüzü) tamamen okunamaz hale geliyordu. Artık navbar telefon
+       butonuyla aynı dil: dolu altın zemin, koyu yeşil yazı.
+       Altın #b8954a üzerinde koyu yeşil #1f4a2a yazı 6.6:1 kontrast verir —
+       fotoğraf ne olursa olsun okunur, çünkü zemin artık opak. */
+    .tag {
+      display: inline-block; padding: 6px 14px;
+      font-size: 0.65rem; font-weight: 700; font-family: var(--font-sans);
+      letter-spacing: 0.16em; text-transform: uppercase;
+      background: var(--gold); color: var(--green-dark);
+      border: 1px solid var(--gold); border-radius: 2px;
+      box-shadow: 0 2px 8px rgba(20, 40, 22, 0.32);
+    }
+    /* Tür ayrımı zeminin TONUYLA yapılıyor, şeffaflıkla değil */
+    .tag-new   { background: var(--green-mid);  border-color: var(--green-mid);  color: #fff; }
+    .tag-hot   { background: var(--gold);       border-color: var(--gold);       color: var(--green-dark); }
+    .tag-deal  { background: var(--cream);      border-color: var(--cream);      color: var(--green-dark); }
+    .tag-villa { background: var(--gold-soft);  border-color: var(--gold-soft);  color: var(--green-dark); }
 
     @keyframes fadeUp   { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
     @keyframes pulse    { 0%,100% { transform:scale(1); } 50% { transform:scale(1.06); } }
