@@ -154,7 +154,7 @@ function renderListings() {
               <div class="listing-price-label">${escapeHtml(l.priceLabel || 'Toplam Fiyat')}</div>
               <div class="listing-price-total">${escapeHtml(l.price)} <small>₺</small></div>
             </div>
-            <a href="https://wa.me/905332516036?text=${waMsg}" target="_blank" class="btn-card">
+            <a href="https://wa.me/905307615120?text=${waMsg}" target="_blank" class="btn-card">
               Bilgi Al
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
