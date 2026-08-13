@@ -81,9 +81,21 @@
       /* Nötr */
       --text-dark:   #1a1a1a;
       --text-mid:    #555;
-      --text-light:  #888;
+      --text-light:  #6b6b6b;    /* #888 krem üzerinde 3,26:1 idi — okuma eşiğinin altında */
       --white:       #ffffff;
       --ink:         #2a2622;     /* metin için yumuşak siyah */
+      /* ── Anlamsal METİN renkleri ────────────────────────────────────
+         --green-dark hem 30 yerde METİN hem 23 yerde ZEMİN olarak
+         kullanılıyordu. Açık temalarda ikisi de koyu olabildiği için
+         sorun çıkmıyordu; koyu temada yüzeyler koyulaşınca metin de
+         koyu kaldı ve başlıklar 1.09:1 kontrastla GÖRÜNMEZ oldu.
+         Metin ve zemin artık ayrı değişkenler.
+         --gold da açık zeminde yalnızca 2.6:1 veriyor; çizgi ve ikonda
+         sorun değil ama METİN olarak okunmuyor. Metin için ayrı,
+         koyulaştırılmış bir altın tanımlandı. */
+      --heading:     #1f4a2a;     /* başlık METNİ (zemin değil) */
+      --gold-text:   #7d6224;     /* açık zeminde okunabilir altın METİN */
+      --on-dark:     #f5f1e8;    /* koyu zeminde metin — her temada acik kalir */
       /* Shadows — minimal */
       --shadow:      0 6px 28px rgba(31,74,42,.08);
       --shadow-lg:   0 18px 60px rgba(31,74,42,.14);
@@ -155,7 +167,7 @@
     .section-title, .tour-title, .hero-title { overflow-wrap: break-word; hyphens: auto; }
     img { display: block; width: 100%; object-fit: cover; }
     ul { list-style: none; }
-    ::selection { background: var(--gold); color: var(--white); }
+    ::selection { background: var(--gold); color: var(--on-dark); }
 
     .container { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
     @media (max-width: 768px) { .container { padding: 0 20px; } }
@@ -170,7 +182,7 @@
       font-family: var(--font-sans);
       font-size: clamp(0.68rem, 1vw, 0.74rem);
       font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase;
-      color: var(--gold); margin-bottom: 20px;
+      color: var(--gold-text); margin-bottom: 20px;
     }
     .section-eyebrow::before,
     .section-eyebrow::after {
@@ -179,14 +191,14 @@
     }
     .section-title {
       font-family: var(--font-serif); font-size: clamp(2.1rem, 4.2vw, 3.3rem);
-      font-weight: 600; color: var(--green-dark); line-height: 1.1;
+      font-weight: 600; color: var(--heading); line-height: 1.1;
       letter-spacing: -0.028em; font-optical-sizing: auto;
       font-variation-settings: var(--wonk-off);
     }
     /* h1-h4'teki ile aynı düzeltme: font-style:normal italiği iptal
        ediyordu, vurgu yalnızca renk farkından ibaret kalıyordu. */
     .section-title em {
-      font-style: italic; font-weight: 500; color: var(--gold);
+      font-style: italic; font-weight: 500; color: var(--gold-text);
       font-variation-settings: var(--wonk-on);
     }
     .section-sub { font-family: var(--font-sans); font-size: clamp(1.05rem, 1.6vw, 1.2rem); color: var(--text-mid); max-width: 620px; line-height: 1.75; font-weight: 400; }
@@ -195,12 +207,12 @@
     }
     /* Editorial butonlar — düz, ince border, hover'da yumuşak dolgu */
     .btn { display: inline-flex; align-items: center; gap: 10px; padding: 18px 38px; font-family: var(--font-sans); font-weight: 500; font-size: 0.88rem; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; transition: var(--transition); position: relative; border-radius: 2px; border: 1px solid transparent; min-height: 48px; }
-    .btn-primary { background: var(--green-dark); color: var(--cream); border-color: var(--green-dark); }
+    .btn-primary { background: var(--green-dark); color: var(--cream); border-color: var(--heading); }
     .btn-primary:hover { background: var(--green-mid); border-color: var(--green-mid); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(31,74,42,.2); }
-    .btn-outline { background: transparent; color: var(--white); border: 1px solid rgba(255,255,255,0.5); }
-    .btn-outline:hover { background: var(--white); color: var(--green-dark); border-color: var(--white); transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--on-dark); border: 1px solid rgba(255,255,255,0.5); }
+    .btn-outline:hover { background: var(--white); color: var(--heading); border-color: var(--on-dark); transform: translateY(-2px); }
     .btn-gold { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
-    .btn-gold:hover { background: var(--gold); color: var(--white); transform: translateY(-2px); }
+    .btn-gold:hover { background: var(--gold); color: var(--on-dark); transform: translateY(-2px); }
     /* Tag'ler — sade, sadece yeşil/altın varyasyonları */
     /* Rozetler ilan fotoğrafının ÜSTÜNDE duruyor. Zemin şeffaf ve yazı
        ince altın olunca açık renkli fotoğraflarda (buğday tarlası, kumsal,
@@ -212,15 +224,15 @@
       display: inline-block; padding: 6px 14px;
       font-size: 0.65rem; font-weight: 700; font-family: var(--font-sans);
       letter-spacing: 0.16em; text-transform: uppercase;
-      background: var(--gold); color: var(--green-dark);
+      background: var(--gold); color: var(--heading);
       border: 1px solid var(--gold); border-radius: 2px;
       box-shadow: 0 2px 8px rgba(20, 40, 22, 0.32);
     }
     /* Tür ayrımı zeminin TONUYLA yapılıyor, şeffaflıkla değil */
     .tag-new   { background: var(--green-mid);  border-color: var(--green-mid);  color: #fff; }
-    .tag-hot   { background: var(--gold);       border-color: var(--gold);       color: var(--green-dark); }
-    .tag-deal  { background: var(--cream);      border-color: var(--cream);      color: var(--green-dark); }
-    .tag-villa { background: var(--gold-soft);  border-color: var(--gold-soft);  color: var(--green-dark); }
+    .tag-hot   { background: var(--gold);       border-color: var(--gold);       color: var(--heading); }
+    .tag-deal  { background: var(--cream);      border-color: var(--cream);      color: var(--heading); }
+    .tag-villa { background: var(--gold-soft);  border-color: var(--gold-soft);  color: var(--heading); }
 
     @keyframes fadeUp   { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
     @keyframes pulse    { 0%,100% { transform:scale(1); } 50% { transform:scale(1.06); } }
@@ -325,11 +337,11 @@
     .nav-inner { display: flex; align-items: center; justify-content: space-between; }
     .nav-logo { display: flex; align-items: center; gap: 14px; }
     .nav-logo-mark { width: 44px; height: 44px; border-radius: 0; background: transparent; border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
-    #navbar.scrolled .nav-logo-mark { background: var(--green-dark); border-color: var(--green-dark); }
+    #navbar.scrolled .nav-logo-mark { background: var(--green-dark); border-color: var(--heading); }
     .nav-logo-mark svg { width: 26px; height: 26px; }
-    .nav-logo-text { font-family: var(--font-serif); font-weight: 600; font-size: 1.08rem; color: var(--white); transition: var(--transition); line-height: 1.1; letter-spacing: -0.015em; font-optical-sizing: auto; font-variation-settings: var(--wonk-off); }
+    .nav-logo-text { font-family: var(--font-serif); font-weight: 600; font-size: 1.08rem; color: var(--on-dark); transition: var(--transition); line-height: 1.1; letter-spacing: -0.015em; font-optical-sizing: auto; font-variation-settings: var(--wonk-off); }
     .nav-logo-text span { font-family: var(--font-sans); font-size: 0.54rem; font-weight: 500; display: block; letter-spacing: 0.34em; opacity: 0.72; margin-top: 5px; color: var(--gold-soft); }
-    #navbar.scrolled .nav-logo-text { color: var(--green-dark); }
+    #navbar.scrolled .nav-logo-text { color: var(--heading); }
     .nav-links { display: flex; align-items: center; gap: 36px; }
     .nav-links a { font-family: var(--font-sans); font-size: 0.72rem; font-weight: 500; color: rgba(255,255,255,0.82); letter-spacing: 0.2em; text-transform: uppercase; transition: color .35s ease; position: relative; }
     /* Altın çizgi soldan çizilir, çıkışta SAĞA doğru toplanır — gidiş ve
@@ -340,19 +352,19 @@
       transition: transform .45s var(--ease-expo);
     }
     .nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
-    .nav-links a:hover { color: var(--white); }
+    .nav-links a:hover { color: var(--on-dark); }
     /* Kaydırma takibiyle işaretlenen aktif bölüm — kullanıcı sayfanın
        neresinde olduğunu görüyor. Önceden hiçbir aktif durum yoktu. */
-    .nav-links a.active { color: var(--white); }
+    .nav-links a.active { color: var(--on-dark); }
     .nav-links a.active::after { transform: scaleX(1); transform-origin: left; }
     #navbar.scrolled .nav-links a { color: rgba(42,38,34,0.68); }
     #navbar.scrolled .nav-links a:hover,
-    #navbar.scrolled .nav-links a.active { color: var(--green-dark); }
+    #navbar.scrolled .nav-links a.active { color: var(--heading); }
     /* Telefon işin birincil eylemi — altın dolgu ile diğer linklerden
        ayrılıyor. Önceden şeffaf çerçeveliydi ve nav linklerinden
        ayırt edilemiyordu. */
     .nav-phone {
-      background: var(--gold) !important; color: var(--green-dark) !important;
+      background: var(--gold) !important; color: var(--heading) !important;
       padding: 12px 24px !important; border-radius: 2px !important;
       font-family: var(--font-sans) !important; font-weight: 700 !important;
       font-size: 0.72rem !important; letter-spacing: 0.16em !important;
@@ -377,7 +389,7 @@
       transform: translateY(-1px);
       box-shadow: 0 10px 26px -12px rgba(184,149,74,0.85), 0 2px 0 rgba(31,74,42,0.14);
     }
-    #navbar.scrolled .nav-phone { background: var(--green-dark) !important; color: var(--cream) !important; border-color: var(--green-dark); }
+    #navbar.scrolled .nav-phone { background: var(--green-dark) !important; color: var(--cream) !important; border-color: var(--heading); }
     #navbar.scrolled .nav-phone:hover { background: var(--green-mid) !important; border-color: var(--green-mid); }
     .hamburger { display: none; flex-direction: column; gap: 6px; cursor: pointer; padding: 8px; width: 40px; height: 40px; align-items: center; justify-content: center; }
     .hamburger span { display: block; width: 26px; height: 1px; background: var(--white); transition: var(--transition); }
@@ -389,7 +401,7 @@
     .mobile-menu { display: none; position: fixed; inset: 0; background: var(--green-dark); z-index: 999; flex-direction: column; align-items: center; justify-content: center; gap: 36px; padding: 40px; }
     .mobile-menu.open { display: flex; }
     .mobile-menu::before { content:''; position: absolute; top: 60px; left: 50%; transform: translateX(-50%); width: 40px; height: 1px; background: var(--gold); opacity: 0.6; }
-    .mobile-menu a { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 700; color: var(--white); letter-spacing: -0.01em; transition: var(--transition); }
+    .mobile-menu a { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 700; color: var(--on-dark); letter-spacing: -0.01em; transition: var(--transition); }
     .mobile-menu a:hover { color: var(--gold); }
     .mobile-menu a:last-child {
       margin-top: 24px; font-family: var(--font-sans); font-size: 0.88rem;
@@ -398,7 +410,7 @@
       color: var(--gold) !important; padding: 16px 32px !important;
       border-radius: 2px !important;
     }
-    .mobile-menu a:last-child:hover { background: var(--gold) !important; color: var(--green-dark) !important; }
+    .mobile-menu a:last-child:hover { background: var(--gold) !important; color: var(--heading) !important; }
 
     /* ── HERO (Editorial Premium — büyük foto + zarif tipografi) ── */
     #hero {
@@ -480,7 +492,7 @@
     .hero-rail-price { display: flex; align-items: baseline; gap: 6px; }
     .hero-rail-num {
       font-family: var(--font-serif); font-weight: 600; font-size: 3.1rem;
-      line-height: 1; color: var(--white); letter-spacing: -0.035em;
+      line-height: 1; color: var(--on-dark); letter-spacing: -0.035em;
       font-optical-sizing: auto; font-variation-settings: var(--wonk-on);
       /* Rakamlar sabit genişlikte — hizalama kaymaz */
       font-variant-numeric: lining-nums tabular-nums;
@@ -506,7 +518,7 @@
     .hero-rail-facts b {
       order: 3;
       font-family: var(--font-sans); font-size: 0.82rem; font-weight: 700;
-      color: var(--white); letter-spacing: 0.01em; white-space: nowrap;
+      color: var(--on-dark); letter-spacing: 0.01em; white-space: nowrap;
     }
     .hero-rail-cta {
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -517,7 +529,7 @@
       transition: color .35s ease;
     }
     .hero-rail-cta svg { width: 16px; height: 16px; transition: transform .45s var(--ease-expo); }
-    .hero-rail-cta:hover { color: var(--white); }
+    .hero-rail-cta:hover { color: var(--on-dark); }
     .hero-rail-cta:hover svg { transform: translateX(6px); }
 
     @media (max-width: 1080px) {
@@ -545,7 +557,7 @@
       font-family: var(--font-serif);
       font-size: clamp(2.8rem, 6.5vw, 5.5rem);
       font-weight: 800;
-      color: var(--white);
+      color: var(--on-dark);
       line-height: 1.05;
       letter-spacing: -0.02em;
       margin-bottom: 40px;
@@ -625,7 +637,7 @@
       border-bottom: 1px solid rgba(184,149,74,0.25);
     }
     .location-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
-    .location-item { display: flex; align-items: center; gap: 16px; color: var(--white); }
+    .location-item { display: flex; align-items: center; gap: 16px; color: var(--on-dark); }
     .location-icon {
       width: 44px; height: 44px;
       background: transparent;
@@ -645,7 +657,7 @@
     .location-value {
       font-family: var(--font-serif);
       font-weight: 700; font-size: 1rem;
-      color: var(--white); letter-spacing: 0;
+      color: var(--on-dark); letter-spacing: 0;
     }
     @media (max-width: 768px) {
       .location-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
@@ -665,7 +677,7 @@
     .listing-body { padding: 32px 28px 28px; }
     .listing-location { display:flex; align-items:center; gap:8px; color:var(--text-light); font-family: var(--font-sans); font-size: 0.78rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 16px; }
     .listing-location svg { width:14px; height:14px; color:var(--gold); }
-    .listing-title { font-family: var(--font-serif); font-size: 1.35rem; font-weight: 700; color: var(--green-dark); margin-bottom: 20px; line-height: 1.3; letter-spacing: -0.01em; }
+    .listing-title { font-family: var(--font-serif); font-size: 1.35rem; font-weight: 700; color: var(--heading); margin-bottom: 20px; line-height: 1.3; letter-spacing: -0.01em; }
     /* İlan açıklaması — en fazla 3 satır, taşan kısım "…" ile kesilir.
        Kart yükseklikleri ızgarada eşit kalsın diye sınırlı. */
     .listing-desc {
@@ -680,13 +692,13 @@
     .listing-footer { display:flex; align-items:center; justify-content:space-between; gap: 14px; }
     .listing-price { font-family: var(--font-sans); }
     .listing-price-label { font-family: var(--font-sans); font-size: 0.68rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.24em; margin-bottom: 5px; }
-    .listing-price-total { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 800; color: var(--green-dark); line-height: 1; letter-spacing: -0.015em; }
+    .listing-price-total { font-family: var(--font-serif); font-size: 1.5rem; font-weight: 800; color: var(--heading); line-height: 1; letter-spacing: -0.015em; }
     .listing-price-total small { font-family: var(--font-sans); font-size: 0.78rem; font-weight: 500; color: var(--text-light); letter-spacing: 0.1em; }
-    .btn-card { padding: 14px 24px; font-size: 0.78rem; background: transparent; color: var(--green-dark); border-radius: 0; font-family: var(--font-sans); font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; transition: var(--transition); cursor: pointer; border: 1px solid var(--green-dark); display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
+    .btn-card { padding: 14px 24px; font-size: 0.78rem; background: transparent; color: var(--heading); border-radius: 0; font-family: var(--font-sans); font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; transition: var(--transition); cursor: pointer; border: 1px solid var(--green-dark); display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
     .btn-card:hover { background: var(--green-dark); color: var(--cream); }
     .btn-card svg { width: 13px; height: 13px; }
     .listings-cta { text-align:center; margin-top: 72px; padding: 64px 36px; background: var(--white); border: 1px solid var(--cream-deep); }
-    .listings-cta-title { font-family: var(--font-serif); font-weight: 700; font-size: 1.5rem; color: var(--green-dark); margin-bottom: 14px; }
+    .listings-cta-title { font-family: var(--font-serif); font-weight: 700; font-size: 1.5rem; color: var(--heading); margin-bottom: 14px; }
     .listings-cta-text { font-family: var(--font-sans); color: var(--text-mid); font-size: 1.05rem; margin-bottom: 30px; max-width: 580px; margin-left: auto; margin-right: auto; line-height: 1.7; }
 
     /* Listings — Mobil */
@@ -708,7 +720,7 @@
     .feature-card:hover { background: var(--white); }
     .feature-icon { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; margin: 0 0 30px; transition: var(--transition); background: transparent; border: none; border-radius: 0; }
     .feature-icon svg { width: 34px; height: 34px; color: var(--gold); stroke-width: 1.5; }
-    .feature-title { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 700; color: var(--green-dark); margin-bottom: 14px; line-height: 1.3; }
+    .feature-title { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 700; color: var(--heading); margin-bottom: 14px; line-height: 1.3; }
     .feature-desc { font-family: var(--font-sans); font-size: 1rem; color: var(--text-mid); line-height: 1.7; }
 
     /* Features — Mobil */
@@ -794,7 +806,7 @@
     .contact-item-icon svg { width: 18px; height: 18px; color: var(--gold); }
     .contact-item:hover .contact-item-icon { transform: none; }
     .contact-item-label { font-family: var(--font-sans); font-size: 0.72rem; font-weight: 500; color: var(--text-light); letter-spacing: 0.24em; text-transform: uppercase; margin-bottom: 7px; }
-    .contact-item-value { font-family: var(--font-serif); font-size: 1.1rem; color: var(--green-dark); font-weight: 700; line-height: 1.3; }
+    .contact-item-value { font-family: var(--font-serif); font-size: 1.1rem; color: var(--heading); font-weight: 700; line-height: 1.3; }
 
     /* Contact — Mobil */
     @media (max-width: 900px) {
@@ -819,13 +831,13 @@
     .contact-item-hours .hours-dot.is-open   { color: #2f6b3d; }
     .contact-item-hours .hours-dot.is-closed { color: var(--text-light); }
     .contact-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
-    .whatsapp-btn { display: inline-flex; align-items: center; gap: 10px; background: transparent; color: var(--green-dark); border: 1px solid var(--green-dark); padding: 14px 26px; border-radius: 2px; font-family: var(--font-sans); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; transition: var(--transition); }
+    .whatsapp-btn { display: inline-flex; align-items: center; gap: 10px; background: transparent; color: var(--heading); border: 1px solid var(--green-dark); padding: 14px 26px; border-radius: 2px; font-family: var(--font-sans); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; transition: var(--transition); }
     .whatsapp-btn:hover { background: var(--green-dark); color: var(--cream); }
     .call-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--green-dark); color: var(--cream); padding: 14px 26px; border-radius: 2px; font-family: var(--font-sans); font-weight: 500; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; transition: var(--transition); border: 1px solid var(--green-dark); }
     .call-btn:hover { background: var(--green-mid); border-color: var(--green-mid); }
     /* Form — editorial sade */
     .contact-form { background: var(--white); padding: 56px 48px; border-radius: 0; border: 1px solid var(--cream-deep); }
-    .form-title { font-family: var(--font-serif); font-size: 1.4rem; font-weight: 700; color: var(--green-dark); margin-bottom: 10px; line-height: 1.2; }
+    .form-title { font-family: var(--font-serif); font-size: 1.4rem; font-weight: 700; color: var(--heading); margin-bottom: 10px; line-height: 1.2; }
     .form-sub { font-family: var(--font-sans); color: var(--text-mid); font-size: 0.92rem; margin-bottom: 36px; font-weight: 300; }
     /* minmax(0,1fr): düz 1fr, input'un varsayılan min-content genişliği
        (tarayıcıya göre ~20 karakter) yüzünden dar ekranda izi şişiriyor
@@ -855,7 +867,7 @@
     .form-group textarea { resize: vertical; min-height: 80px; }
     .form-submit { width: 100%; padding: 18px; background: var(--green-dark); color: var(--cream); border: none; border-radius: 2px; font-family: var(--font-sans); font-weight: 500; font-size: 0.82rem; letter-spacing: 0.22em; text-transform: uppercase; cursor: pointer; transition: var(--transition); margin-top: 14px; }
     .form-submit:hover { background: var(--green-mid); transform: translateY(-2px); box-shadow: 0 12px 28px rgba(31,74,42,0.22); }
-    .form-success { display: none; text-align: center; padding: 18px; color: var(--green-dark); font-family: var(--font-serif); font-weight: 700; font-size: 1rem; }
+    .form-success { display: none; text-align: center; padding: 18px; color: var(--heading); font-family: var(--font-serif); font-weight: 700; font-size: 1rem; }
 
     /* ── PRE-FOOTER CTA BANDI — büyük, dikkat çekici ── */
     #prefooter {
@@ -894,7 +906,7 @@
       font-family: var(--font-serif);
       font-size: clamp(2.2rem, 4.5vw, 3.4rem);
       font-weight: 700; line-height: 1.15;
-      color: var(--green-dark); letter-spacing: -0.02em;
+      color: var(--heading); letter-spacing: -0.02em;
       margin-bottom: 22px;
     }
     .prefooter-title em { font-style: normal; color: var(--gold); }
@@ -924,7 +936,7 @@
       box-shadow: 0 14px 40px rgba(31,74,42,0.10);
     }
     .prefooter-cta-card:hover::before { transform: scaleY(1); }
-    .prefooter-cta-card--alt { background: var(--green-dark); border-color: var(--green-dark); }
+    .prefooter-cta-card--alt { background: var(--green-dark); border-color: var(--heading); }
     .prefooter-cta-card--alt:hover { background: var(--green-mid); border-color: var(--gold); }
     .prefooter-cta-eyebrow {
       font-family: var(--font-sans); font-size: 0.7rem;
@@ -935,7 +947,7 @@
     .prefooter-cta-card--alt .prefooter-cta-eyebrow { color: var(--gold-soft); }
     .prefooter-cta-value {
       font-family: var(--font-serif); font-size: 1.65rem;
-      font-weight: 700; color: var(--green-dark);
+      font-weight: 700; color: var(--heading);
       letter-spacing: -0.01em; line-height: 1.1;
     }
     .prefooter-cta-card--alt .prefooter-cta-value { color: var(--cream); }
@@ -984,13 +996,13 @@
     }
     #footer .container { position: relative; z-index: 1; }
     .footer-top { display: grid; grid-template-columns: 1.8fr 1fr 1.1fr 1.1fr; gap: 56px; padding-bottom: 60px; border-bottom: 1px solid rgba(184,149,74,0.15); }
-    .footer-brand .nav-logo-text { color: var(--cream); margin-bottom: 22px; font-family: var(--font-serif); font-size: 1.2rem; font-weight: 700; }
+    .footer-brand .nav-logo-text { color: var(--on-dark); margin-bottom: 22px; font-family: var(--font-serif); font-size: 1.2rem; font-weight: 700; }
     .footer-brand p { color: rgba(255,255,255,0.6); font-family: var(--font-sans); font-size: 1rem; line-height: 1.85; max-width: 400px; margin-bottom: 36px; font-weight: 300; }
     .social-links { display: flex; gap: 12px; }
     .social-link { width: 44px; height: 44px; border-radius: 0; background: transparent; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
     .social-link:hover { background: var(--gold); border-color: var(--gold); transform: translateY(-2px); }
     .social-link svg { width: 18px; height: 18px; color: var(--cream); }
-    .social-link:hover svg { color: var(--green-dark); }
+    .social-link:hover svg { color: var(--heading); }
     .footer-col h4 { font-family: var(--font-sans); font-size: 0.78rem; font-weight: 500; color: var(--gold-soft); letter-spacing: 0.28em; text-transform: uppercase; margin-bottom: 26px; }
     .footer-col ul { display: flex; flex-direction: column; gap: 14px; }
     .footer-col ul li a, .footer-col ul li { color: rgba(255,255,255,0.7); font-family: var(--font-sans); font-size: 0.98rem; transition: var(--transition); font-weight: 400; }
@@ -1056,7 +1068,7 @@
       animation: pulse 2.5s infinite;
     }
     .float-whatsapp:hover { transform: scale(1.1); }
-    .float-whatsapp svg { width: 28px; height: 28px; color: var(--white); }
+    .float-whatsapp svg { width: 28px; height: 28px; color: var(--on-dark); }
 
     /* ── RESPONSIVE — Editorial Mobile ── */
     @media (max-width: 1024px) {
@@ -1097,7 +1109,7 @@
     .admin-bar {
       position: fixed; top: 0; left: 0; right: 0; z-index: 1100;
       background: linear-gradient(90deg, #1a1a1a, #2C5F2E);
-      color: var(--white); padding: 10px 20px;
+      color: var(--on-dark); padding: 10px 20px;
       display: none; align-items: center; justify-content: space-between;
       box-shadow: 0 2px 12px rgba(0,0,0,.3);
     }
@@ -1111,9 +1123,9 @@
     .admin-btn svg { width: 14px; height: 14px; }
     .admin-btn-add { background: var(--green-accent); color: #1a1a1a; }
     .admin-btn-add:hover { background: var(--white); }
-    .admin-btn-pw { background: rgba(255,255,255,.15); color: var(--white); }
+    .admin-btn-pw { background: rgba(255,255,255,.15); color: var(--on-dark); }
     .admin-btn-pw:hover { background: rgba(255,255,255,.25); }
-    .admin-btn-out { background: #c62828; color: var(--white); }
+    .admin-btn-out { background: #c62828; color: var(--on-dark); }
     .admin-btn-out:hover { background: #8d1414; }
 
     /* Card admin overlay */
@@ -1155,7 +1167,7 @@
       border: 1px solid rgba(255,255,255,.25);
     }
     body.yonetim-erisim .admin-trigger:hover { opacity: 1; background: var(--green-dark); }
-    .admin-trigger svg { width: 18px; height: 18px; color: var(--white); }
+    .admin-trigger svg { width: 18px; height: 18px; color: var(--on-dark); }
     body.admin-mode .admin-trigger { display: none; }
 
     /* Modal */
@@ -1172,7 +1184,7 @@
       animation: fadeUp .3s ease;
     }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .modal-title { font-family:'Montserrat',sans-serif; font-weight: 800; font-size: 1.3rem; color: var(--green-dark); }
+    .modal-title { font-family:'Montserrat',sans-serif; font-weight: 800; font-size: 1.3rem; color: var(--heading); }
     .modal-close { background: none; border: none; cursor: pointer; font-size: 1.8rem; color: var(--text-light); line-height: 1; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: var(--transition); }
     .modal-close:hover { background: var(--cream); color: var(--text-dark); }
     .modal-body { display: flex; flex-direction: column; gap: 14px; }
@@ -1200,23 +1212,23 @@
     .modal-btn { padding: 11px 22px; border-radius: 50px; font-family:'Montserrat',sans-serif; font-weight: 700; font-size: .85rem; cursor: pointer; border: none; transition: var(--transition); }
     .modal-btn-cancel { background: var(--cream); color: var(--text-mid); }
     .modal-btn-cancel:hover { background: var(--cream-deep); }
-    .modal-btn-save { background: var(--green-mid); color: var(--white); }
+    .modal-btn-save { background: var(--green-mid); color: var(--on-dark); }
     .modal-btn-save:hover { background: var(--green-dark); }
-    .modal-btn-danger { background: #c62828; color: var(--white); }
+    .modal-btn-danger { background: #c62828; color: var(--on-dark); }
     .modal-btn-danger:hover { background: #8d1414; }
 
     /* Login modal special */
     .login-modal { max-width: 420px; text-align: center; }
     .login-modal .lock-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--cream); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
     .login-modal .lock-icon svg { width: 28px; height: 28px; color: var(--green-mid); }
-    .login-modal h3 { font-family:'Montserrat',sans-serif; font-weight: 800; color: var(--green-dark); margin-bottom: 8px; }
+    .login-modal h3 { font-family:'Montserrat',sans-serif; font-weight: 800; color: var(--heading); margin-bottom: 8px; }
     .login-modal p { color: var(--text-light); font-size: .88rem; margin-bottom: 20px; }
     .login-hint { font-size: .75rem; color: var(--text-light); margin-top: 12px; font-style: italic; }
 
     /* Toast */
     .toast {
       position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: var(--green-dark); color: var(--white); padding: 14px 24px;
+      background: var(--green-dark); color: var(--on-dark); padding: 14px 24px;
       border-radius: 50px; font-family:'Montserrat',sans-serif; font-weight: 600; font-size: .85rem;
       box-shadow: 0 10px 30px rgba(0,0,0,.3); z-index: 1300;
       opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s;
@@ -1262,7 +1274,7 @@
     }
     .loader-text {
       font-family: 'Montserrat', sans-serif; font-weight: 900;
-      font-size: 1.05rem; color: var(--white); letter-spacing: 4px;
+      font-size: 1.05rem; color: var(--on-dark); letter-spacing: 4px;
       margin: 22px 0 4px; opacity: 0.95;
     }
     .loader-subtext {
@@ -1355,7 +1367,7 @@
       -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--glass-border);
       border-radius: 14px; padding: 14px 16px;
-      text-align: center; color: var(--white);
+      text-align: center; color: var(--on-dark);
       transform-style: preserve-3d;
       will-change: transform;
       opacity: 0;
@@ -1542,7 +1554,7 @@
     .tour-title {
       font-family: var(--font-serif); font-weight: 600;
       font-size: clamp(2.2rem, 4.4vw, 3.5rem); line-height: 1.06;
-      letter-spacing: -0.03em; color: var(--white);
+      letter-spacing: -0.03em; color: var(--on-dark);
       font-optical-sizing: auto; font-variation-settings: var(--wonk-off);
     }
     .tour-title em { font-style: italic; font-weight: 500; color: var(--gold); font-variation-settings: var(--wonk-on); }
@@ -1565,7 +1577,7 @@
     }
     .tour-steps h3 {
       font-family: var(--font-serif); font-size: 1.16rem; font-weight: 600;
-      color: var(--white); letter-spacing: -0.015em; margin-bottom: 5px;
+      color: var(--on-dark); letter-spacing: -0.015em; margin-bottom: 5px;
     }
     .tour-steps p { font-family: var(--font-sans); font-size: 0.9rem; line-height: 1.65; color: rgba(244,237,224,0.62); }
 
@@ -1583,7 +1595,7 @@
     }
     .tour-card-lead {
       font-family: var(--font-serif); font-size: 1.28rem; font-weight: 500;
-      line-height: 1.35; color: var(--white); letter-spacing: -0.02em; margin-bottom: 10px;
+      line-height: 1.35; color: var(--on-dark); letter-spacing: -0.02em; margin-bottom: 10px;
     }
     /* Kimin karşılayacağını yazmak arama önündeki eşiği düşürür —
        arayan kişi kime ulaşacağını biliyor. */
@@ -1594,7 +1606,7 @@
     }
     .tour-card-phone {
       display: flex; align-items: center; justify-content: center; gap: 11px;
-      background: var(--gold); color: var(--green-dark);
+      background: var(--gold); color: var(--heading);
       font-family: var(--font-sans); font-weight: 700; font-size: 0.92rem;
       letter-spacing: 0.06em; padding: 16px 20px; border-radius: 2px;
       transition: background .35s ease, transform .35s var(--ease-expo), box-shadow .45s var(--ease-expo);
@@ -1609,7 +1621,7 @@
       letter-spacing: 0.08em; transition: background .35s ease, color .35s ease, border-color .35s ease;
     }
     .tour-card-wa svg { width: 16px; height: 16px; }
-    .tour-card-wa:hover { background: rgba(212,184,118,0.14); color: var(--white); border-color: var(--gold); }
+    .tour-card-wa:hover { background: rgba(212,184,118,0.14); color: var(--on-dark); border-color: var(--gold); }
     .tour-card-hours {
       display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
       margin-top: 16px;
@@ -1819,7 +1831,7 @@
       .mcta-metin { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
       .mcta-metin b { font-size: 0.97rem; font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; }
       .mcta-alt { font-style: normal; font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: .72; }
-      .mcta-call { background: var(--gold); color: var(--green-dark); }
+      .mcta-call { background: var(--gold); color: var(--heading); }
       .mcta-wa   { background: #1f8f4e; color: #fff; }
       .mcta:active { filter: brightness(0.93); }
       /* Hat kapalıyken "Hemen ara" yerine saat aralığı gösterilir —
@@ -2751,8 +2763,9 @@ const THEMES = {
       '--green-dark': '#1f4a2a', '--green-mid': '#2f6b3d', '--green-light': '#4a8f3f', '--green-accent': '#7ab648',
       '--gold': '#b8954a', '--gold-soft': '#d4b876',
       '--cream': '#f4ede0', '--cream-deep': '#e8ddc5', '--cream-pale': '#faf5eb',
-      '--text-dark': '#1a1a1a', '--text-mid': '#555555', '--text-light': '#888888',
-      '--white': '#ffffff', '--ink': '#2a2622'
+      '--text-dark': '#1a1a1a', '--text-mid': '#555555', '--text-light': '#6b6b6b',
+      '--white': '#ffffff', '--ink': '#2a2622',
+      '--heading': '#1f4a2a', '--gold-text': '#7d6224', '--on-dark': '#f5f1e8'
     }
   },
   blue: {
@@ -2761,8 +2774,9 @@ const THEMES = {
       '--green-dark': '#123a63', '--green-mid': '#1b5a94', '--green-light': '#2f7fc4', '--green-accent': '#5aa9e6',
       '--gold': '#4a7fa8', '--gold-soft': '#8fbcd9',
       '--cream': '#eef4f9', '--cream-deep': '#d8e6f1', '--cream-pale': '#f7fafd',
-      '--text-dark': '#0f2b47', '--text-mid': '#3d5a75', '--text-light': '#7089a1',
-      '--white': '#ffffff', '--ink': '#16263a'
+      '--text-dark': '#0f2b47', '--text-mid': '#3d5a75', '--text-light': '#5d7085',
+      '--white': '#ffffff', '--ink': '#16263a',
+      '--heading': '#0f2b47', '--gold-text': '#2d5c7d', '--on-dark': '#f5f1e8'
     }
   },
   gold: {
@@ -2771,8 +2785,9 @@ const THEMES = {
       '--green-dark': '#6b5218', '--green-mid': '#8f6f22', '--green-light': '#b8913a', '--green-accent': '#d9b45c',
       '--gold': '#b8954a', '--gold-soft': '#e0c98c',
       '--cream': '#faf3e0', '--cream-deep': '#efe2c2', '--cream-pale': '#fdf9ee',
-      '--text-dark': '#2b2110', '--text-mid': '#5c4a24', '--text-light': '#8a7746',
-      '--white': '#ffffff', '--ink': '#332811'
+      '--text-dark': '#2b2110', '--text-mid': '#5c4a24', '--text-light': '#6b5f45',
+      '--white': '#ffffff', '--ink': '#332811',
+      '--heading': '#2b2110', '--gold-text': '#6b5218', '--on-dark': '#f5f1e8'
     }
   },
   dark: {
@@ -2784,7 +2799,8 @@ const THEMES = {
       '--gold': '#c9a961', '--gold-soft': '#8a7440',
       '--cream': '#17181b', '--cream-deep': '#101113', '--cream-pale': '#1c1d20',
       '--text-dark': '#f0ece4', '--text-mid': '#b8b2a6', '--text-light': '#8a857b',
-      '--white': '#17181b', '--ink': '#f0ece4'
+      '--white': '#17181b', '--ink': '#f0ece4',
+      '--heading': '#f0ece4', '--gold-text': '#d9bd7a', '--on-dark': '#f5f1e8'
     }
   },
   purple: {
@@ -2793,8 +2809,9 @@ const THEMES = {
       '--green-dark': '#3b1259', '--green-mid': '#5a1f82', '--green-light': '#7b35a8', '--green-accent': '#a86ecb',
       '--gold': '#9c6bbf', '--gold-soft': '#c9a3de',
       '--cream': '#f5eefa', '--cream-deep': '#e6d5f0', '--cream-pale': '#faf6fd',
-      '--text-dark': '#2a0e40', '--text-mid': '#523268', '--text-light': '#7d5f91',
-      '--white': '#ffffff', '--ink': '#33124d'
+      '--text-dark': '#2a0e40', '--text-mid': '#523268', '--text-light': '#6b5878',
+      '--white': '#ffffff', '--ink': '#33124d',
+      '--heading': '#2a0e40', '--gold-text': '#6b3f8c', '--on-dark': '#f5f1e8'
     }
   },
   red: {
@@ -2803,8 +2820,9 @@ const THEMES = {
       '--green-dark': '#6e1616', '--green-mid': '#93221f', '--green-light': '#c0392b', '--green-accent': '#e06055',
       '--gold': '#b8954a', '--gold-soft': '#d9a89f',
       '--cream': '#faeeec', '--cream-deep': '#f0d8d4', '--cream-pale': '#fdf7f6',
-      '--text-dark': '#2b0f0d', '--text-mid': '#5c2f2b', '--text-light': '#8a5a55',
-      '--white': '#ffffff', '--ink': '#331311'
+      '--text-dark': '#2b0f0d', '--text-mid': '#5c2f2b', '--text-light': '#7a5550',
+      '--white': '#ffffff', '--ink': '#331311',
+      '--heading': '#2b0f0d', '--gold-text': '#8a3b32', '--on-dark': '#f5f1e8'
     }
   }
 };
