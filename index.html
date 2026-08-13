@@ -2037,6 +2037,18 @@
         }
 
         applyPhone(s.phone);
+
+        /* Hero'nun sağındaki öne çıkan fırsat kartı. Fiyat sabit kodlu
+           kalınca sitede üç farklı rakam dolaşıyordu; artık ayarlardan
+           tek kaynaktan yönetiliyor. textContent kullanılıyor —
+           bu alanlar HTML kabul etmez. */
+        var railYaz = function (sec, deger) {
+          if (typeof deger !== 'string' || !deger.trim()) return;
+          document.querySelectorAll(sec).forEach(function (el) { el.textContent = deger; });
+        };
+        railYaz('[data-hero-price]', s.heroPrice);
+        railYaz('[data-hero-pin]',   s.heroPin);
+        railYaz('[data-hero-unit]',  s.heroPriceUnit);
         applyHours(s.hoursOpen, s.hoursClose);
 
         // Tema da ayarın parçası — böylece cihazlar arası senkron olur.
@@ -2276,13 +2288,13 @@
       <aside class="hero-rail" aria-label="Öne çıkan fırsat">
         <div class="hero-rail-top">
           <span class="hero-rail-label">Öne Çıkan Fırsat</span>
-          <span class="hero-rail-pin">Çeşmeli</span>
+          <span class="hero-rail-pin" data-hero-pin>Çeşmeli</span>
         </div>
         <div class="hero-rail-price">
-          <span class="hero-rail-num">599.000</span>
+          <span class="hero-rail-num" data-hero-price>599.000</span>
           <span class="hero-rail-cur">₺</span>
         </div>
-        <div class="hero-rail-unit">1 dönüm · 1.000 m² · tapulu</div>
+        <div class="hero-rail-unit" data-hero-unit>1 dönüm · 1.000 m² · tapulu</div>
         <div class="hero-rail-rule"></div>
         <ul class="hero-rail-facts">
           <li><span>İstanbul</span><b>45 dk</b></li>
@@ -2835,6 +2847,10 @@ const DEFAULT_SITE_SETTINGS = {
   phone:        '0530 761 51 20',
   hoursOpen:    '08:00',
   hoursClose:   '23:00',
+  // Hero sağındaki öne çıkan fırsat kartı
+  heroPrice:     '599.000',
+  heroPin:       'Çeşmeli',
+  heroPriceUnit: '1 dönüm · 1.000 m² · tapulu',
   logo:         null,
   theme:        'green'
 };
@@ -2927,6 +2943,23 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
         <textarea id="heroDesc" placeholder="Açıklama..."></textarea>
         <label>Telefon Numarası</label>
         <input type="tel" id="phone" placeholder="0530 761 51 20" />
+
+        <!-- Hero'nun sağındaki öne çıkan fırsat kartı. Fiyat en sık
+             değişen bilgi; sabit kodlu kalınca sitede üç farklı rakam
+             dolaşıyordu. Artık tek kaynaktan yönetiliyor. -->
+        <label>⭐ Öne Çıkan Fırsat (hero sağ kart)</label>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="heroPrice" style="font-size:0.72rem;opacity:.75;">Fiyat</label>
+            <input type="text" id="heroPrice" placeholder="599.000" maxlength="20" />
+          </div>
+          <div class="form-group">
+            <label for="heroPin" style="font-size:0.72rem;opacity:.75;">Bölge rozeti</label>
+            <input type="text" id="heroPin" placeholder="Çeşmeli" maxlength="24" />
+          </div>
+        </div>
+        <label for="heroPriceUnit" style="font-size:0.72rem;opacity:.75;">Fiyatın altındaki satır</label>
+        <input type="text" id="heroPriceUnit" placeholder="1 dönüm · 1.000 m² · tapulu" maxlength="70" />
         <label>📞 Telefon Hattı Çalışma Saatleri</label>
         <div class="form-row">
           <div class="form-group">
@@ -2989,6 +3022,9 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
       document.getElementById('phone').value = settings.phone;
       document.getElementById('hoursOpen').value  = settings.hoursOpen  || '08:00';
       document.getElementById('hoursClose').value = settings.hoursClose || '23:00';
+      document.getElementById('heroPrice').value     = settings.heroPrice     || '';
+      document.getElementById('heroPin').value       = settings.heroPin       || '';
+      document.getElementById('heroPriceUnit').value = settings.heroPriceUnit || '';
 
       if (settings.logo) {
         document.getElementById('logoImg').src = settings.logo;
@@ -3082,6 +3118,9 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
           phone:        document.getElementById('phone').value || '0530 761 51 20',
           hoursOpen:    document.getElementById('hoursOpen').value  || '08:00',
           hoursClose:   document.getElementById('hoursClose').value || '23:00',
+          heroPrice:     document.getElementById('heroPrice').value.trim()     || '599.000',
+          heroPin:       document.getElementById('heroPin').value.trim()       || 'Çeşmeli',
+          heroPriceUnit: document.getElementById('heroPriceUnit').value.trim() || '1 dönüm · 1.000 m² · tapulu',
           logo:         window.uploadedLogo || base.logo || null,
           theme:        base.theme || 'green',
         };
@@ -3096,6 +3135,9 @@ window.ThemeSystem = { applyTheme, getSiteSettings, saveSiteSettings, THEMES };
             phone:        settings.phone,
             hoursOpen:    settings.hoursOpen,
             hoursClose:   settings.hoursClose,
+            heroPrice:     settings.heroPrice,
+            heroPin:       settings.heroPin,
+            heroPriceUnit: settings.heroPriceUnit,
             logo:         settings.logo,
             theme:        settings.theme,
             updatedAt:    firebase.firestore.FieldValue.serverTimestamp()
